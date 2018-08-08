@@ -5,6 +5,7 @@
  */
 let constants = {
     "USERNAME": "SandGrainOne",
+    "ROOM_STATE_NORMAL": "normal",
     "BODY": {
         "W3N78": "W3N78"
     },

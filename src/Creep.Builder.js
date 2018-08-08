@@ -57,16 +57,6 @@ class CreepBuilder extends CreepWorker {
                         return true;
                     }
                     
-                    let target = this.creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
-
-                    if (target !== null) {                        
-                        if (this.creep.build(target) === ERR_NOT_IN_RANGE) {
-                            this.creep.moveTo(target);
-                        }
-                        
-                        return true;
-                    }
-                    
                     let rampartToRepair = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
                         filter: function (wall) { 
                             return wall.structureType === STRUCTURE_RAMPART && (wall.hits < 120000); 
@@ -80,6 +70,16 @@ class CreepBuilder extends CreepWorker {
 
                         return true;
                     } 
+                    
+                    let target = this.creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+
+                    if (target !== null) {                        
+                        if (this.creep.build(target) === ERR_NOT_IN_RANGE) {
+                            this.creep.moveTo(target);
+                        }
+                        
+                        return true;
+                    }
                     
                     let roadToRepair = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
                         filter: function (road) { 

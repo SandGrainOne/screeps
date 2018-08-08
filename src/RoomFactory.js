@@ -4,7 +4,7 @@ let RoomBase = require('Room.Base');
 
 class RoomFactory {
     /**
-     * Add a layer of room type spesific logic to the given room.
+     * Add a layer of room type specific logic to the given room.
      * 
      * @param {Room} room - The room to be wrapped.
      */

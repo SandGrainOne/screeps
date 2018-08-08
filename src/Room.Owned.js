@@ -34,34 +34,6 @@ class RoomOwned {
         return links;
     }
 
-    orderCreeps() {
-        let roomSpawn = this.room.find(FIND_MY_SPAWNS)[0];
-        
-        if (roomSpawn.spawning || this.room.energyAvailable < 1200) {
-            return;
-        }
-        
-        if (count(this.creeps.miners) < 2) {
-            roomSpawn.createCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE], null, { job: "miner", remoteroom: this.Name, homeroom: this.Name });
-            return;
-        }
-        
-        if (count(this.creeps.haulers) < 3) {
-            roomSpawn.createCreep([WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "hauler", remoteroom: this.Name, homeroom: this.Name });
-            return;
-        }
-        
-        if (count(this.creeps.upgraders) < 3) {
-            roomSpawn.createCreep([WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], null, { job: "upgrader", remoteroom: this.Name, homeroom: this.Name });
-            return;
-        }
-
-        if (count(this.creeps.builders) < 2) {
-            roomSpawn.createCreep([WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], null, { job: "builder", remoteroom: this.Name, homeroom: this.Name });
-            return;
-        }
-    }
-
     getMiningNode(creepName) {
         if (!this.getMem("sources")) {
             return null;
@@ -122,7 +94,7 @@ class RoomOwned {
             if (this.getMem("wallcount") > wallCount) {
                 if (this.room.controller && this.room.controller.my && !this.room.controller.safeMode) {
                     let hostiles = this.room.find(FIND_HOSTILE_CREEPS).length;
-                    console.log(hostiles);
+                    //console.log(hostiles);
                     if (hostiles > 1) {
                         this.room.controller.activateSafeMode();
                     }

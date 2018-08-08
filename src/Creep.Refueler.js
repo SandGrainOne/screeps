@@ -2,13 +2,13 @@
 
 let C = require('constants');
 
-let CreepBase = require('Creep.Base');
+let CreepWorker = require('Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for a refueler.
  * Primary purpose of these creeps are to keep the towers, spawn and extensions stocked with energy in that order.
  */
-class CreepRefueler extends CreepBase {   
+class CreepRefueler extends CreepWorker {   
     /**
      * Initializes a new instance of the CreepRefueler class with the specified creep.
      * 
@@ -35,6 +35,7 @@ class CreepRefueler extends CreepBase {
                 if (this.creep.transfer(tower, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                     this.creep.moveTo(tower);
                 }
+                return true;
             }
                     
             let spawn = this.creep.pos.findClosestByPath(FIND_MY_SPAWNS);

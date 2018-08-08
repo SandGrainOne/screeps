@@ -2,13 +2,13 @@
 
 let C = require('constants');
 
-let CreepBase = require('Creep.Base');
+let CreepWorker = require('Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for a hauler.
  * Primary purpose of these creeps are to move resources from the perimeter of a room and into the center.
  */
-class CreepHauler extends CreepBase {   
+class CreepHauler extends CreepWorker {   
     /**
      * Initializes a new instance of the CreepHauler class with the specified creep.
      * 
@@ -27,7 +27,6 @@ class CreepHauler extends CreepBase {
         if (this.Task === "hauling")  {
             if (this.creep.carry.energy < this.creep.carryCapacity) {
                 if (this.moveOut()) {
-                    
                     let container = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
                         filter: function (s) { 
                             return s.structureType === STRUCTURE_CONTAINER && s.store.energy > 600; 
@@ -41,12 +40,11 @@ class CreepHauler extends CreepBase {
                         return true;
                     }
                     
-                    // The hauler will usually move close to places where there can be dropped energy.
-                    let drops = this.creep.pos.findInRange(FIND_DROPPED_ENERGY, 2);
+                    let drop = this.creep.pos.findClosestByPath(FIND_DROPPED_ENERGY);
 
-                    if (drops.length && drops[0].amount > 50) {
-                        if (this.creep.pickup(drops[0]) === ERR_NOT_IN_RANGE)  {
-                            this.creep.moveTo(drops[0]);
+                    if (drop && drop.amount > 50) {
+                        if (this.creep.pickup(drop) === ERR_NOT_IN_RANGE)  {
+                            this.creep.moveTo(drop);
                         }
                         return true;
                     }

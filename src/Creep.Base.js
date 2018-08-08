@@ -1,10 +1,12 @@
 'use strict';
 
-let C = require('constants')
+let C = require('constants');
+
 let RoomBase = require('Room.Base');
+let RoomFake = require('Room.Fake');
 
 /**
- * Wrapper class with basic logic for creeps.
+ * The CreepBase class is the base class for all creep wrappers. 
  */
 class CreepBase {
     /**
@@ -14,6 +16,8 @@ class CreepBase {
      */
     constructor(creep) {
         this.creep = creep;
+        this.mem = creep.memory;
+        this.init();
     }
 
     /**
@@ -27,44 +31,21 @@ class CreepBase {
      * Gets the stored number of remaining ticks to live.
      */
     get TicksToLive() {
-        return this.getMem("ticksToLive");
+        return this.creep.ticksToLive;
     }
 
     /**
-     * Gets or sets the current task.
+     * Gets the current task.
      */
     get Task() {
-        return this.getMem("task") !== null ? this.getMem("task") : "none";
+        return this.mem.task;
     }
+
+    /**
+     * Sets the current task.
+     */
     set Task(value) {
-        this.setMem("task", value);
-    }
-
-    /**
-     * Gets the home room of the creep.
-     */
-    get HomeRoom() {
-        if (!this.getMem("homeroom")) {
-            this.setMem("homeroom", this.Room.Name);
-        }
-        return this.getMem("homeroom");
-    }
-
-    /**
-     * Gets the remote work room of the creep.
-     */
-    get RemoteRoom() {
-        if (!this.getMem("remoteroom")) {
-            this.setMem("remoteroom", this.Room.Name);
-        }
-        return this.getMem("remoteroom");
-    }
-
-    /**
-     * Gets the current room object.
-     */
-    get Room() {
-        return new RoomBase(this.creep.room);
+        this.mem.task = value;
     }
 
     /**
@@ -74,8 +55,6 @@ class CreepBase {
      * @returns {Boolean} true if the creep successfully has performed an action.
      */
     act() {
-        this.save();
-
         if (this.creep.spawning) {
             return true;
         }
@@ -111,6 +90,11 @@ class CreepBase {
      * @returns {Boolean} true if the retreat was required and the creep is on the move
      */
     retreat() {
+        if (this.Room.State !== "normal") {
+            this.creep.say("help");
+            this.moveHome();
+            return true;
+        }
         return false;
     }
 
@@ -120,23 +104,6 @@ class CreepBase {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
-        return false;
-    }
-
-    /**
-     * The creep will move to its remote room.
-     * 
-     * @param {boolean} sneak - Don't move into the room, but stay on the exit.
-     * 
-     * @returns {object} true if the creep is in the remote room already.
-     */
-    moveOut(sneak) {
-        if (this.moveToRoom(this.RemoteRoom)) {
-            if (!sneak) {
-                this.moveIn();
-            }
-            return true;
-        }
         return false;
     }
 
@@ -154,17 +121,43 @@ class CreepBase {
     }
 
     /**
+     * The creep will move to its work room.
+     * 
+     * @param {boolean} sneak - Don't move into the room, but stay on the exit.
+     * 
+     * @returns {object} true if the creep is in the work room already.
+     */
+    moveOut(sneak) {
+        if (this.moveToRoom(this.WorkRoom)) {
+            if (!sneak) {
+                this.moveIn();
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * The creep will move to the given room.
      * 
      * @returns {object} true if the creep is in the given room already.
      */
-    moveToRoom(roomName) {
-        if (this.Room.Name !== roomName) {
-            let exitDir = this.creep.room.findExitTo(roomName);
+    moveToRoom(room) {
+        // Don't move into a room under siege.
+        if (room.State !== "normal") {
+            let flag = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
+            if (flag) {
+                this.creep.moveTo(flag);
+            }
+            return false;
+        }
+
+        if (this.Room.Name !== room.Name) {
+            let exitDir = this.creep.room.findExitTo(room.Name);
 
             let roomExits = C.EXIT[this.Room.Name];
             if (roomExits && roomExits[exitDir]) {
-                this.creep.moveTo(roomExits[exitDir].x, roomExits[exitDir].y);
+                this.creep.moveTo(roomExits[exitDir].x, roomExits[exitDir].y, { maxRooms: 1 });
             }
             else {
                 let exit = this.creep.pos.findClosestByRange(exitDir);
@@ -176,8 +169,8 @@ class CreepBase {
     }
 
     /**
-     * Make the creep move off the exit zone and into the room. This will normally
-     * be overruled by any other movement action performed by work logic.
+     * Make the creep move off the exit zone and into the room. This move will normally
+     * be replaced by any other movement action performed by work logic.
      */
     moveIn() {
         if (this.creep.pos.x === 0) {
@@ -194,34 +187,36 @@ class CreepBase {
         }
     }
 
-    save() {
-        // Make sure it is possible to find time of death from memory.
-        this.setMem("ticksToLive", this.creep.ticksToLive);
+    /**
+     * Prepare the creep short and long term memory.
+     */
+    init() {
+        if (!this.mem.homeroom) {
+            this.mem.homeroom = this.creep.room.name;
+        }
+        if (!this.mem.workroom) {
+            this.mem.workroom = this.mem.homeroom;
+        }
+        if (!this.mem.task) {
+            this.mem.task = "none";
+        } 
+
+        this.mem.ticksToLive = this.creep.ticksToLive;
+
+        this.Room = this.getRoom(this.creep.room.name);
+        this.HomeRoom = this.getRoom(this.mem.homeroom);
+        this.WorkRoom = this.getRoom(this.mem.workroom);
     }
 
     /**
-     * Get something from the creep memory. 
-     * 
-     * @returns {object} The value stored under the given key. null if not found.
+     * Attempt to get the room from the list of visible rooms and wrap it in room type specific logic.
      */
-    getMem(key) {
-        if (typeof this.creep.memory[key] != 'undefined') {
-            return this.creep.memory[key];
+    getRoom(name) {
+        let room = Game.rooms[name];
+        if (room) {
+            return new RoomBase(room);
         }
-        
-        return null;
-    }
-
-    /**
-     * Store a value to the creep memory under the given key.
-     * 
-     * @param {string} key - The key assigned to the storage.
-     * @param {value} value - The value to be stored under the key.
-     */
-    setMem(key, value) {
-        if (this.creep.memory[key] !== value) {
-            this.creep.memory[key] = value;
-        }
+        return new RoomFake(name);
     }
 }
 

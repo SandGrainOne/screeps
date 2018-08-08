@@ -38,187 +38,46 @@ module.exports.loop = function () {
         let room = Game.rooms[roomName];
         let smartRoom = roomFactory.wrap(Game.rooms[roomName]);
 
-        if (room.name === "W4N79") {
-            let homeRoom = "W3N79";
-            let roomSpawn = Game.rooms[homeRoom].find(FIND_MY_SPAWNS)[0];
-
-            if (!roomSpawn.spawning && Game.rooms[homeRoom].energyAvailable >= 1200) {
-                let roomPop = pop[room.name];
-
-                if ((!roomPop.settlers ? 0 : roomPop.settlers.length) < room.memory.jobs.settlers) {
-                    roomSpawn.createCreep([CLAIM, CLAIM, MOVE, MOVE], null, { job: "settler", remoteroom: room.name, homeroom: homeRoom });
-                }
-
-                if ((!roomPop.builders ? 0 : roomPop.builders.length) < 2) {
-                    roomSpawn.createCreep([WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "builder", remoteroom: room.name, homeroom: homeRoom });
-                }           
-
-                if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 2) {
-                    roomSpawn.createCreep([WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "hauler", remoteroom: room.name, homeroom: homeRoom });
-                }
-                
-                if ((!roomPop.miners ? 0 : roomPop.miners.length) < 2) {
-                    roomSpawn.createCreep([WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "miner", remoteroom: room.name, homeroom: homeRoom });
-                }
-
-                if ((!roomPop.soldiers ? 0 : roomPop.soldiers.length) < 1) {
-                    roomSpawn.createCreep([TOUGH, TOUGH, TOUGH, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "soldier", remoteroom: room.name, homeroom: homeRoom });
-                }
-            }
-        }
-
-        if (room.name === "W5N78") {
-            let homeRoom = "W4N78";
-            let roomSpawn = Game.rooms[homeRoom].find(FIND_MY_SPAWNS)[0];
-
-            if (!roomSpawn.spawning && Game.rooms[homeRoom].energyAvailable >= 1200) {
-                let roomPop = pop[room.name];
-
-                if ((!roomPop.settlers ? 0 : roomPop.settlers.length) < room.memory.jobs.settlers) {
-                    roomSpawn.createCreep([CLAIM, CLAIM, MOVE, MOVE], null, { job: "settler", remoteroom: room.name, homeroom: homeRoom });
-                }
-
-                if ((!roomPop.builders ? 0 : roomPop.builders.length) < 1) {
-                    roomSpawn.createCreep([WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], null, { job: "builder", remoteroom: room.name, homeroom: homeRoom });
-                }            
-
-                if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 1) {
-                    roomSpawn.createCreep([WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "hauler", remoteroom: room.name, homeroom: homeRoom });
-                }
-
-                if ((!roomPop.miners ? 0 : roomPop.miners.length) < 1) {
-                    roomSpawn.createCreep([WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "miner", remoteroom: room.name, homeroom: homeRoom });
-                }
-            }
-        }
-
-        if (room.name === "ERROR") { //W5N79
-            let homeRoom = "W4N78";
-            let roomSpawn = Game.rooms[homeRoom].find(FIND_MY_SPAWNS)[0];
-
-            if (!roomSpawn.spawning && Game.rooms[homeRoom].energyAvailable >= 1200) {
-                let roomPop = pop[room.name];
-
-                if ((!roomPop.settlers ? 0 : roomPop.settlers.length) < room.memory.jobs.settlers) {
-                    roomSpawn.createCreep([CLAIM, CLAIM, MOVE, MOVE], null, { job: "settler", remoteroom: room.name, homeroom: homeRoom });
-                }
-
-                if ((!roomPop.builders ? 0 : roomPop.builders.length) < 1) {
-                    roomSpawn.createCreep([WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], null, { job: "builder", remoteroom: room.name, homeroom: homeRoom });
-                }            
-
-                if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 0) {
-                    roomSpawn.createCreep([WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "hauler", remoteroom: room.name, homeroom: homeRoom });
-                }
-
-                if ((!roomPop.miners ? 0 : roomPop.miners.length) < 2) {
-                    roomSpawn.createCreep([WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "miner", remoteroom: room.name, homeroom: homeRoom });
-                }
-            }
-        }
-        
-        if (room.name === "W4N78") {
+        if (room.name === "E79N85") {
             let roomSpawn = room.find(FIND_MY_SPAWNS)[0];
             
-            if (!roomSpawn.spawning && room.energyAvailable >= 1000) {
+            if (roomSpawn && !roomSpawn.spawning && room.energyAvailable >= 300) {
                 let roomPop = pop[room.name];
-                
-                if ((!roomPop.soldiers ? 0 : roomPop.soldiers.length) < 0) {
-                    roomSpawn.createCreep([RANGED_ATTACK, RANGED_ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE], null, { job: "soldier", remoteroom: room.name, homeroom: room.name });
-                }
-                
-                if ((!roomPop.builders ? 0 : roomPop.builders.length) < 4) {
-                    roomSpawn.createCreep([WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], null, { job: "builder", remoteroom: room.name, homeroom: room.name });
-                }
-                
-                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 2) {
-                    roomSpawn.createCreep([WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], null, { job: "upgrader", remoteroom: room.name, homeroom: room.name });
-                }
-
-                if ((!roomPop.refuelers ? 0 : roomPop.refuelers.length) < 1) {
-                    roomSpawn.createCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], null, { job: "refueler", remoteroom: room.name, homeroom: room.name });
-                }
-
-                if ((!roomPop.brokers ? 0 : roomPop.brokers.length) < 1) {
-                    roomSpawn.createCreep([CARRY, CARRY, CARRY, CARRY, MOVE], null, { job: "broker", remoteroom: room.name, homeroom: room.name });
-                }
-
-                if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 3) {
-                    roomSpawn.createCreep([WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "hauler", remoteroom: room.name, homeroom: room.name });
-                }
-                
-                if ((!roomPop.miners ? 0 : roomPop.miners.length) < 2) {
-                    roomSpawn.createCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE], null, { job: "miner", remoteroom: room.name, homeroom: room.name });
-                }
-                
-                if ((!roomPop.defenders ? 0 : roomPop.defenders.length) < 2) {
-                    roomSpawn.createCreep([TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE], null, { job: "defender", remoteroom: room.name, homeroom: room.name });
-                }
-            }
-        }
-
-        if (room.name === "W3N78") {
-            let homeRoom = "W3N79";
-            let roomSpawn = Game.rooms[homeRoom].find(FIND_MY_SPAWNS)[0];
-
-            if (!roomSpawn.spawning && Game.rooms[homeRoom].energyAvailable >= 1200) {
-                let roomPop = pop[room.name];
-
-                if ((!roomPop.settlers ? 0 : roomPop.settlers.length) < room.memory.jobs.settlers) {
-                    roomSpawn.createCreep([CLAIM, CLAIM, MOVE, MOVE], null, { job: "settler", remoteroom: room.name, homeroom: homeRoom });
-                }
 
                 if ((!roomPop.builders ? 0 : roomPop.builders.length) < 1) {
-                    roomSpawn.createCreep([WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "builder", remoteroom: room.name, homeroom: homeRoom });
+                    roomSpawn.createCreep([WORK, CARRY, MOVE, MOVE], null, { job: "builder" });
                 }
                 
-                if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 2) {
-                    // TODO: Remember hack to redistribute energy to room under attack.
-                    roomSpawn.createCreep([WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "hauler", remoteroom: room.name, homeroom: "W4N78" });
+                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 1) {
+                    roomSpawn.createCreep([WORK, CARRY, MOVE, MOVE], null, { job: "upgrader" });
                 }
                 
-                if ((!roomPop.miners ? 0 : roomPop.miners.length) < 2) {
-                    roomSpawn.createCreep([WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "miner", remoteroom: room.name, homeroom: homeRoom });
-                }
-
-                if ((!roomPop.soldiers ? 0 : roomPop.soldiers.length) < 1) {
-                    roomSpawn.createCreep([TOUGH, TOUGH, TOUGH, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "soldier", remoteroom: room.name, homeroom: homeRoom });
-                }
-            }
-        }
-
-        if (room.name === "W3N79") {
-            let roomSpawn = room.find(FIND_MY_SPAWNS)[0];
-            
-            if (!roomSpawn.spawning && room.energyAvailable >= 1200) {
-                let roomPop = pop[room.name];
-
-                if ((!roomPop.builders ? 0 : roomPop.builders.length) < 2) {
-                    roomSpawn.createCreep([WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], null, { job: "builder", remoteroom: room.name, homeroom: room.name });
-                }
-                
-                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 3) {
-                    roomSpawn.createCreep([WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], null, { job: "upgrader", remoteroom: room.name, homeroom: room.name });
-                }
-                
-                if ((!roomPop.refuelers ? 0 : roomPop.refuelers.length) < 1) {
-                    roomSpawn.createCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], null, { job: "refueler", remoteroom: room.name, homeroom: room.name });
-                }
-
-                if ((!roomPop.brokers ? 0 : roomPop.brokers.length) < 1) {
-                    roomSpawn.createCreep([CARRY, CARRY, CARRY, CARRY, MOVE], null, { job: "broker", remoteroom: room.name, homeroom: room.name });
-                }
-                
-                if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 3) {
-                    roomSpawn.createCreep([WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "hauler", remoteroom: room.name, homeroom: room.name });
-                }
-                
-                if ((!roomPop.miners ? 0 : roomPop.miners.length) < 2) {
-                    roomSpawn.createCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE], null, { job: "miner", remoteroom: room.name, homeroom: room.name });
+                if ((!roomPop.healers ? 0 : roomPop.healers.length) < 0) {
+                    roomSpawn.createCreep([TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, HEAL, MOVE, HEAL, MOVE, HEAL, MOVE, HEAL, MOVE], null, { job: "healer" });
                 }
                 
                 if ((!roomPop.defenders ? 0 : roomPop.defenders.length) < 0) {
-                    roomSpawn.createCreep([TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE], null, { job: "defender", remoteroom: room.name, homeroom: room.name });
+                    roomSpawn.createCreep([TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE], null, { job: "defender" });
+                }
+                
+                if ((!roomPop.attackers ? 0 : roomPop.attackers.length) < 0) {
+                    roomSpawn.createCreep([TOUGH, MOVE, TOUGH, MOVE, TOUGH, MOVE, TOUGH, MOVE, ATTACK, MOVE, ATTACK, MOVE, ATTACK, MOVE, ATTACK, MOVE, ATTACK, MOVE, ATTACK, MOVE, ATTACK, MOVE, ATTACK, MOVE, ATTACK, MOVE, ATTACK, MOVE, ATTACK, MOVE, ATTACK, MOVE, ATTACK, MOVE], null, { job: "attacker" });
+                }
+                
+                if ((!roomPop.refuelers ? 0 : roomPop.refuelers.length) < 0) {
+                    roomSpawn.createCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], null, { job: "refueler" });
+                }
+
+                if ((!roomPop.brokers ? 0 : roomPop.brokers.length) < 0) {
+                    roomSpawn.createCreep([CARRY, CARRY, CARRY, CARRY, MOVE], null, { job: "broker" });
+                }
+                
+                if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 1) {
+                    roomSpawn.createCreep([CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], null, { job: "hauler" });
+                }
+                
+                if ((!roomPop.miners ? 0 : roomPop.miners.length) < room.memory.jobs.miners) {
+                    roomSpawn.createCreep([WORK, CARRY, CARRY, MOVE, MOVE], null, { job: "miner" });
                 }
             }
         }
@@ -229,7 +88,7 @@ module.exports.loop = function () {
 
             let damagedCreeps = tower.room.find(FIND_MY_CREEPS, {
                 filter: (creep) => {
-                    return creep.hits < creep.hitsMax / 3;
+                    return creep.hits < creep.hitsMax / 2;
                 }
             });
     
@@ -239,11 +98,10 @@ module.exports.loop = function () {
             }
 
             let hostiles = tower.room.find(FIND_HOSTILE_CREEPS);
-
             let hostileCreep = tower.pos.findClosestByRange(hostiles);
 
             // TODO: Check for body parts that are hostile
-            if (hostileCreep !== null) {
+            if (hostileCreep !== null && hostileCreep.pos.y < 49) {
                 tower.attack(hostileCreep);
                 continue;
             }
@@ -254,7 +112,7 @@ module.exports.loop = function () {
 
             let rampartToRepair = tower.pos.findClosestByRange(FIND_STRUCTURES, { 
                 filter: (s) => { 
-                    return s.structureType === STRUCTURE_RAMPART && (s.hits < 150000); 
+                    return s.structureType === STRUCTURE_RAMPART && (s.hits < 200000);
                 } 
             });
             

@@ -4,16 +4,18 @@ let CreepBase = require('Creep.Base');
 let CreepMiner = require('Creep.Miner');
 let CreepHauler = require('Creep.Hauler');
 let CreepBroker = require('Creep.Broker');
+let CreepHealer = require('Creep.Healer');
 let CreepBuilder = require('Creep.Builder');
 let CreepSettler = require('Creep.Settler');
 let CreepSoldier = require('Creep.Soldier');
 let CreepUpgrader = require('Creep.Upgrader');
 let CreepRefueler = require('Creep.Refueler');
 let CreepDefender = require('Creep.Defender');
+let CreepAttacker = require('Creep.Attacker');
 
 class CreepFactory {
     /**
-     * Add a layer of job spesific logic to the given creep.
+     * Add a layer of job specific logic to the given creep.
      * 
      * @param {Creep} creep - The creep to be wrapped.
      */
@@ -39,6 +41,12 @@ class CreepFactory {
                 
             case 'defender':
                 return new CreepDefender(creep);
+                
+            case 'healer':
+                return new CreepHealer(creep);
+                
+            case 'attacker':
+                return new CreepAttacker(creep);
                 
             case 'soldier':
                 return new CreepSoldier(creep);

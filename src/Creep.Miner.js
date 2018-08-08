@@ -1,12 +1,12 @@
 'use strict';
 
-let CreepBase = require('Creep.Base');
+let CreepWorker = require('Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for a miner.
  * Primary purpose of these creeps are to harvest energy or minerals.
  */
-class CreepMiner extends CreepBase {
+class CreepMiner extends CreepWorker {
     /**
      * Initializes a new instance of the CreepMiner class with the specified creep.
      * 
@@ -15,25 +15,6 @@ class CreepMiner extends CreepBase {
     constructor(creep) {
         super(creep);
     }
-
-    get IsParked() {
-        if (!this.getMem("isparked")) {
-            if (!this.creep.pos.isNearTo(this.getSource())) {
-                return false;
-            }
-            
-            for (let obj of this.creep.pos.look()) {
-                if ( obj.type === "structure") {
-                    if (obj.structure.structureType === "container") {
-                        this.setMem("isparked", true);
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return !!this.getMem("isparked");
-    }
     
     /**
      * Perform mining related logic.
@@ -41,25 +22,69 @@ class CreepMiner extends CreepBase {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
-        if (this.creep.carry.energy < this.creep.carryCapacity) {
+        let energy = this.creep.carry.energy;
+
+        if (energy > this.creep.carryCapacity - 20) {
+            let target = null;
+            for (let structure of this.creep.pos.lookFor(LOOK_STRUCTURES)) {
+                if (structure.hits <= structure.hitsMax - structure.hitsMax / 10) {
+
+                }
+            }
+        }
+
+        let source = this.getSource();
+        
+        //let harvestResult;
+
+        if (source) {
+            let harvestResult = this.creep.harvest(null);
+            //console.log(harvestResult);
+            let deposit = source.pos.findInRange(FIND_STRUCTURES, 1);
+        }
+
+        if (this.creep.carry.energy < this.creep.carryCapacity - 25) {
             if (this.moveOut()) {
 
-                let source = this.getSource();
+                let mysource = this.getSource();
+                let crates = mysource.pos.findInRange(FIND_STRUCTURES, 1, { filter: (c) => c.structureType === STRUCTURE_CONTAINER});
+
+                if (mysource && crates.length > 0 && this.creep.pos.isEqualTo(crates[0])) {
+                    this.creep.harvest(mysource);
+                    
+                    this.creep.transfer(crates[0], RESOURCE_ENERGY);
+            
+                    let structs = this.creep.pos.lookFor(LOOK_STRUCTURES);
+                    for (let struct of structs) {
+                        if (struct.hits < struct.hitsMax) {
+                            this.creep.repair(struct);
+                        }
+                    }
+                    return true;
+                }
                 
-                if (source !== null) {
-                    if (this.IsParked) {
-                        this.creep.harvest(source);
-                        this.creep.drop(RESOURCE_ENERGY);
-                        return true;
-                    }
-                    if (this.creep.harvest(source) === ERR_NOT_IN_RANGE) {
-                        let result = this.creep.moveTo(source);
-                    }
+                if (this.creep.harvest(mysource) === ERR_NOT_IN_RANGE) {
+                    this.creep.moveTo(mysource);
+                    return true;
                 }
             }
         }
         else {
+            let sites = this.creep.pos.lookFor(LOOK_CONSTRUCTION_SITES);
+            if (sites.length > 0) {
+                this.creep.build(sites[0]);
+                return true;
+            }
+            
+            let structs = this.creep.pos.lookFor(LOOK_STRUCTURES);
+            for (let struct of structs) {
+                if (struct.hits < struct.hitsMax) {
+                    this.creep.repair(struct);
+                }
+            }
+            
             if (this.moveHome()) {
+                
                 let container = this.creep.pos.findClosestByPath(FIND_STRUCTURES, {
                     filter: function (s) { 
                         return (s.structureType === STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] < s.storeCapacity) || 
@@ -111,17 +136,16 @@ class CreepMiner extends CreepBase {
      * @returns {Source} The source that the miner has reserved if available.
      */
     getSource() {
-        if (this.getMem("source")) {
-            return Game.getObjectById(this.getMem("source").id);
+        if (!this.mem.source) {
+            let source = this.WorkRoom.getMiningNode(this.Name);
+            if (source) {
+                this.mem.source = source;
+            }
+            else {
+                return null;
+            }
         }
-
-        let source = this.Room.getMiningNode(this.creep.name);
-        if (!source) {
-            return null;
-        }
-        
-        this.setMem("source", source);
-        return Game.getObjectById(source.id);
+        return Game.getObjectById(this.mem.source);
     }
 }
 

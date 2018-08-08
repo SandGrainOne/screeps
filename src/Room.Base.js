@@ -11,9 +11,8 @@ class RoomBase {
      * 
      * @param {Room} room - The room to be wrapped.
      */
-    constructor(room, creeps) {
+    constructor(room) {
         this.room = room;
-        this.creeps = creeps;
     }
 
     /**
@@ -23,12 +22,25 @@ class RoomBase {
         return this.room.name;
     }
 
+    /**
+     * Gets the state of the room.
+     */
+    get State() {
+        return this.getMem("state");
+    }
+
+    /**
+     * Sets the state of the room.
+     */
+    set State(value) {
+        return this.setMem("state", value);
+    }
+
     getSendingLinks() {
         let links = [];
         for (let link of this.getMem("linksend")){
             links.push(Game.getObjectById(link.id));
         }
-
         return links;
     }
 
@@ -37,36 +49,7 @@ class RoomBase {
         for (let link of this.getMem("linkreceive")){
             links.push(Game.getObjectById(link.id));
         }
-
         return links;
-    }
-
-    orderCreeps() {
-        let roomSpawn = this.room.find(FIND_MY_SPAWNS)[0];
-        
-        if (roomSpawn.spawning || this.room.energyAvailable < 1200) {
-            return;
-        }
-        
-        if (count(this.creeps.miners) < 2) {
-            roomSpawn.createCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE], null, { job: "miner", remoteroom: this.Name, homeroom: this.Name });
-            return;
-        }
-        
-        if (count(this.creeps.haulers) < 3) {
-            roomSpawn.createCreep([WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "hauler", remoteroom: this.Name, homeroom: this.Name });
-            return;
-        }
-        
-        if (count(this.creeps.upgraders) < 3) {
-            roomSpawn.createCreep([WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], null, { job: "upgrader", remoteroom: this.Name, homeroom: this.Name });
-            return;
-        }
-
-        if (count(this.creeps.builders) < 2) {
-            roomSpawn.createCreep([WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], null, { job: "builder", remoteroom: this.Name, homeroom: this.Name });
-            return;
-        }
     }
 
     getMiningNode(creepName) {
@@ -76,14 +59,14 @@ class RoomBase {
         
         for (let source of this.getMem("sources")) {
             if (source.miner === creepName) {
-                return source;
+                return source.id;
             }
         }
 
         for (let source of this.getMem("sources")) {
-            if (source.miner === undefined || source.miner === null) {
+            if (!source.miner || !source.miner) {
                 source.miner = creepName;
-                return source;
+                return source.id;
             }
         }
 
@@ -91,12 +74,8 @@ class RoomBase {
     }
 
     update() {
-        if (this.getMem("nextupdate") < Game.time) {
-            this.setMem("nextupdate", Game.time + 50 + Math.floor(Math.random() * 10));
-            this.setMem("lastupdate", Game.time);
-
-            this.analyze();
-        }
+        // Perform an analysis of the room every 50-60 ticks.
+        this.analyze();
 
         // Remove miners that are dead.
         if (this.getMem("sources")) {
@@ -105,6 +84,14 @@ class RoomBase {
                     source.miner = null;
                 }
             }
+        }
+
+        let hostileCreeps = this.room.find(FIND_HOSTILE_CREEPS);
+        if (hostileCreeps.length > 0) {
+            this.State = "invaded";
+        }
+        else {
+            this.State = "normal";
         }
 
         this.room.memory.jobs = { 
@@ -125,11 +112,9 @@ class RoomBase {
 
         let wallCount = this.room.find(FIND_STRUCTURES, { filter: (s) => s.structureType === STRUCTURE_WALL }).length;
         if (wallCount > 0) {
-            //console.log(this.getMem("wallcount") + " > " + wallCount + ": " + (this.getMem("wallcount") > wallCount));
             if (this.getMem("wallcount") > wallCount) {
                 if (this.room.controller && this.room.controller.my && !this.room.controller.safeMode) {
                     let hostiles = this.room.find(FIND_HOSTILE_CREEPS).length;
-                    console.log(hostiles);
                     if (hostiles > 1) {
                         this.room.controller.activateSafeMode();
                     }
@@ -139,11 +124,36 @@ class RoomBase {
             if (this.getMem("wallcount") < wallCount) {
                 this.setMem("wallcount", wallCount);
             }
+        }        
+
+        let rampCount = this.room.find(FIND_STRUCTURES, { filter: (s) => s.structureType === STRUCTURE_RAMPART }).length;
+        if (rampCount > 0) {
+            if (this.getMem("rampcount") > rampCount) {
+                if (this.room.controller && this.room.controller.my && !this.room.controller.safeMode) {
+                    let hostiles = this.room.find(FIND_HOSTILE_CREEPS).length;
+                    if (hostiles > 1) {
+                        this.room.controller.activateSafeMode();
+                    }
+                }
+            }
+            
+            if (this.getMem("rampcount") < rampCount) {
+                this.setMem("rampcount", rampCount);
+            }
         }
     }
 
+    /**
+     * Perform an analysis of the room once every 50-60 ticks.
+     */
     analyze() {
-        // Identifying sources in a room should only need to run once, ever.
+        if (this.getMem("nextupdate") >= Game.time) {
+            return;
+        }
+
+        this.setMem("nextupdate", Game.time + 50 + Math.floor(Math.random() * 10));
+        this.setMem("lastupdate", Game.time);
+
         if (!this.getMem("sources")) {
             let sources = [];
             for (let source of this.room.find(FIND_SOURCES)) {
@@ -155,13 +165,17 @@ class RoomBase {
         if (!this.getMem("wallcount")) {
             this.setMem("wallcount", 0);
         }
+        
+        if (!this.getMem("rampcount")) {
+            this.setMem("rampcount", 0);
+        }
 
         let linkSend = [];
         this.setMem("linksend", linkSend);
         let linkReceive = [];
         this.setMem("linkreceive", linkReceive);
 
-        let roomStructures = this.room.find(FIND_MY_STRUCTURES);
+        let roomStructures = this.room.find(FIND_STRUCTURES);
         for (let structure of roomStructures) {
             if (structure.structureType === STRUCTURE_LINK) {
                 let rangeToStorage = structure.pos.getRangeTo(this.room.storage);
@@ -199,10 +213,6 @@ class RoomBase {
         if (this.room.memory[key] !== value) {
             this.room.memory[key] = value;
         }
-    }
-
-    count(list) {
-        return (!list ? 0 : list.length)
     }
 }
 

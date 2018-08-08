@@ -1,12 +1,12 @@
 'use strict';
 
-let CreepBase = require('Creep.Base');
+let CreepSoldier = require('Creep.Soldier');
 
 /**
  * Wrapper class for creeps with logic for a room defender.
  * Primary purpose of these creeps are to defend against attacks from enemies.
  */
-class CreepDefender extends CreepBase {   
+class CreepDefender extends CreepSoldier {   
     /**
      * Initializes a new instance of the CreepDefender class with the specified creep.
      * 
@@ -21,25 +21,42 @@ class CreepDefender extends CreepBase {
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
-    work() {
+    work() {     
+        // Retreat ?
+        if (this.creep.hits < this.creep.hitsMax / 2) {
+            let flagRetreat = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
+            if (flagRetreat) {
+                this.creep.moveTo(flagRetreat);
+            }
+
+            return true;
+        }
+        
         let hostileCreep = this.creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-        if (hostileCreep !== null) {
+        
+        if (hostileCreep) {            
             let attackResult = this.creep.rangedAttack(hostileCreep);
-            if (attackResult === ERR_NOT_IN_RANGE) {
-                let moveResult = this.creep.moveTo(hostileCreep);
+            let rangeToCreep = this.creep.pos.getRangeTo(hostileCreep);
+            
+            if (rangeToCreep > 3) {
+                this.creep.moveTo(hostileCreep);
+            }
+            
+            if (rangeToCreep < 3){
+                let x = this.creep.pos.x - hostileCreep.pos.x;
+                let y = this.creep.pos.y - hostileCreep.pos.y;
+                
+                this.creep.moveTo(this.creep.pos.x + x, this.creep.pos.y + y);
             }
 
             return true;
         }
 
-        let flag = this.creep.pos.findClosestByRange(FIND_FLAGS);
+        // Attack ?
+        let flagAttack = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_RED });
 
-        if (flag) {
-            this.creep.moveTo(flag);
-        }
-
-        if (this.creep.hits < this.creep.hitsMax / 3) {
-            this.creep.moveTo(this.Room.room.controller);
+        if (flagAttack) {
+            this.creep.moveTo(flagAttack);
         }
 
         return true;
