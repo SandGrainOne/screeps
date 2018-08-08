@@ -2,33 +2,28 @@
  * The Population class is responsible for keeping informasjon about all creeps and their jobs.
  * It will primarily use the game memory in order to remember everything between ticks.
  */
-class Population
-{
+class Population {
      /**
      * Initializes a new instance of the Population class.
      */
-    constructor()
-    {
+    constructor() {
     }
 
     /**
      * Refresh all population data being stored.
      */
-    refresh()
-    {
+    refresh() {
         Memory.population = {};
         Memory.population.miners = [];
         Memory.population.haulers = [];
         Memory.population.builders = [];
-        Memory.population.repairers = [];
         Memory.population.upgraders = [];
+        Memory.population.soldiers = [];
 
         // Loop through all creeps in memory and sort them to quick access buckets.
-        for (let creepName in Memory.creeps)
-        {
+        for (let creepName in Memory.creeps) {
             let creep = Game.creeps[creepName];
-            if (!creep) 
-            {
+            if (!creep) {
                 // The creep must be dead.
                 console.log(creepName + " has died. Memory: " + JSON.stringify(Memory.creeps[creepName]));
                 
@@ -36,8 +31,7 @@ class Population
                 continue;
             }
             
-            switch (creep.memory.role) 
-            {
+            switch (creep.memory.role)  {
                 case "miner":
                     Memory.population.miners.push(creepName);
                     break;
@@ -50,12 +44,12 @@ class Population
                     Memory.population.builders.push(creepName);
                     break;
                 
-                case "repairer":
-                    Memory.population.repairers.push(creepName);
-                    break;
-                
                 case "upgrader":
                     Memory.population.upgraders.push(creepName);
+                    break;
+                
+                case "soldier":
+                    Memory.population.soldiers.push(creepName);
                     break;
                 
                 default:

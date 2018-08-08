@@ -5,15 +5,14 @@ let CreepBase = require('Creep.Base');
 /**
  * Wrapper class for creeps with worker related logic.
  */
-class CreepWorker extends CreepBase
-{   
+class CreepWorker extends CreepBase {
+    
     /**
      * Initializes a new instance of the CreepWorker class with the specified creep.
      * 
      * @param {Creep} creep - The creep to be wrapped
      */
-    constructor(creep)
-    {
+    constructor(creep) {
         super(creep);
     }
     
@@ -22,22 +21,18 @@ class CreepWorker extends CreepBase
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
-    work()
-    {
+    work() {
         return false;
     }
     
     /**
      * Logic that tries to find a source of stored energy in current room and withdraw as much as possible.
      */
-    findStoredEnergy()
-    {
+    findStoredEnergy() {
         let roomStorage = this.creep.room.storage;
 
-        if (roomStorage !== undefined && roomStorage.store[RESOURCE_ENERGY] > 0)
-        {
-            if (this.creep.withdraw(roomStorage, RESOURCE_ENERGY) !== OK)
-            {
+        if (roomStorage !== undefined && roomStorage.store[RESOURCE_ENERGY] > 0) {
+            if (this.creep.withdraw(roomStorage, RESOURCE_ENERGY) !== OK) {
                 this.creep.moveTo(roomStorage);
             }
             
@@ -50,10 +45,8 @@ class CreepWorker extends CreepBase
             } 
         });
 
-        if (container !== null)
-        {
-            if (this.creep.withdraw(container, RESOURCE_ENERGY) !== OK)
-            {
+        if (container !== null) {
+            if (this.creep.withdraw(container, RESOURCE_ENERGY) !== OK) {
                 this.creep.moveTo(container);
             }
             

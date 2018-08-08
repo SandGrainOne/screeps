@@ -3,34 +3,49 @@
 /**
  * Wrapper class with basic logic for rooms.
  */
-class RoomBase
-{
+class RoomBase {
     /**
      * Initializes a new instance of the RoomBase class with the specified room.
      * 
      * @param {Room} room - The room to be wrapped.
      */
-    constructor(room)
-    {
+    constructor(room) {
         this.room = room;
     }
-    
-    getSourceIds()
-    {
-        if (this.getMem("sources") === null) 
-        {
-            let mySources = [];
-            let sources = this.room.find(FIND_SOURCES);
-            
-            for (let source of sources)
-            {
-                mySources.push(source.id);
+
+    getMiningNode(creepName) {
+        if (!this.getMem("sources")) {
+            let infoList = [];
+            for (let source of this.room.find(FIND_SOURCES)) {
+                infoList.push({ sourceId: source.id, miner: null, px: 0, py: 0 });
             }
-            
-            this.setMem("sources", mySources);
+
+            this.setMem("sources", infoList);
         }
-        
-        return this.getMem("sources");
+
+        for (let source of this.getMem("sources")) {
+            if (source.miner === creepName) {
+                return source;
+            }
+        }
+
+        for (let source of this.getMem("sources")) {
+            if (source.miner === undefined || source.miner === null) {
+                source.miner = creepName;
+                return source;
+            }
+        }
+
+        return null;
+    }
+
+    removeMiner(creepName) {
+        for (let source of this.getMem("sources")) {
+            if (source.miner === creepName) {
+                source.miner = null;
+                return;
+            }
+        }
     }
     
     /**
@@ -38,10 +53,8 @@ class RoomBase
      * 
      * @returns {object} The value stored under the given key. null if not found.
      */
-    getMem(key)
-    {
-        if (typeof this.room.memory[key] != 'undefined') 
-        {
+    getMem(key) {
+        if (typeof this.room.memory[key] != 'undefined') {
             return this.room.memory[key];
         }
         
@@ -54,8 +67,7 @@ class RoomBase
      * @param {string} key - The key assigned to the storage.
      * @param {value} value - The value to be stored under the key.
      */
-    setValue(key, value) 
-    {
+    setMem(key, value) {
         if (this.room.memory[key] !== value) 
         {
             this.room.memory[key] = value;

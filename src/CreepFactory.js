@@ -5,12 +5,13 @@ let CreepMiner = require('Creep.Miner');
 let CreepHauler = require('Creep.Hauler');
 let CreepBuilder = require('Creep.Builder');
 let CreepUpgrader = require('Creep.Upgrader');
-let CreepRepairer = require('Creep.Repairer');
+let CreepRemoteMiner = require('Creep.RemoteMiner');
+
+let CreepSoldier = require('Creep.Soldier');
 
 class CreepFactory
 {
-    wrap(creep)
-    {
+    wrap(creep) {
         switch (creep.memory.role) {
             case 'miner':
                 return new CreepMiner(creep);
@@ -24,8 +25,11 @@ class CreepFactory
             case 'upgrader':
                 return new CreepUpgrader(creep);
                 
-            case 'repairer':
-                return new CreepRepairer(creep);
+            case 'remoteminer':
+                return new CreepRemoteMiner(creep);
+                
+            case 'soldier':
+                return new CreepSoldier(creep);
             
             default:
                 return new CreepBase(creep);

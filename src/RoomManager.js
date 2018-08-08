@@ -3,45 +3,37 @@
 /**
  * Room manager will determine the stage of the room and make creep requests.
  */
-class RoomManager
-{
-    analyze(room)
-    {
-        room.memory.settings = 
-        {
-            miners: 3,
-            upgraders: 6,
+class RoomManager {
+
+    analyze(room) {
+        room.memory.settings = {
+            miners: 2,
+            upgraders: 4,
             builders: 2,
-            repairers: 1,
-            haulers: 3
+            haulers: 3,
+            soldiers: 1
         };
             
-        if (room.controller === undefined)
-        {
+        if (room.controller === undefined) {
             room.memory.stage = 0;
             return;
         }
         
-        if (room.controller.level === 0)
-        {
+        if (room.controller.level === 0) {
             room.memory.stage = 0;
             return;
         }
         
-        if (room.controller.level === 1)
-        {
+        if (room.controller.level === 1) {
             room.memory.stage = 1;
             return;
         }
         
-        if (room.controller.level === 2)
-        {
-            if (room.energyCapacityAvailable < 550)
-            {
+        if (room.controller.level === 2) {
+            if (room.energyCapacityAvailable < 550) {
                 room.memory.stage = 2;
             }
-            else
-            {
+            else {
                 room.memory.stage = 3;
             }
         }
