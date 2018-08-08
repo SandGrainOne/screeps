@@ -16,6 +16,7 @@ class CreepMiner extends CreepWorker
     {
         super(creep);
         this.activity = "mining";
+        this.mySource = null;
     }
     
     /**
@@ -25,9 +26,16 @@ class CreepMiner extends CreepWorker
      */
     work()
     {
+        if (this.mySource === null)
+        {
+            this.mySource = this.getRoom().getSourceIds()[0];
+        }
+        
+        //this.getSource();
+        
         if (this.creep.carry.energy < this.creep.carryCapacity)
         {
-            let source = this.creep.pos.findClosestByPath(FIND_SOURCES);
+            let source = this.getSource();
             
             if (source !== null)
             {
@@ -146,6 +154,32 @@ class CreepMiner extends CreepWorker
         }
         
         return true;
+    }
+    
+    /**
+     * Get the source reserved by this miner. If no source has been reserved, then attempt to reserve one.
+     * 
+     * @returns {Source} The source that the miner has reserved if available.
+     */
+    getSource()
+    {
+        if (this.creep.memory.sourceId === undefined) 
+        {
+            let miners = this.creep.room.find(FIND_MY_CREEPS, {
+                filter: (c) => {
+                    return c.memory.role === "hauler" && c.carry.energy < c.carryCapacity
+                }
+            });
+
+            for (let sourceId of this.getRoom().getSourceIds())
+            {
+                
+            }
+            
+            this.creep.memory.sourceId = this.getRoom().getSourceIds()[0];
+        }
+        
+        return Game.getObjectById(this.creep.memory.sourceId);
     }
 }
 

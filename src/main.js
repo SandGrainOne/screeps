@@ -1,8 +1,8 @@
 'use strict';
 
 let code = require('code');
-let tools = require('tools');
 
+let Population = require('Population');
 let CreepFactory = require('CreepFactory');
 let RoomManager = require('RoomManager');
 
@@ -11,8 +11,9 @@ module.exports.loop = function ()
     // Ensure that the hive is up to date with what the code expects.
     code.update();
 
-    // Remove dead creeps from memory.
-    tools.cleanMemory();
+    // Refresh population data.
+    let pop = new Population();
+    pop.refresh();
     
     let controlledRooms = [];
     
@@ -24,8 +25,8 @@ module.exports.loop = function ()
         }
     }
     
-    let roomManager = new RoomManager();
     let creepFactory = new CreepFactory();
+    let roomManager = new RoomManager();
     
     for (let room of controlledRooms)
     {
@@ -38,7 +39,7 @@ module.exports.loop = function ()
             
             if (room.energyAvailable >= 300 && !roomSpawn.spawning)
             {
-                let numberOfBuilders = _(roomCreeps).filter( { memory: { role: 'builder' } } ).size();
+                let numberOfBuilders = Memory.population.builders.length;
                 
                 let numberOfConstructionSites = _(room.find(FIND_MY_CONSTRUCTION_SITES)).size();
                 
@@ -47,32 +48,32 @@ module.exports.loop = function ()
                     roomSpawn.createCreep([WORK, CARRY, MOVE, MOVE], null, {role: "builder" });
                 }
 
-                let numberOfRepairers = _(roomCreeps).filter( { memory: { role: 'repairer' } } ).size();
+                let numberOfRepairers = Memory.population.repairers.length;
             
                 if (numberOfRepairers < room.memory.settings.repairers)
                 {
                     roomSpawn.createCreep([WORK, CARRY, MOVE, MOVE], null, { role: "repairer" });
                 }
                 
-                let numberOfUpgraders = _(roomCreeps).filter( { memory: { role: 'upgrader' } } ).size();
+                let numberOfUpgraders = Memory.population.upgraders.length;
             
                 if (numberOfUpgraders < room.memory.settings.upgraders)
                 {
                     roomSpawn.createCreep([WORK, CARRY, MOVE, MOVE], null, {role: "upgrader" });
                 }
 
-                let numberOfHaulers = _(roomCreeps).filter( { memory: { role: 'hauler' } } ).size();
+                let numberOfHaulers = Memory.population.haulers.length;
                 
                 if (numberOfHaulers < room.memory.settings.haulers)
                 {
                     roomSpawn.createCreep([CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], null, { role: "hauler" });
                 }
                 
-                let numberOfMiners = _(roomCreeps).filter( { memory: { role: 'miner' } } ).size();
+                let numberOfMiners = Memory.population.miners.length;
                 
                 if (numberOfMiners < room.memory.settings.miners)
                 {
-                    roomSpawn.createCreep([WORK, WORK, CARRY, MOVE], null, { role: "miner" });
+                    let creepName = roomSpawn.createCreep([WORK, WORK, CARRY, MOVE], null, { role: "miner" });
                 }
             }
         }
@@ -111,6 +112,7 @@ module.exports.loop = function ()
         
         if (creep.spawning)
         {
+            // The creep can't act. Get the next creep.
             continue;
         }
         
@@ -119,7 +121,7 @@ module.exports.loop = function ()
         
         if (smartCreep.act())
         {
-            // The creep performed its task(s). Get next creep.
+            // The creep performed its task(s). Get the next creep.
             continue;
         }
     }

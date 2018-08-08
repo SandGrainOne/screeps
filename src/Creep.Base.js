@@ -1,6 +1,6 @@
 'use strict';
 
-let tools = require('tools');
+let RoomBase = require('Room.Base');
 
 /**
  * Wrapper class with basic logic for creeps.
@@ -10,12 +10,12 @@ class CreepBase
     /**
      * Initializes a new instance of the CreepBase class with the specified creep.
      * 
-     * @param {Creep} creep - The creep to be wrapped with
+     * @param {Creep} creep - The creep to be wrapped.
      */
     constructor(creep)
     {
         this.creep = creep;
-        this.activity = "idling";
+        this.activity = "resting";
     }
     
     /**
@@ -99,6 +99,11 @@ class CreepBase
     setTask(task)
     {
         this.creep.memory.task = task;
+    }
+    
+    getRoom()
+    {
+        return new RoomBase(this.creep.room);
     }
     
     /**

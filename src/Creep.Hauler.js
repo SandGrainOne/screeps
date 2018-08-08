@@ -25,116 +25,130 @@ class CreepHauler extends CreepWorker
      */
     work()
     {
-        if (this.creep.carry.energy < this.creep.carryCapacity)
+        if (this.getTask() === "collecting") 
         {
-            let target = this.creep.pos.findClosestByRange(FIND_DROPPED_ENERGY);
-            
-            // Don't move to pick up tiny piles
-            if (target !== null && target.amount > 10)
+            if (this.creep.carry.energy < this.creep.carryCapacity)
             {
-                if (this.creep.pickup(target) == ERR_NOT_IN_RANGE) 
-                {
-                    this.creep.moveTo(target);
-                }
+                let target = this.creep.pos.findClosestByRange(FIND_DROPPED_ENERGY);
                 
-                return true;
-            }
-            
-            let miners = this.creep.room.find(FIND_MY_CREEPS, { 
-                filter: function (creep) { 
-                    return creep.memory.role === "miner"; 
-                } 
-            });
-            
-            if (miners.length)
-            {
-                if (!this.creep.pos.isNearTo(miners[0]))
+                // Don't move to pick up tiny piles
+                if (target !== null && target.amount > 10)
                 {
-                    this.creep.moveTo(miners[0]);
-                }
-            }
-        }
-        else
-        {
-            let spawn = this.creep.pos.findClosestByPath(FIND_MY_SPAWNS);
-            
-            if (spawn !== null && spawn.energy < spawn.energyCapacity)
-            {
-                if (this.creep.transfer(spawn, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE)
-                {
-                    this.creep.moveTo(spawn);
-                }
-            }
-            else
-            {
-                let extension = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                    filter: function (object) { 
-                        return object.structureType === STRUCTURE_EXTENSION && (object.energy < object.energyCapacity); 
-                    } 
-                });
-
-                if (extension != undefined)
-                {
-                    if (this.creep.transfer(extension, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE)
+                    if (this.creep.pickup(target) == ERR_NOT_IN_RANGE) 
                     {
-                        this.creep.moveTo(extension);
+                        this.creep.moveTo(target);
                     }
                 }
                 else
                 {
-                    let tower = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                        filter: function (object) { 
-                            return object.structureType === STRUCTURE_TOWER && (object.energy < object.energyCapacity); 
+                    let miners = this.creep.room.find(FIND_MY_CREEPS, { 
+                        filter: function (creep) { 
+                            return creep.memory.role === "miner"; 
                         } 
                     });
-
-                    if (tower != undefined)
+                    
+                    if (miners.length)
                     {
-                        if (this.creep.transfer(tower, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE)
+                        if (!this.creep.pos.isNearTo(miners[0]))
                         {
-                            this.creep.moveTo(tower);
+                            this.creep.moveTo(miners[0]);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                this.setTask("delivering");
+            }
+        }
+        else
+        {
+            if (this.creep.carry.energy > 0)
+            {
+                let spawn = this.creep.pos.findClosestByPath(FIND_MY_SPAWNS);
+            
+                if (spawn !== null && spawn.energy < spawn.energyCapacity)
+                {
+                    if (this.creep.transfer(spawn, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE)
+                    {
+                        this.creep.moveTo(spawn);
+                    }
+                }
+                else
+                {
+                    let extension = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
+                        filter: function (object) { 
+                            return object.structureType === STRUCTURE_EXTENSION && (object.energy < object.energyCapacity); 
+                        } 
+                    });
+    
+                    if (extension != undefined)
+                    {
+                        if (this.creep.transfer(extension, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE)
+                        {
+                            this.creep.moveTo(extension);
                         }
                     }
                     else
                     {
-                        let storage = this.creep.room.storage;
-                        
-                        if (storage !== undefined)
+                        let tower = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
+                            filter: function (object) { 
+                                return object.structureType === STRUCTURE_TOWER && (object.energy < object.energyCapacity); 
+                            } 
+                        });
+    
+                        if (tower != undefined)
                         {
-                            if (this.creep.pos.isNearTo(storage))
+                            if (this.creep.transfer(tower, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE)
                             {
-                                this.creep.transfer(storage, RESOURCE_ENERGY);
-                            }
-                            else
-                            {
-                                this.creep.moveTo(storage);
+                                this.creep.moveTo(tower);
                             }
                         }
                         else
                         {
-                            let container = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                                filter: function (object) { 
-                                    return object.structureType === STRUCTURE_CONTAINER && (object.store.energy < object.storeCapacity); 
-                                } 
-                            });
-    
-                            if (container != undefined)
+                            let storage = this.creep.room.storage;
+                            
+                            if (storage !== undefined)
                             {
-                                if (this.creep.transfer(container, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE)
+                                if (this.creep.pos.isNearTo(storage))
                                 {
-                                    this.creep.moveTo(container);
+                                    this.creep.transfer(storage, RESOURCE_ENERGY);
+                                }
+                                else
+                                {
+                                    this.creep.moveTo(storage);
                                 }
                             }
                             else
                             {
-                                if (spawn !== null && !this.creep.pos.inRangeTo(spawn, 2))
+                                let container = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
+                                    filter: function (object) { 
+                                        return object.structureType === STRUCTURE_CONTAINER && (object.store.energy < object.storeCapacity); 
+                                    } 
+                                });
+        
+                                if (container != undefined)
                                 {
-                                    this.creep.moveTo(spawn);
+                                    if (this.creep.transfer(container, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE)
+                                    {
+                                        this.creep.moveTo(container);
+                                    }
+                                }
+                                else
+                                {
+                                    if (spawn !== null && !this.creep.pos.inRangeTo(spawn, 2))
+                                    {
+                                        this.creep.moveTo(spawn);
+                                    }
                                 }
                             }
                         }
                     }
                 }
+            }
+            else
+            {
+                this.setTask("collecting");
             }
         }
         

@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Room handler will determine the stage of the room and make creep requests
+ * Room manager will determine the stage of the room and make creep requests.
  */
 class RoomManager
 {
@@ -10,10 +10,10 @@ class RoomManager
         room.memory.settings = 
         {
             miners: 3,
-            upgraders: 4,
+            upgraders: 6,
             builders: 2,
             repairers: 1,
-            haulers: 2
+            haulers: 3
         };
             
         if (room.controller === undefined)
