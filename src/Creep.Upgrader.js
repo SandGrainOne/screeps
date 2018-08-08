@@ -4,6 +4,7 @@ let CreepWorker = require('Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for an upgrader.
+ * Primary purpose of these creeps are to perform upgrading on an owned controller.
  */
 class CreepUpgrader extends CreepWorker {   
     /**
@@ -21,14 +22,16 @@ class CreepUpgrader extends CreepWorker {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
-        if (this.Task === "harvesting") {
+        if (this.Task === "charging") {
             if (this.creep.carry.energy < this.creep.carryCapacity)  {
-                if (!this.findStoredEnergy()) {
-                    let source = this.creep.pos.findClosestByPath(FIND_SOURCES);
-                    
-                    if (source !== null) {
-                        if (this.creep.harvest(source) === ERR_NOT_IN_RANGE) {
-                            this.creep.moveTo(source);
+                if (this.moveHome()) {
+                    if (!this.findStoredEnergy()) {
+                        let source = this.creep.pos.findClosestByPath(FIND_SOURCES);
+                        
+                        if (source !== null) {
+                            if (this.creep.harvest(source) === ERR_NOT_IN_RANGE) {
+                                this.creep.moveTo(source);
+                            }
                         }
                     }
                 }
@@ -39,14 +42,16 @@ class CreepUpgrader extends CreepWorker {
         }
         else {
             if (this.creep.carry.energy > 0)  {
-                let target = this.creep.room.controller;
-            
-                if (this.creep.upgradeController(target) === ERR_NOT_IN_RANGE) {
-                    this.creep.moveTo(target);
+                if (this.moveOut()) {
+                    let target = this.creep.room.controller;
+                
+                    if (this.creep.upgradeController(target) === ERR_NOT_IN_RANGE) {
+                        this.creep.moveTo(target);
+                    }
                 }
             }
             else {
-                this.Task = "harvesting";
+                this.Task = "charging";
             }
         }
         

@@ -3,11 +3,12 @@
 let CreepBase = require('Creep.Base');
 
 /**
- * Wrapper class for creeps with logic for a remote miner.
+ * Wrapper class for creeps with logic for a settler.
+ * Primary purpose of these creeps are to claim or reserve a controller in other rooms.
  */
 class CreepSettler extends CreepBase {   
     /**
-     * Initializes a new instance of the CreepMiner class with the specified creep.
+     * Initializes a new instance of the CreepSettler class with the specified creep.
      * 
      * @param {Creep} creep - The creep to be wrapped
      */
@@ -16,7 +17,7 @@ class CreepSettler extends CreepBase {
     }
     
     /**
-     * Perform mining related logic.
+     * Perform settler related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
@@ -28,16 +29,6 @@ class CreepSettler extends CreepBase {
         }
 
         return true;
-    }
-    
-    /**
-     * Perform settler specific retirement logic. 
-     * A settler never retires.
-     * 
-     * @returns {Boolean} Always false.
-     */
-    retire() {
-        return false; 
     }
 }
 

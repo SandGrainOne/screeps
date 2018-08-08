@@ -10,33 +10,30 @@ class Population {
     }
 
     /**
-     * Refresh all population data being stored.
+     * Build up a structure with creeps organized in rooms and jobs.
      */
-    refresh() {
-        Memory.population = {};
-
+    populate() {
         // Loop through all creeps in memory and sort them to quick access buckets.
         for (let creepName in Memory.creeps) {
             let creep = Game.creeps[creepName];
             if (!creep) {
-                // The creep must be dead.
-                console.log(creepName + " has died. Memory: " + JSON.stringify(Memory.creeps[creepName]));
-                
+                // The creep must have died
                 delete Memory.creeps[creepName];
                 continue;
             }
 
-            let homeroom = creep.memory.homeroom ? creep.memory.homeroom : creep.room.name;
+            // Just in case I forget to set the remote room value on a new creep.
+            let remoteroom = creep.memory.remoteroom ? creep.memory.remoteroom : creep.room.name;
 
-            if (!Memory.population[homeroom]) {
-                Memory.population[homeroom] = {};
+            if (!this[remoteroom]) {
+                this[remoteroom] = {};
             }
 
-            if (!Memory.population[homeroom][creep.memory.role + 's']) {
-                Memory.population[homeroom][creep.memory.role + 's'] = [];
+            if (!this[remoteroom][creep.memory.job + 's']) {
+                this[remoteroom][creep.memory.job + 's'] = [];
             }            
 
-            Memory.population[homeroom][creep.memory.role + 's'].push(creepName);
+            this[remoteroom][creep.memory.job + 's'].push(creep);
         }
     }
 }

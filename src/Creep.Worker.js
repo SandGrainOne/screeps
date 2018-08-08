@@ -17,15 +17,6 @@ class CreepWorker extends CreepBase {
     }
     
     /**
-     * Perform work related logic.
-     * 
-     * @returns {Boolean} true if the creep has successfully performed some work.
-     */
-    work() {
-        return false;
-    }
-    
-    /**
      * Logic that tries to find a source of stored energy in current room and withdraw as much as possible.
      */
     findStoredEnergy() {

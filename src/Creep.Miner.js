@@ -1,11 +1,12 @@
 'use strict';
 
-let CreepWorker = require('Creep.Worker');
+let CreepBase = require('Creep.Base');
 
 /**
  * Wrapper class for creeps with logic for a miner.
+ * Primary purpose of these creeps are to harvest energy or minerals.
  */
-class CreepMiner extends CreepWorker {   
+class CreepMiner extends CreepBase {
     /**
      * Initializes a new instance of the CreepMiner class with the specified creep.
      * 
@@ -15,8 +16,8 @@ class CreepMiner extends CreepWorker {
         super(creep);
     }
 
-    get isParked() {
-        if (!this.getMem("isParked")) {
+    get IsParked() {
+        if (!this.getMem("isparked")) {
             if (!this.creep.pos.isNearTo(this.getSource())) {
                 return false;
             }
@@ -24,14 +25,14 @@ class CreepMiner extends CreepWorker {
             for (let obj of this.creep.pos.look()) {
                 if ( obj.type === "structure") {
                     if (obj.structure.structureType === "container") {
-                        this.setMem("isParked", true);
+                        this.setMem("isparked", true);
                         return true;
                     }
                 }
             }
         }
 
-        return !!this.getMem("isParked");
+        return !!this.getMem("isparked");
     }
     
     /**
@@ -40,19 +41,19 @@ class CreepMiner extends CreepWorker {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
-        //if (this.isParked) {
-        //    this.creep.harvest(this.getSource());
-        //    this.creep.drop(RESOURCE_ENERGY);
-        //    return true;
-        //}
-
         if (this.creep.carry.energy < this.creep.carryCapacity) {
             if (this.moveOut()) {
+
                 let source = this.getSource();
                 
                 if (source !== null) {
+                    if (this.IsParked) {
+                        this.creep.harvest(source);
+                        this.creep.drop(RESOURCE_ENERGY);
+                        return true;
+                    }
                     if (this.creep.harvest(source) === ERR_NOT_IN_RANGE) {
-                        this.creep.moveTo(source);
+                        let result = this.creep.moveTo(source);
                     }
                 }
             }
@@ -105,31 +106,22 @@ class CreepMiner extends CreepWorker {
     }
     
     /**
-     * Perform miner specific retirement logic. 
-     * A miner at less than a low number of ticks left to live will unassign themself from a room mining node, but continue to mine.
-     * 
-     * @returns {Boolean} Always false.
-     */
-    retire() {
-        if (this.creep.ticksToLive <= 5) {
-            this.Room.removeMiner(this.creep.name);
-        }
-
-        return false; 
-    }
-    
-    /**
      * Get the source reserved by this miner. If no source has been reserved, then attempt to reserve one.
      * 
      * @returns {Source} The source that the miner has reserved if available.
      */
-    getSource()
-    {
-        if (this.getMem("source") === null) {
-            this.setMem("source", this.Room.getMiningNode(this.creep.name));
+    getSource() {
+        if (this.getMem("source")) {
+            return Game.getObjectById(this.getMem("source").id);
         }
 
-        return Game.getObjectById(this.getMem("source").id);
+        let source = this.Room.getMiningNode(this.creep.name);
+        if (!source) {
+            return null;
+        }
+        
+        this.setMem("source", source);
+        return Game.getObjectById(source.id);
     }
 }
 

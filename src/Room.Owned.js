@@ -3,24 +3,17 @@
 let C = require('constants');
 
 /**
- * Wrapper class with basic logic for rooms.
+ * Wrapper class with logic for a room owned by the player.
  */
-class RoomBase {
+class RoomOwned {
     /**
-     * Initializes a new instance of the RoomBase class with the specified room.
+     * Initializes a new instance of the RoomOwned class with the specified room.
      * 
      * @param {Room} room - The room to be wrapped.
      */
     constructor(room, creeps) {
-        this.room = room;
+        super(room);
         this.creeps = creeps;
-    }
-
-    /**
-     * Gets the name of the room.
-     */
-    get Name() {
-        return this.room.name;
     }
 
     getSendingLinks() {

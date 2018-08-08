@@ -1,5 +1,6 @@
 'use strict';
 
+let C = require('constants')
 let RoomBase = require('Room.Base');
 
 /**
@@ -16,6 +17,20 @@ class CreepBase {
     }
 
     /**
+     * Gets the name of the creep.
+     */
+    get Name() {
+        return this.creep.name;
+    }
+
+    /**
+     * Gets the stored number of remaining ticks to live.
+     */
+    get TicksToLive() {
+        return this.getMem("ticksToLive");
+    }
+
+    /**
      * Gets or sets the current task.
      */
     get Task() {
@@ -26,12 +41,8 @@ class CreepBase {
     }
 
     /**
-     * Gets the current room.
+     * Gets the home room of the creep.
      */
-    get Room() {
-        return new RoomBase(this.creep.room);
-    }
-
     get HomeRoom() {
         if (!this.getMem("homeroom")) {
             this.setMem("homeroom", this.Room.Name);
@@ -39,11 +50,21 @@ class CreepBase {
         return this.getMem("homeroom");
     }
 
+    /**
+     * Gets the remote work room of the creep.
+     */
     get RemoteRoom() {
         if (!this.getMem("remoteroom")) {
             this.setMem("remoteroom", this.Room.Name);
         }
         return this.getMem("remoteroom");
+    }
+
+    /**
+     * Gets the current room object.
+     */
+    get Room() {
+        return new RoomBase(this.creep.room);
     }
 
     /**
@@ -53,15 +74,13 @@ class CreepBase {
      * @returns {Boolean} true if the creep successfully has performed an action.
      */
     act() {
+        this.save();
+
         if (this.creep.spawning) {
             return true;
         }
 
         if (this.renew()) {
-            return true;
-        }
-
-        if (this.retire()) {
             return true;
         }
         
@@ -78,33 +97,12 @@ class CreepBase {
     
     /**
      * Perform the required checks to see if the creep should be renewed and if so, then
-     * steer the creep to a place where a renew can occur.
+     * stear the creep to a place where a renew can occur.
      * 
      * @returns {Boolean} true if the creep is being renewed
      */
     renew() {
         return false;
-    }
-    
-    /**
-     * Perform a retirement if it's needed. This means it will move to the graveyard.
-     * 
-     * @returns {Boolean} true if the creep is getting old and is retiring
-     */
-    retire() {
-        if (this.creep.ticksToLive > 40) {
-            return false;
-        }
-
-        let spawn = this.creep.pos.findClosestByPath(FIND_MY_SPAWNS);
-
-        if (spawn !== null) {
-            if (!(this.creep.pos.x === spawn.pos.x && this.creep.pos.y === spawn.pos.y)) {
-                this.creep.moveTo(spawn.pos.x + 1, spawn.pos.y + 1);
-            }
-        }
-
-        return true; 
     }
 
     /**
@@ -149,6 +147,7 @@ class CreepBase {
      */
     moveHome(){
         if (this.moveToRoom(this.HomeRoom)) {
+            this.moveIn();
             return true;
         }
         return false;
@@ -160,18 +159,25 @@ class CreepBase {
      * @returns {object} true if the creep is in the given room already.
      */
     moveToRoom(roomName) {
-        if (this.creep.room.name !== roomName) {
+        if (this.Room.Name !== roomName) {
             let exitDir = this.creep.room.findExitTo(roomName);
-            let exit = this.creep.pos.findClosestByRange(exitDir);
-            this.creep.moveTo(exit);
+
+            let roomExits = C.EXIT[this.Room.Name];
+            if (roomExits && roomExits[exitDir]) {
+                this.creep.moveTo(roomExits[exitDir].x, roomExits[exitDir].y);
+            }
+            else {
+                let exit = this.creep.pos.findClosestByRange(exitDir);
+                this.creep.moveTo(exit);
+            }
             return false;
         }
-
         return true;
     }
 
     /**
-     * Make the creep move off the exit zone and into the room.
+     * Make the creep move off the exit zone and into the room. This will normally
+     * be overruled by any other movement action performed by work logic.
      */
     moveIn() {
         if (this.creep.pos.x === 0) {
@@ -186,6 +192,11 @@ class CreepBase {
         if (this.creep.pos.y === 49) {
             this.creep.moveTo(this.creep.pos.x, this.creep.pos.y - 1);
         }
+    }
+
+    save() {
+        // Make sure it is possible to find time of death from memory.
+        this.setMem("ticksToLive", this.creep.ticksToLive);
     }
 
     /**

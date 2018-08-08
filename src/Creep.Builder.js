@@ -3,7 +3,8 @@
 let CreepWorker = require('Creep.Worker');
 
 /**
- * Wrapper class for creeps with logic for a builder that will repair and build new structures.
+ * Wrapper class for creeps with logic for a builder.
+ * Primary porpose of these creeps are to build and repair structures.
  */
 class CreepBuilder extends CreepWorker {   
     /**
@@ -24,11 +25,13 @@ class CreepBuilder extends CreepWorker {
         if (this.Task === "charging") {
             if (this.creep.carry.energy < this.creep.carryCapacity) {
                 if (!this.findStoredEnergy()) {
-                    let source = this.creep.pos.findClosestByPath(FIND_SOURCES);
-                    
-                    if (source !== null) {
-                        if (this.creep.harvest(source) === ERR_NOT_IN_RANGE) {
-                            this.creep.moveTo(source);
+                    if (this.moveHome()) {
+                        let source = this.creep.pos.findClosestByPath(FIND_SOURCES);
+                        
+                        if (source !== null) {
+                            if (this.creep.harvest(source) === ERR_NOT_IN_RANGE) {
+                                this.creep.moveTo(source);
+                            }
                         }
                     }
                 }
@@ -66,7 +69,7 @@ class CreepBuilder extends CreepWorker {
                     
                     let rampartToRepair = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
                         filter: function (wall) { 
-                            return wall.structureType === STRUCTURE_RAMPART && (wall.hits < 70000); 
+                            return wall.structureType === STRUCTURE_RAMPART && (wall.hits < 120000); 
                         } 
                     });
                     
@@ -91,10 +94,10 @@ class CreepBuilder extends CreepWorker {
                         
                         return true;
                     }
-                    
+
                     let wallToRepair = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
                         filter: function (wall) { 
-                            return wall.structureType === STRUCTURE_WALL && (wall.hits < 60000); 
+                            return wall.structureType === STRUCTURE_WALL && (wall.hits < 100000); 
                         } 
                     });
                     
