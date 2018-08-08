@@ -13,7 +13,6 @@ class CreepUpgrader extends CreepWorker {
      */
     constructor(creep) {
         super(creep);
-        this.activity = "upgrading";
     }
     
     /**

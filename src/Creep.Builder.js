@@ -13,7 +13,6 @@ class CreepBuilder extends CreepWorker {
      */
     constructor(creep) {
         super(creep);
-        this.activity = "building";
     }
     
     /**
@@ -23,7 +22,7 @@ class CreepBuilder extends CreepWorker {
      */
     work() {
         if (this.Task === "charging") {
-            if (this.creep.carry.energy < this.creep.carryCapacity)  {
+            if (this.creep.carry.energy < this.creep.carryCapacity) {
                 if (!this.findStoredEnergy()) {
                     let source = this.creep.pos.findClosestByPath(FIND_SOURCES);
                     
@@ -39,71 +38,73 @@ class CreepBuilder extends CreepWorker {
             }
         }
         else {
-            if (this.creep.carry.energy > 0)  {
-                let containerToRepair = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                    filter: function (structure) { 
-                        return structure.structureType === STRUCTURE_CONTAINER && (structure.hits < structure.hitsMax); 
-                    }
-                });
-                
-                if (containerToRepair !== null) {
-                    if (this.creep.repair(containerToRepair) === ERR_NOT_IN_RANGE) {
-                        this.creep.moveTo(containerToRepair);
+            if (this.creep.carry.energy > 0) {
+                if (this.moveOut()) {
+                    let containerToRepair = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
+                        filter: function (structure) { 
+                            return structure.structureType === STRUCTURE_CONTAINER && (structure.hits < structure.hitsMax); 
+                        }
+                    });
+                    
+                    if (containerToRepair !== null) {
+                        if (this.creep.repair(containerToRepair) === ERR_NOT_IN_RANGE) {
+                            this.creep.moveTo(containerToRepair);
+                        }
+                        
+                        return true;
                     }
                     
-                    return true;
-                }
-                
-                let target = this.creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+                    let target = this.creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
 
-                if (target !== null) {                        
-                    if (this.creep.build(target) === ERR_NOT_IN_RANGE) {
-                        this.creep.moveTo(target);
+                    if (target !== null) {                        
+                        if (this.creep.build(target) === ERR_NOT_IN_RANGE) {
+                            this.creep.moveTo(target);
+                        }
+                        
+                        return true;
                     }
                     
-                    return true;
-                }
-                
-                let rampartToRepair = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                    filter: function (wall) { 
-                        return wall.structureType === STRUCTURE_RAMPART && (wall.hits < 70000); 
-                    } 
-                });
-                
-                if (rampartToRepair !== null) {
-                    if (this.creep.repair(rampartToRepair) === ERR_NOT_IN_RANGE) {
-                        this.creep.moveTo(rampartToRepair);
-                    }
+                    let rampartToRepair = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
+                        filter: function (wall) { 
+                            return wall.structureType === STRUCTURE_RAMPART && (wall.hits < 70000); 
+                        } 
+                    });
+                    
+                    if (rampartToRepair !== null) {
+                        if (this.creep.repair(rampartToRepair) === ERR_NOT_IN_RANGE) {
+                            this.creep.moveTo(rampartToRepair);
+                        }
 
-                    return true;
-                } 
-                
-                let roadToRepair = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                    filter: function (road) { 
-                        return road.structureType === STRUCTURE_ROAD && (road.hits < road.hitsMax); 
+                        return true;
                     } 
-                });
-                
-                if (roadToRepair !== null) {
-                    if (this.creep.repair(roadToRepair) === ERR_NOT_IN_RANGE) {
-                        this.creep.moveTo(roadToRepair);
+                    
+                    let roadToRepair = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
+                        filter: function (road) { 
+                            return road.structureType === STRUCTURE_ROAD && (road.hits < road.hitsMax); 
+                        } 
+                    });
+                    
+                    if (roadToRepair !== null) {
+                        if (this.creep.repair(roadToRepair) === ERR_NOT_IN_RANGE) {
+                            this.creep.moveTo(roadToRepair);
+                        }
+                        
+                        return true;
                     }
                     
-                    return true;
-                }
-                
-                let wallToRepair = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                    filter: function (wall) { 
-                        return wall.structureType === STRUCTURE_WALL && (wall.hits < 60000); 
-                    } 
-                });
-                
-                if (wallToRepair !== null) {
-                    if (this.creep.repair(wallToRepair) === ERR_NOT_IN_RANGE) {
-                        this.creep.moveTo(wallToRepair);
-                    }
+                    let wallToRepair = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
+                        filter: function (wall) { 
+                            return wall.structureType === STRUCTURE_WALL && (wall.hits < 60000); 
+                        } 
+                    });
+                    
+                    if (wallToRepair !== null) {
+                        if (this.creep.repair(wallToRepair) === ERR_NOT_IN_RANGE) {
+                            this.creep.moveTo(wallToRepair);
+                        }
 
-                    return true;
+                        return true;
+                    }
                 }
             }
             else {

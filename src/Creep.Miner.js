@@ -13,7 +13,6 @@ class CreepMiner extends CreepWorker {
      */
     constructor(creep) {
         super(creep);
-        this.activity = "mining";
     }
 
     get isParked() {
@@ -41,87 +40,67 @@ class CreepMiner extends CreepWorker {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
-        if (this.isParked) {
-            this.creep.harvest(this.getSource());
-            this.creep.drop(RESOURCE_ENERGY);            
-            return true;
-        }
+        //if (this.isParked) {
+        //    this.creep.harvest(this.getSource());
+        //    this.creep.drop(RESOURCE_ENERGY);
+        //    return true;
+        //}
 
         if (this.creep.carry.energy < this.creep.carryCapacity) {
-            let source = this.getSource();
-            
-            if (source !== null) {
-                if (this.creep.harvest(source) === ERR_NOT_IN_RANGE) {
-                    this.creep.moveTo(source);
+            if (this.moveOut()) {
+                let source = this.getSource();
+                
+                if (source !== null) {
+                    if (this.creep.harvest(source) === ERR_NOT_IN_RANGE) {
+                        this.creep.moveTo(source);
+                    }
                 }
             }
         }
         else {
-            let container = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                filter: function (object) { 
-                    return object.structureType === STRUCTURE_CONTAINER && (object.store.energy < object.storeCapacity); 
-                } 
-            });
-            
-            if (container != undefined) {
-                if (this.creep.transfer(container, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                    this.creep.moveTo(container);
-                }
-            }
-            else {
-                let spawn = this.creep.pos.findClosestByPath(FIND_MY_SPAWNS);
+            if (this.moveHome()) {
+                let container = this.creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                    filter: function (s) { 
+                        return (s.structureType === STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] < s.storeCapacity) || 
+                               (s.structureType === STRUCTURE_LINK && s.energy < s.energyCapacity); 
+                    } 
+                });
                 
-                if (spawn !== null && spawn.energy < spawn.energyCapacity) {
+                if (container != undefined) {
+                    if (this.creep.transfer(container, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+                        this.creep.moveTo(container);
+                    }
+                    return true;
+                }
+
+                let spawn = this.creep.pos.findClosestByPath(FIND_MY_SPAWNS, { 
+                    filter: function (s) { 
+                        return s.structureType === STRUCTURE_EXTENSION && (s.energy < s.energyCapacity); 
+                    } 
+                });
+                
+                if (spawn !== null) {
                     if (this.creep.transfer(spawn, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                         this.creep.moveTo(spawn);
                     }
+                    return true;
                 }
-                else {
-                    let extension = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                        filter: function (object) { 
-                            return object.structureType === STRUCTURE_EXTENSION && (object.energy < object.energyCapacity); 
-                        } 
-                    });
 
-                    if (extension != undefined) {
-                        if (this.creep.transfer(extension, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                            this.creep.moveTo(extension);
-                        }
-                    }
-                    else {
-                        let tower = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                            filter: function (object) { 
-                                return object.structureType === STRUCTURE_TOWER && (object.energy < object.energyCapacity); 
-                            } 
-                        });
+                let extension = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
+                    filter: function (s) { 
+                        return s.structureType === STRUCTURE_EXTENSION && (s.energy < s.energyCapacity); 
+                    } 
+                });
 
-                        if (tower != undefined) {
-                            if (this.creep.transfer(tower, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                                this.creep.moveTo(tower);
-                            }
-                        }
-                        else {
-                            let storage = this.creep.room.storage;
-                            
-                            if (storage !== undefined) {
-                                if (this.creep.pos.isNearTo(storage)) {
-                                    this.creep.transfer(storage, RESOURCE_ENERGY);
-                                }
-                                else {
-                                    this.creep.moveTo(storage);
-                                }
-                            }
-                            else {
-                                if (spawn !== null && !this.creep.pos.inRangeTo(spawn, 2)) {
-                                    this.creep.moveTo(spawn);
-                                }
-                            }
-                        }
+                if (extension != undefined) {
+                    if (this.creep.transfer(extension, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+                        this.creep.moveTo(extension);
                     }
+                    return true;
                 }
             }
         }
-        
+
         return true;
     }
     
@@ -133,7 +112,7 @@ class CreepMiner extends CreepWorker {
      */
     retire() {
         if (this.creep.ticksToLive <= 5) {
-            this.getRoom().removeMiner(this.creep.name);
+            this.Room.removeMiner(this.creep.name);
         }
 
         return false; 
@@ -147,10 +126,10 @@ class CreepMiner extends CreepWorker {
     getSource()
     {
         if (this.getMem("source") === null) {
-            this.setMem("source", this.getRoom().getMiningNode(this.creep.name));
+            this.setMem("source", this.Room.getMiningNode(this.creep.name));
         }
 
-        return Game.getObjectById(this.getMem("source").sourceId);
+        return Game.getObjectById(this.getMem("source").id);
     }
 }
 

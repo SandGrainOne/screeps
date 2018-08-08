@@ -13,11 +13,21 @@ class RoomBase {
         this.room = room;
     }
 
+    /**
+     * Gets the name of the room.
+     */
+    get Name() {
+        return this.room.name;
+    }
+
+    get Sources() {
+    }
+
     getMiningNode(creepName) {
-        if (!this.getMem("sources")) {
+        if (!this.getMem("sources")) { 
             let infoList = [];
             for (let source of this.room.find(FIND_SOURCES)) {
-                infoList.push({ sourceId: source.id, miner: null, px: 0, py: 0 });
+                infoList.push({ id: source.id, miner: null, hauler: null });
             }
 
             this.setMem("sources", infoList);
@@ -47,7 +57,7 @@ class RoomBase {
             }
         }
     }
-    
+
     /**
      * Get something from the room memory. 
      * 
@@ -57,10 +67,9 @@ class RoomBase {
         if (typeof this.room.memory[key] != 'undefined') {
             return this.room.memory[key];
         }
-        
         return null;
     }
-    
+
     /**
      * Store a value to the room memory under the given key.
      * 
@@ -68,8 +77,7 @@ class RoomBase {
      * @param {value} value - The value to be stored under the key.
      */
     setMem(key, value) {
-        if (this.room.memory[key] !== value) 
-        {
+        if (this.room.memory[key] !== value) {
             this.room.memory[key] = value;
         }
     }

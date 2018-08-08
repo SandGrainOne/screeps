@@ -13,54 +13,66 @@ class CreepBase {
      */
     constructor(creep) {
         this.creep = creep;
-        this.activity = "idling";
     }
 
     /**
-     * Retrieve the creeps current task
+     * Gets or sets the current task.
      */
     get Task() {
         return this.getMem("task") !== null ? this.getMem("task") : "none";
     }
+    set Task(value) {
+        this.setMem("task", value);
+    }
 
     /**
-     * Give the creep a task
+     * Gets the current room.
      */
-    set Task(task) {
-        this.setMem("task", task);
+    get Room() {
+        return new RoomBase(this.creep.room);
     }
-    
+
+    get HomeRoom() {
+        if (!this.getMem("homeroom")) {
+            this.setMem("homeroom", this.Room.Name);
+        }
+        return this.getMem("homeroom");
+    }
+
+    get RemoteRoom() {
+        if (!this.getMem("remoteroom")) {
+            this.setMem("remoteroom", this.Room.Name);
+        }
+        return this.getMem("remoteroom");
+    }
+
     /**
-     * Run all creep logic.
+     * Run all creep logic. If this function returns true, the creep should not be asked
+     * to perform additional actions this tick.
      * 
-     * @returns {Boolean} true if the action was successful
+     * @returns {Boolean} true if the creep successfully has performed an action.
      */
     act() {
         if (this.creep.spawning) {
             return true;
         }
-        
+
         if (this.renew()) {
-            this.sayRandom("renewing");
             return true;
         }
 
         if (this.retire()) {
-            this.sayRandom("retiring");
             return true;
         }
         
         if (this.retreat()) {
-            this.sayRandom("retreating");
             return true;
         }
 
         if (this.work()) {
-            this.sayRandom(this.activity);
             return true;
         }
-        
-        this.sayRandom("waiting");      
+
         return false;
     }
     
@@ -83,18 +95,18 @@ class CreepBase {
         if (this.creep.ticksToLive > 40) {
             return false;
         }
-        
+
         let spawn = this.creep.pos.findClosestByPath(FIND_MY_SPAWNS);
-            
+
         if (spawn !== null) {
             if (!(this.creep.pos.x === spawn.pos.x && this.creep.pos.y === spawn.pos.y)) {
                 this.creep.moveTo(spawn.pos.x + 1, spawn.pos.y + 1);
             }
         }
-        
+
         return true; 
     }
-    
+
     /**
      * Perform a retreat if there is an enemy creep or tower attacking the creep.
      * 
@@ -103,7 +115,7 @@ class CreepBase {
     retreat() {
         return false;
     }
-    
+
     /**
      * Perform job related logic.
      * 
@@ -112,11 +124,70 @@ class CreepBase {
     work() {
         return false;
     }
-    
-    getRoom() {
-        return new RoomBase(this.creep.room);
+
+    /**
+     * The creep will move to its remote room.
+     * 
+     * @param {boolean} sneak - Don't move into the room, but stay on the exit.
+     * 
+     * @returns {object} true if the creep is in the remote room already.
+     */
+    moveOut(sneak) {
+        if (this.moveToRoom(this.RemoteRoom)) {
+            if (!sneak) {
+                this.moveIn();
+            }
+            return true;
+        }
+        return false;
     }
-    
+
+    /**
+     * The creep will move to its home room.
+     * 
+     * @returns {object} true if the creep is in the home room already.
+     */
+    moveHome(){
+        if (this.moveToRoom(this.HomeRoom)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * The creep will move to the given room.
+     * 
+     * @returns {object} true if the creep is in the given room already.
+     */
+    moveToRoom(roomName) {
+        if (this.creep.room.name !== roomName) {
+            let exitDir = this.creep.room.findExitTo(roomName);
+            let exit = this.creep.pos.findClosestByRange(exitDir);
+            this.creep.moveTo(exit);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Make the creep move off the exit zone and into the room.
+     */
+    moveIn() {
+        if (this.creep.pos.x === 0) {
+            this.creep.moveTo(this.creep.pos.x + 1, this.creep.pos.y);
+        }
+        if (this.creep.pos.x === 49) {
+            this.creep.moveTo(this.creep.pos.x - 1, this.creep.pos.y);
+        }
+        if (this.creep.pos.y === 0) {
+            this.creep.moveTo(this.creep.pos.x, this.creep.pos.y + 1);
+        }
+        if (this.creep.pos.y === 49) {
+            this.creep.moveTo(this.creep.pos.x, this.creep.pos.y - 1);
+        }
+    }
+
     /**
      * Get something from the creep memory. 
      * 
@@ -129,7 +200,7 @@ class CreepBase {
         
         return null;
     }
-    
+
     /**
      * Store a value to the creep memory under the given key.
      * 
@@ -139,17 +210,6 @@ class CreepBase {
     setMem(key, value) {
         if (this.creep.memory[key] !== value) {
             this.creep.memory[key] = value;
-        }
-    }
-    
-    /**
-     * Make the creep say a message. This will only succeed every 10 ticks to reduce the spam.
-     * 
-     * @param {string} message - The message to be said
-     */
-    sayRandom(message) {
-        if ((Math.floor((Math.random() * 10) + 1)) % 10 === 0) {
-            this.creep.say(message);
         }
     }
 }

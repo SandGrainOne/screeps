@@ -14,11 +14,6 @@ class Population {
      */
     refresh() {
         Memory.population = {};
-        Memory.population.miners = [];
-        Memory.population.haulers = [];
-        Memory.population.builders = [];
-        Memory.population.upgraders = [];
-        Memory.population.soldiers = [];
 
         // Loop through all creeps in memory and sort them to quick access buckets.
         for (let creepName in Memory.creeps) {
@@ -30,31 +25,18 @@ class Population {
                 delete Memory.creeps[creepName];
                 continue;
             }
-            
-            switch (creep.memory.role)  {
-                case "miner":
-                    Memory.population.miners.push(creepName);
-                    break;
-                
-                case "hauler":
-                    Memory.population.haulers.push(creepName);
-                    break;
-                
-                case "builder":
-                    Memory.population.builders.push(creepName);
-                    break;
-                
-                case "upgrader":
-                    Memory.population.upgraders.push(creepName);
-                    break;
-                
-                case "soldier":
-                    Memory.population.soldiers.push(creepName);
-                    break;
-                
-                default:
-                    // code
+
+            let homeroom = creep.memory.homeroom ? creep.memory.homeroom : creep.room.name;
+
+            if (!Memory.population[homeroom]) {
+                Memory.population[homeroom] = {};
             }
+
+            if (!Memory.population[homeroom][creep.memory.role + 's']) {
+                Memory.population[homeroom][creep.memory.role + 's'] = [];
+            }            
+
+            Memory.population[homeroom][creep.memory.role + 's'].push(creepName);
         }
     }
 }

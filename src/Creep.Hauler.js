@@ -13,7 +13,6 @@ class CreepHauler extends CreepBase {
      */
     constructor(creep) {
         super(creep);
-        this.activity = "hauling";
     }
     
     /**
@@ -23,7 +22,7 @@ class CreepHauler extends CreepBase {
      */
     work() {
         if (this.Task === "hauling")  {
-            if (this.creep.carry.energy < this.creep.carryCapacity) {
+            if (this.creep.carry.energy < this.creep.carryCapacity / 2) {
                 // The hauler will usually move close to places where there can be dropped energy.
                 let drops = this.creep.pos.findInRange(FIND_DROPPED_ENERGY, 2);
 
@@ -32,16 +31,24 @@ class CreepHauler extends CreepBase {
                         this.creep.moveTo(drops[0]);
                     }
                 }
-                else {        
-                    let container = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                        filter: function (structure) { 
-                            return structure.structureType === STRUCTURE_CONTAINER && (structure.store.energy > 500); 
-                        } 
-                    });
+                else {
+                    let inLink = Game.getObjectById("5878e5303393edb0108b660e");
+                    if (inLink && inLink.energy && this.Room.Name === "W3N79") {
+                        if (this.creep.withdraw(inLink, RESOURCE_ENERGY) !== OK) {
+                                this.creep.moveTo(inLink);
+                        }
+                    }
+                    else {
+                        let container = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
+                            filter: function (structure) { 
+                                return structure.structureType === STRUCTURE_CONTAINER && (structure.store.energy > 600); 
+                            } 
+                        });
 
-                    if (container !== null) {
-                        if (this.creep.withdraw(container, RESOURCE_ENERGY) !== OK) {
-                            this.creep.moveTo(container);
+                        if (container !== null) {
+                            if (this.creep.withdraw(container, RESOURCE_ENERGY) !== OK) {
+                                this.creep.moveTo(container);
+                            }
                         }
                     }
                 }
@@ -53,67 +60,66 @@ class CreepHauler extends CreepBase {
         else {
             if (this.creep.carry.energy > 0) {
                 let spawn = this.creep.pos.findClosestByPath(FIND_MY_SPAWNS);
-            
                 if (spawn !== null && spawn.energy < spawn.energyCapacity) {
                     if (this.creep.transfer(spawn, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                         this.creep.moveTo(spawn);
                     }
+                    return true;
                 }
-                else {
-                    let extension = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                        filter: function (object) { 
-                            return object.structureType === STRUCTURE_EXTENSION && (object.energy < object.energyCapacity); 
-                        } 
-                    });
-    
-                    if (extension != undefined) {
-                        if (this.creep.transfer(extension, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                            this.creep.moveTo(extension);
-                        }
+
+                let extension = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
+                    filter: function (object) { 
+                        return object.structureType === STRUCTURE_EXTENSION && (object.energy < object.energyCapacity); 
+                    } 
+                });
+                if (extension != undefined) {
+                    if (this.creep.transfer(extension, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+                        this.creep.moveTo(extension);
+                    }
+                    return true;
+                }
+
+                let tower = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
+                    filter: function (object) { 
+                        return object.structureType === STRUCTURE_TOWER && (object.energy < object.energyCapacity - 200); 
+                    } 
+                });
+
+                if (tower != undefined) {
+                    if (this.creep.transfer(tower, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+                        this.creep.moveTo(tower);
+                    }
+                    return true;
+                }
+
+                let storage = this.creep.room.storage;
+                
+                if (storage !== undefined) {
+                    if (this.creep.pos.isNearTo(storage)) {
+                        this.creep.transfer(storage, RESOURCE_ENERGY);
                     }
                     else {
-                        let tower = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                            filter: function (object) { 
-                                return object.structureType === STRUCTURE_TOWER && (object.energy < object.energyCapacity - 200); 
-                            } 
-                        });
-    
-                        if (tower != undefined) {
-                            if (this.creep.transfer(tower, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                                this.creep.moveTo(tower);
-                            }
-                        }
-                        else {
-                            let storage = this.creep.room.storage;
-                            
-                            if (storage !== undefined) {
-                                if (this.creep.pos.isNearTo(storage)) {
-                                    this.creep.transfer(storage, RESOURCE_ENERGY);
-                                }
-                                else {
-                                    this.creep.moveTo(storage);
-                                }
-                            }
-                            else {
-                                let container = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                                    filter: function (object) { 
-                                        return object.structureType === STRUCTURE_CONTAINER && (object.store.energy < 300); 
-                                    } 
-                                });
-        
-                                if (container !== undefined) {
-                                    if (this.creep.transfer(container, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                                        this.creep.moveTo(container);
-                                    }
-                                }
-                                else {
-                                    if (spawn !== null && !this.creep.pos.inRangeTo(spawn, 2)) {
-                                        this.creep.moveTo(spawn);
-                                    }
-                                }
-                            }
-                        }
+                        this.creep.moveTo(storage);
                     }
+                    return true;
+                }
+
+                let container = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
+                    filter: function (object) { 
+                        return object.structureType === STRUCTURE_CONTAINER;
+                    } 
+                });
+
+                if (container !== undefined) {
+                    if (this.creep.transfer(container, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+                        this.creep.moveTo(container);
+                    }
+                    return true;
+                }
+
+                if (spawn !== null && !this.creep.pos.inRangeTo(spawn, 2)) {
+                    this.creep.moveTo(spawn);
+                    return true;
                 }
             }
             else {
