@@ -1,5 +1,7 @@
 'use strict';
 
+let tools = require('tools');
+
 /**
  * Wrapper class with basic logic for creeps.
  */
@@ -13,6 +15,7 @@ class CreepBase
     constructor(creep)
     {
         this.creep = creep;
+        this.activity = "idling";
     }
     
     /**
@@ -24,16 +27,19 @@ class CreepBase
     {
         if (this.retire())
         {
+            this.sayRandom("retiring");
             return true;
         }
         
         if (this.retreat())
         {
+            this.sayRandom("retreating");
             return true;
         }
 
         if (this.work())
         {
+            this.sayRandom(this.activity);
             return true;
         }
         
@@ -41,17 +47,32 @@ class CreepBase
     }
     
     /**
-     * Perform a retreat if it's needed.
+     * Perform a retirement if it's needed. This means it will move to the graveyard.
      * 
-     * @returns {Boolean} true if the retreat was required and the creep is on the move
+     * @returns {Boolean} true if the creep is getting old and is retiring
      */
     retire()
     {
-        return false; 
+        if (this.creep.ticksToLive > 50)
+        {
+            return false;
+        }
+        
+        let spawn = this.creep.pos.findClosestByPath(FIND_MY_SPAWNS);
+            
+        if (spawn !== null)
+        {
+            if (!(this.creep.pos.x === spawn.pos.x && this.creep.pos.y === spawn.pos.y))
+            {
+                this.creep.moveTo(spawn.pos.x + 1, spawn.pos.y + 1);
+            }
+        }
+        
+        return true; 
     }
     
     /**
-     * Perform a retreat if it's needed.
+     * Perform a retreat if there is an enemy creep or tower attacking the creep.
      * 
      * @returns {Boolean} true if the retreat was required and the creep is on the move
      */
@@ -67,17 +88,20 @@ class CreepBase
      */
     work()
     {
-        return true;
+        return false;
     }
     
     /**
-     * Make the creep say a message.
+     * Make the creep say a message. This will only succeed every 10 ticks to reduce the spam.
      * 
      * @param {string} message - The message to be said
      */
-    say(message)
+    sayRandom(message)
     {
-        this.creep.say(message);
+        if ((Math.floor((Math.random() * 10) + 1)) % 10 === 0)
+        {
+            this.creep.say(message);
+        }
     }
 }
 

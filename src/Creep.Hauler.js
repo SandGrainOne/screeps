@@ -5,21 +5,21 @@ let CreepBase = require('Creep.Base');
 /**
  * Wrapper class for creeps with logic for a miner.
  */
-class CreepMiner extends CreepBase
+class CreepHauler extends CreepBase
 {   
     /**
-     * Initializes a new instance of the CreepMiner class with the specified creep.
+     * Initializes a new instance of the CreepHauler class with the specified creep.
      * 
      * @param {Creep} creep - The creep to be wrapped
      */
     constructor(creep)
     {
         super(creep);
-        this.activity = "mining";
+        this.activity = "hauling";
     }
     
     /**
-     * Perform mining related logic.
+     * Perform hauling related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
@@ -27,42 +27,22 @@ class CreepMiner extends CreepBase
     {
         if (this.creep.carry.energy < this.creep.carryCapacity)
         {
-            let source = this.creep.pos.findClosestByPath(FIND_SOURCES);
+            let miners = this.creep.room.find(FIND_MY_CREEPS, { 
+                filter: function (creep) { 
+                    return creep.memory.role === "miner"; 
+                } 
+            });
             
-            if (source !== null)
+            if (miners.length)
             {
-                if (this.creep.harvest(source) === ERR_NOT_IN_RANGE)
+                if (!this.creep.pos.isNearTo(miners[0]))
                 {
-                    this.creep.moveTo(source);
+                    this.creep.moveTo(miners[0]);
                 }
             }
         }
         else
         {
-            let haulers = this.creep.room.find(FIND_MY_CREEPS, {
-                filter: (c) => {
-                    return c.memory.role === "hauler" && c.carry.energy < c.carryCapacity
-                }
-            });
-            
-            if (haulers.length)
-            {
-                let result = ERR_FULL; // Type of error is not important.
-                
-                for (let hauler of haulers)
-                {
-                    if (this.creep.pos.isNearTo(hauler))
-                    {
-                        result = this.creep.transfer(hauler, RESOURCE_ENERGY);
-                        break;
-                    }
-                }
-                
-                if (result === OK) {
-                    return true;
-                }
-            }
-
             let spawn = this.creep.pos.findClosestByPath(FIND_MY_SPAWNS);
             
             if (spawn !== null && spawn.energy < spawn.energyCapacity)
@@ -124,7 +104,7 @@ class CreepMiner extends CreepBase
                                     return object.structureType === STRUCTURE_CONTAINER && (object.store.energy < object.storeCapacity); 
                                 } 
                             });
-                            
+    
                             if (container != undefined)
                             {
                                 if (this.creep.transfer(container, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE)
@@ -149,4 +129,4 @@ class CreepMiner extends CreepBase
     }
 }
 
-module.exports = CreepMiner;
+module.exports = CreepHauler;

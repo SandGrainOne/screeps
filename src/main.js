@@ -1,10 +1,9 @@
 'use strict';
 
-let CreepWorker = require('Creep.Worker');
-let CreepMiner = require('Creep.Miner');
-
 let code = require('code');
 let tools = require('tools');
+
+let CreepFactory = require('CreepFactory');
 
 let taskDelivering = require('task.delivering');
 let taskHarvesting = require('task.harvesting');
@@ -21,7 +20,7 @@ module.exports.loop = function ()
     
     for (let roomName in Game.rooms)
     {
-        if (Game.rooms[roomName].controller !== undefined && Game.rooms[roomName].controller.my) 
+        if (Game.rooms[roomName].controller !== undefined && Game.rooms[roomName].controller.my)
         {
             controlledRooms.push(Game.rooms[roomName]);
         }
@@ -42,7 +41,7 @@ module.exports.loop = function ()
                 upgraders: 4,
                 builders: 2,
                 repairers: 1,
-                carriers: 0,
+                curators: 1,
                 haulers: 2
             };
             
@@ -78,11 +77,11 @@ module.exports.loop = function ()
                     roomSpawn.createCreep([WORK, CARRY, MOVE, MOVE], null, { role: "repairer" });
                 }
 
-                let numberOfCarriers = _(roomCreeps).filter( { memory: { role: 'carrier' } } ).size();
+                let numberOfCurators = _(roomCreeps).filter( { memory: { role: 'curator' } } ).size();
             
-                if (numberOfCarriers < room.memory.settings.carriers)
+                if (numberOfCurators < room.memory.settings.curators)
                 {
-                    roomSpawn.createCreep([CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], null, { role: "carrier" });
+                    roomSpawn.createCreep([CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], null, { role: "curator" });
                 }
 
                 let numberOfHaulers = _(roomCreeps).filter( { memory: { role: 'hauler' } } ).size();
@@ -93,98 +92,53 @@ module.exports.loop = function ()
                 }
             }
         }
+        
+        let roomTowers = room.find(FIND_MY_STRUCTURES, { filter: { structureType: STRUCTURE_TOWER } });
+    
+        for (let tower of roomTowers) 
+        {
+            let hostileCreep = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+            
+            if (hostileCreep !== null)
+            {
+                tower.attack(hostileCreep);
+            }
+            else
+            {
+                let damagedCreeps = tower.room.find(FIND_MY_CREEPS, {
+                    filter: (creep) => {
+                        return creep.hits < creep.hitsMax
+                    }
+                });
+        
+                if (damagedCreeps.length > 0)
+                {
+                    let damagedCreep = _(damagedCreeps).first();
+                    
+                    tower.heal(damagedCreep);
+                }
+            }
+        }
     }
+        
+    let creepFactory = new CreepFactory();
     
     for (let creepName in Game.creeps)
     {
         let creep = Game.creeps[creepName];
         
-        if (creep.memory.role === "miner")
+        if (creep.spawning)
         {
-            let miner = new CreepMiner(creep, "miner");
-            
-            if (miner.act())
-            {
-                continue;
-            }
-        }
-
-        if (creep.memory.role === "hauler")
-        {
-            if (creep.memory.task !== "collecting" && creep.memory.task !== "delivering" )
-            {
-                creep.memory.task = "collecting";
-            }
-            
-            if (creep.memory.task === "collecting")
-            {
-                if (creep.carry.energy >= creep.carryCapacity)
-                {
-                    creep.memory.task = "delivering";
-                }
-                
-                let miners = _(Game.creeps).filter( { memory: { role: 'miner' } } );
-                
-                if (_(miners).size() > 0)
-                {
-                    if (!creep.pos.isNearTo(miners.first()))
-                    {
-                        creep.moveTo(miners.first());
-                    }
-                }
-            }
-            
-            if (creep.memory.task === "delivering")
-            {
-                taskDelivering.run(creep, "collecting");
-                continue;
-            }
+            continue;
         }
         
-        if (creep.memory.role === "carrier")
+        // Add a logic layer to the creep
+        let smartCreep = creepFactory.wrap(creep);
+        
+        if (smartCreep.act())
         {
-            if (creep.memory.task !== "carrying" && creep.memory.task !== "delivering")
-            {
-                creep.memory.task = "carrying";
-            }
-            
-            if (creep.memory.task === "carrying")
-            {
-                if (creep.carry.energy < creep.carryCapacity)
-                {
-                    let target = creep.pos.findClosestByRange(FIND_DROPPED_ENERGY);
-                    
-                    if (target !== null) 
-                    {
-                        let keeper = target.pos.findInRange(FIND_HOSTILE_CREEPS, 5);
-                        
-                        if (keeper.length > 0)
-                        {
-                            continue;
-                        }
-                        
-                        if (creep.pickup(target) == ERR_NOT_IN_RANGE) 
-                        {
-                            creep.moveTo(target);
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        creep.memory.task = "delivering";
-                    }
-                }
-                else
-                {
-                    creep.memory.task = "delivering";
-                }
-            }
-            
-            if (creep.memory.task === "delivering")
-            {
-                taskDelivering.run(creep, "carrying");
-                continue;
-            }
+            // The creep performed its task(s). Get next creep.
+            continue;
         }
         
         if (creep.memory.role === "repairer")
@@ -197,7 +151,6 @@ module.exports.loop = function ()
             if (creep.memory.task === "harvesting")
             {
                 taskHarvesting.run(creep, "repairing");
-                continue;
             }
             
             if (creep.memory.task === "repairing")
@@ -215,7 +168,6 @@ module.exports.loop = function ()
                         if (creep.repair(containerToRepair) === ERR_NOT_IN_RANGE)
                         {
                             creep.moveTo(containerToRepair);
-                            continue;
                         }
                     }
                     else
@@ -229,7 +181,6 @@ module.exports.loop = function ()
                         if (creep.repair(roadToRepair) === ERR_NOT_IN_RANGE)
                         {
                             creep.moveTo(roadToRepair);
-                            continue;
                         }
                         else
                         {
@@ -242,12 +193,10 @@ module.exports.loop = function ()
                             if (creep.repair(wallToRepair) === ERR_NOT_IN_RANGE)
                             {
                                 creep.moveTo(wallToRepair);
-                                continue;
                             }
                             else
                             {
                                 taskDelivering.run(creep, "harvesting");
-                                continue;
                             }
                         }
                     }
@@ -257,6 +206,8 @@ module.exports.loop = function ()
                     creep.memory.task = "harvesting";
                 }
             }
+            
+            continue;
         }
         
         if (creep.memory.role === "builder")
@@ -283,7 +234,6 @@ module.exports.loop = function ()
                         if (creep.fatigue === 0)
                         {
                             creep.moveTo(storage);
-                            continue;
                         }
                     }
                 }
@@ -308,7 +258,6 @@ module.exports.loop = function ()
                             if (creep.fatigue === 0)
                             {
                                 creep.moveTo(container);
-                                continue;
                             }
                         }
                     }
@@ -328,7 +277,6 @@ module.exports.loop = function ()
                     if (creep.build(target) === ERR_NOT_IN_RANGE)
                     {
                         creep.moveTo(target);
-                        continue;
                     }
                 }
                 else
@@ -336,6 +284,8 @@ module.exports.loop = function ()
                     creep.memory.task = "harvesting";
                 }
             }
+            
+            continue;
         }
         
         if (creep.memory.role === "upgrader")
@@ -362,7 +312,6 @@ module.exports.loop = function ()
                         if (creep.fatigue === 0)
                         {
                             creep.moveTo(storage);
-                            continue;
                         }
                     }
                 }
@@ -387,7 +336,6 @@ module.exports.loop = function ()
                             if (creep.fatigue === 0)
                             {
                                 creep.moveTo(container);
-                                continue;
                             }
                         }
                     }
@@ -407,7 +355,6 @@ module.exports.loop = function ()
                     if (creep.upgradeController(target) === ERR_NOT_IN_RANGE)
                     {
                         creep.moveTo(target);
-                        continue;
                     }
                 }
                 else
@@ -415,36 +362,10 @@ module.exports.loop = function ()
                     creep.memory.task = "harvesting";
                 }
             }
+            
+            continue;
         }
     }
-    
-    /*
-    let roomTowers = Game.rooms["sim"].find(FIND_MY_STRUCTURES, { filter: { structureType: STRUCTURE_TOWER } });
-    
-    for (let tower of roomTowers) 
-    {
-        let hostileCreep = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-        
-        if (hostileCreep !== null)
-        {
-            tower.attack(hostileCreep);
-        }
-        else
-        {
-            let damagedCreeps = tower.room.find(FIND_MY_CREEPS, {
-                filter: (creep) => {
-                    return creep.hits < creep.hitsMax
-                }
-            });
-    
-            if (damagedCreeps.length > 0)
-            {
-                let damagedCreep = _(damagedCreeps).first();
-                
-                tower.heal(damagedCreep);
-            }
-        }
-    }*/
     
     function setRoomStage(room)
     {
