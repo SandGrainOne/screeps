@@ -1,0 +1,8 @@
+# Do not track Visual Studio Code settings
+.vscode
+
+# Do not track node modules
+node_modules
+
+# Do not track username and password information
+.secret.json
