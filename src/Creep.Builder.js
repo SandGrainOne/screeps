@@ -3,23 +3,23 @@
 let CreepWorker = require('Creep.Worker');
 
 /**
- * Wrapper class for creeps with logic for an upgrader.
+ * Wrapper class for creeps with logic for a repairer.
  */
-class CreepUpgrader extends CreepWorker
+class CreepBuilder extends CreepWorker
 {   
     /**
-     * Initializes a new instance of the CreepUpgrader class with the specified creep.
+     * Initializes a new instance of the CreepBuilder class with the specified creep.
      * 
      * @param {Creep} creep - The creep to be wrapped
      */
     constructor(creep)
     {
         super(creep);
-        this.activity = "upgrading";
+        this.activity = "building";
     }
     
     /**
-     * Perform upgrading related logic.
+     * Perform building related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
@@ -44,16 +44,16 @@ class CreepUpgrader extends CreepWorker
             }
             else
             {
-                this.setTask("upgrading");
+                this.setTask("building");
             }
         }
         else
         {
             if (this.creep.carry.energy > 0) 
             {
-                let target = this.creep.room.controller;
-            
-                if (this.creep.upgradeController(target) === ERR_NOT_IN_RANGE)
+                let target = this.creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+                        
+                if (this.creep.build(target) === ERR_NOT_IN_RANGE)
                 {
                     this.creep.moveTo(target);
                 }
@@ -68,4 +68,4 @@ class CreepUpgrader extends CreepWorker
     }
 }
 
-module.exports = CreepUpgrader;
+module.exports = CreepBuilder;

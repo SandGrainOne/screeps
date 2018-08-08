@@ -1,11 +1,11 @@
 'use strict';
 
-let CreepBase = require('Creep.Base');
+let CreepWorker = require('Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for a miner.
  */
-class CreepMiner extends CreepBase
+class CreepMiner extends CreepWorker
 {   
     /**
      * Initializes a new instance of the CreepMiner class with the specified creep.

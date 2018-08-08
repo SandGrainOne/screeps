@@ -53,7 +53,7 @@ class CreepBase
      */
     retire()
     {
-        if (this.creep.ticksToLive > 50)
+        if (this.creep.ticksToLive > 40)
         {
             return false;
         }
@@ -89,6 +89,16 @@ class CreepBase
     work()
     {
         return false;
+    }
+    
+    getTask()
+    {
+        return this.creep.memory.task;
+    }
+    
+    setTask(task)
+    {
+        this.creep.memory.task = task;
     }
     
     /**

@@ -1,11 +1,11 @@
 'use strict';
 
-let CreepBase = require('Creep.Base');
+let CreepWorker = require('Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for a miner.
  */
-class CreepHauler extends CreepBase
+class CreepHauler extends CreepWorker
 {   
     /**
      * Initializes a new instance of the CreepHauler class with the specified creep.
@@ -27,6 +27,19 @@ class CreepHauler extends CreepBase
     {
         if (this.creep.carry.energy < this.creep.carryCapacity)
         {
+            let target = this.creep.pos.findClosestByRange(FIND_DROPPED_ENERGY);
+            
+            // Don't move to pick up tiny piles
+            if (target !== null && target.amount > 10)
+            {
+                if (this.creep.pickup(target) == ERR_NOT_IN_RANGE) 
+                {
+                    this.creep.moveTo(target);
+                }
+                
+                return true;
+            }
+            
             let miners = this.creep.room.find(FIND_MY_CREEPS, { 
                 filter: function (creep) { 
                     return creep.memory.role === "miner"; 

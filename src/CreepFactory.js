@@ -3,8 +3,9 @@
 let CreepBase = require('Creep.Base');
 let CreepMiner = require('Creep.Miner');
 let CreepHauler = require('Creep.Hauler');
-let CreepCurator = require('Creep.Curator');
+let CreepBuilder = require('Creep.Builder');
 let CreepUpgrader = require('Creep.Upgrader');
+let CreepRepairer = require('Creep.Repairer');
 
 class CreepFactory
 {
@@ -17,11 +18,14 @@ class CreepFactory
             case 'hauler':
                 return new CreepHauler(creep);
                 
-            case 'curator':
-                return new CreepCurator(creep);
+            case 'builder':
+                return new CreepBuilder(creep);
                 
             case 'upgrader':
                 return new CreepUpgrader(creep);
+                
+            case 'repairer':
+                return new CreepRepairer(creep);
             
             default:
                 return new CreepBase(creep);
