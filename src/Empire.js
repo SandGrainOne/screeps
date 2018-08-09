@@ -13,10 +13,11 @@ class Empire {
      * Initializes a new instance of the Empire class.
      */
     constructor() {
-        Memory.empire = {};
-        Memory.empire.creeps = {};
-
         this._mem = Memory.empire;
+
+        // Saving creeps to memory every tick to make the population visible.
+        // This is temporary. Should instead have a command to output creeps.
+        this._mem.creeps = {};
 
         this._creepFactory = new CreepFactory();
 
@@ -30,14 +31,14 @@ class Empire {
     /**
      * Get an array of all known rooms.
      */
-    get AllRooms() {
+    get rooms() {
         return this._allRooms;
     }
 
     /**
      * Get an array of all living creeps.
      */
-    get AllCreeps() {
+    get creeps() {
         return this._allCreeps;
     }
 
@@ -54,7 +55,7 @@ class Empire {
     }
 
     /**
-     * Get an object with all creeps working in the specified room.
+     * Get an object with all creeps assigned to be working in the specified room.
      * 
      * @param {string} roomName - The name of the room to retrieve.
      */
@@ -63,6 +64,26 @@ class Empire {
             return this._creeps[roomName];
         }
         return {};
+    }
+
+    /**
+     * Attempt to reserve a game object or something with a unique id to prevent other
+     * creeps, towers, etc from targeting the same thing. A reservation will time out and 
+     * be released after 2 ticks. This means a reservation must be renewed.
+     * 
+     * @param {string} id - A unique id identifying what is being reserved.
+     * @param {string} creepName - The name of the creep making the reservation.
+     */
+    reserve(id, creepName) {
+        if (!this._mem.reservations[id]) {
+            this._mem.reservations[id] = { creepName: creepName, ttl: 2 };
+            return true;
+        }
+        if (this._mem.reservations[id].creepName === creepName) {
+            this._mem.reservations[id].ttl = 2;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -97,11 +118,11 @@ class Empire {
             smartCreep.WorkRoom = this.getRoom(creep.memory.rooms.work);
 
             if (smartCreep.IsRetired) {
-                // Don't count creeps that are retired and about to die.
+                // Don't count creeps that are retired.
                 continue;
             }
 
-            let job = smartCreep.Job;
+            let job = smartCreep.job;
             let workroom = smartCreep.WorkRoom.name;
 
             if (!this._mem.creeps[workroom]) {

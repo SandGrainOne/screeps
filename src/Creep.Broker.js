@@ -29,9 +29,9 @@ class CreepBroker extends CreepWorker {
             return true;
         }
 
-        let storage = this.Room.Storage;
+        let storage = this.Room.storage;
         let storageLink = this.Room.Links.Storage;
-        let terminal = this.Room.Terminal;
+        let terminal = this.Room.terminal;
 
         if (!storage || (!storageLink && !terminal)) {
             this.creep.say("todo?");

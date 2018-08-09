@@ -1,5 +1,7 @@
 'use strict';
 
+let C = require('constants');
+
 let CreepWorker = require('Creep.Worker');
 
 /**
@@ -23,15 +25,15 @@ class CreepSettler extends CreepWorker {
      */
     work() {
         if (this.AtWork) {
-            if (this.Room.Controller && this.creep.pos.isNearTo(this.Room.Controller)) {
-                if (!this.Room.Controller.sign) {
-                    this.creep.signController(this.Room.Controller, "For the Sand empire!");
+            if (this.Room.controller && this.creep.pos.isNearTo(this.Room.controller)) {
+                if (!this.Room.controller.sign || this.Room.controller.sign.username === C.USERNAME) {
+                    this.creep.signController(this.Room.controller, "For the Sand empire!");
                 }
-                if (this.Name === "Gavin") {
-                    this.creep.claimController(this.Room.Controller);
+                if (this.name === " ") {
+                    this.creep.claimController(this.Room.controller);
                 }
                 else {
-                    this.creep.reserveController(this.Room.Controller);
+                    this.creep.reserveController(this.Room.controller);
                 }
             }
         }
@@ -40,8 +42,8 @@ class CreepSettler extends CreepWorker {
             this.moveToRoom(this.WorkRoom.name);
         }
         else {
-            if (this.Room.Controller && !this.creep.pos.isNearTo(this.Room.Controller)) {
-                this.moveTo(this.Room.Controller);
+            if (this.Room.controller && !this.creep.pos.isNearTo(this.Room.controller)) {
+                this.moveTo(this.Room.controller);
             }
         }
 

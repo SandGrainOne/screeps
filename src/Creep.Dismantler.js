@@ -78,7 +78,7 @@ class CreepDismantler extends CreepWorker {
                 if (carry === 0) {
                     this.IsWorking = true;
                 }
-                let storage = this.Room.Storage;
+                let storage = this.Room.storage;
 
                 if (storage) {
                     if (this.creep.pos.isNearTo(storage)) {

@@ -7,14 +7,14 @@ let code = {
     /**
      * Returns current code version.
      */
-    getVersion: function () {
+    _getVersion: function () {
         return Memory.code.version;
     },
 
     /**
      * Sets current code version.
      */
-    setVersion: function (version) {
+    _setVersion: function (version) {
         Memory.code.version = version;
     },
 
@@ -26,14 +26,21 @@ let code = {
         if (Memory.code === undefined)  {
             Memory.code = {};
         }
-        
+
         // Ensure that the version is defined. First update.
         if (Memory.code.version === undefined)  {
-            this.setVersion("1.0");
+            this._setVersion("1.0");
         }
-        
-        if (this.getVersion() === "1.0") {
-            // No work todo. No new versions.
+
+        // Adding the empire memory space
+        if (this._getVersion() === "1.0") {
+            if (Memory.empire === undefined) {
+                Memory.empire = {};
+            }
+            if (Memory.empire.reservations === undefined) {
+                Memory.empire.reservations = {};
+            }
+            this._setVersion("1.1");
         }
     }
 }

@@ -24,17 +24,44 @@ class CreepBuilder extends CreepWorker {
     work() {
         if (this.AtWork && this.StartEnergy > 0) {
             let performedWork = false;
-            if (this.Room.BuildSites.length > 0) {
-                for (let buildSite of this.Room.BuildSites) {
-                    let rangeToBuildSite = this.creep.pos.getRangeTo(buildSite);
-                    if (rangeToBuildSite <= 3) {
-                        if (this.build(buildSite) === OK) {
+            if (this.Room.constructionSites.length > 0) {
+                for (let site of this.Room.constructionSites) {
+                    let rangeToSite = this.creep.pos.getRangeTo(site);
+                    if (rangeToSite <= 3) {
+                        if (this.build(site) === OK) {
                             performedWork = true;
                             break;
                         }
                     }
                 }
             }
+
+            if (!performedWork) {
+                let containers = this.creep.pos.findInRange(FIND_STRUCTURES, 3, { 
+                    filter: function (s) { 
+                        return (s.structureType === STRUCTURE_CONTAINER) && (s.hits < s.hitsMax); 
+                    } 
+                });
+
+                if (containers.length > 0) {
+                    this.repair(containers[0]);
+                    performedWork = true;
+                } 
+            }
+
+            if (!performedWork) {
+                let roads = this.creep.pos.findInRange(FIND_STRUCTURES, 3, { 
+                    filter: function (s) { 
+                        return s.structureType === STRUCTURE_ROAD && (s.hits < s.hitsMax); 
+                    } 
+                });
+
+                if (roads.length > 0) {
+                    this.repair(roads[0]);
+                    performedWork = true;
+                } 
+            }
+            
             if (!performedWork && this.Room.Repairs.length > 0) {
                 for (let repairs of this.Room.Repairs) {
                     let rangeToRepairs = this.creep.pos.getRangeTo(repairs);
@@ -49,20 +76,20 @@ class CreepBuilder extends CreepWorker {
         }
 
         if (this.NextCarry < this.Capacity) {
-            let storage = this.Room.Storage;
+            let storage = this.Room.storage;
             if (storage && storage.store.energy > 0 && this.creep.pos.isNearTo(storage)) {
                 this.withdraw(storage, RESOURCE_ENERGY);
             }
 
-            if (this.Room.Containers.length > 0) {
-                let containers = this.creep.pos.findInRange(this.Room.Containers, 1);
+            if (this.Room.containers.length > 0) {
+                let containers = this.creep.pos.findInRange(this.Room.containers, 1);
                 if (containers.length > 0) {
                     this.withdraw(containers[0], RESOURCE_ENERGY);
                 }
             }
 
-            if (this.Room.Resources.Sources.length > 0) {
-                let sources = this.creep.pos.findInRange(this.Room.Resources.Sources, 1);
+            if (this.Room.sources.length > 0) {
+                let sources = this.creep.pos.findInRange(this.Room.sources, 1);
                 if (sources[0] && this.creep.pos.isNearTo(sources[0])) {
                     let res = this.harvest(sources[0]);
                 }
@@ -87,10 +114,9 @@ class CreepBuilder extends CreepWorker {
                 moveRequired = true;
             }
 
-            if (!moveTarget && this.Room.BuildSites.length > 0) {
-                let site = this.creep.pos.findClosestByRange(this.Room.BuildSites);
+            if (!moveTarget && this.Room.constructionSites.length > 0) {
+                let site = this.creep.pos.findClosestByRange(this.Room.constructionSites);
                 if (site) {
-                    this.mem.buildTargetId = site.id;
                     moveTarget = site;
                     if (this.creep.pos.getRangeTo(site) > 3) {
                         moveRequired = true;
@@ -98,22 +124,41 @@ class CreepBuilder extends CreepWorker {
                 }
             }
 
-            if (!moveTarget && this.Room.Repairs.length > 0) {
-                let repairs = this.creep.pos.findClosestByRange(this.Room.Repairs);
-                if (repairs) {
-                    this.mem.repairTargetId = repairs.id;
-                    moveTarget = repairs;
-                    if (this.creep.pos.getRangeTo(repairs) > 3) {
+            if (!moveTarget) {
+                let container = this.creep.pos.findClosestByRange(FIND_STRUCTURES, { 
+                    filter: function (s) { 
+                        return s.structureType === STRUCTURE_CONTAINER && s.hits < s.hitsMax; 
+                    } 
+                });
+
+                if (container) {
+                    moveTarget = container;
+                    if (this.creep.pos.getRangeTo(container) > 3) {
                         moveRequired = true;
                     }
-                }
+                } 
+            }
+
+            if (!moveTarget) {
+                let road = this.creep.pos.findClosestByRange(FIND_STRUCTURES, { 
+                    filter: function (s) { 
+                        return s.structureType === STRUCTURE_ROAD && s.hits < s.hitsMax; 
+                    } 
+                });
+
+                if (road) {
+                    moveTarget = road;
+                    if (this.creep.pos.getRangeTo(road) > 3) {
+                        moveRequired = true;
+                    }
+                } 
             }
         }
         else {
 
-            if (!this.Room.Storage && (this.AtHome || this.AtWork)) {
-                if (!moveTarget && this.Room.Containers.length > 0) {
-                    let container = this.creep.pos.findClosestByRange(this.Room.Containers);
+            if (!this.Room.storage && (this.AtHome || this.AtWork)) {
+                if (!moveTarget && this.Room.containers.length > 0) {
+                    let container = this.creep.pos.findClosestByRange(this.Room.containers);
                     if (container && container.store.energy > 0) {
                         moveTarget = container;
                         if (!this.creep.pos.isNearTo(container)) {
@@ -122,8 +167,8 @@ class CreepBuilder extends CreepWorker {
                     }
                 }
 
-                if (!moveTarget && this.Room.Resources.Sources.length > 0) {
-                    let source = this.creep.pos.findClosestByRange(this.Room.Resources.Sources);
+                if (!moveTarget && this.Room.sources.length > 0) {
+                    let source = this.creep.pos.findClosestByRange(this.Room.sources);
                     if (source) {
                         moveTarget = source;
                         if (!this.creep.pos.isNearTo(source)) {
@@ -138,8 +183,8 @@ class CreepBuilder extends CreepWorker {
                 moveRequired = true;
             }
 
-            if (!moveTarget && this.Room.Storage) {
-                let storage = this.Room.Storage;
+            if (!moveTarget && this.Room.storage) {
+                let storage = this.Room.storage;
                 if (storage && storage.store.energy > 0) {
                     moveTarget = storage;
                     if (!this.creep.pos.isNearTo(storage)) {

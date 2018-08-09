@@ -83,18 +83,24 @@ class CreepWorker extends CreepBase {
     }
 
     /**
-     * Perform a retreat if there is an enemy creep in the room or if it is hurt.
+     * Perform a retreat if the creep is hurt.
      * 
-     * @returns {Boolean} true if the retreat was required and the creep is on the move
+     * @returns {Boolean} true if the creep is retreating
      */
     retreat() {
-        // TODO: Add more advanced logic to handle type of hostile creeps and type of room.
-        //if (!this.AtHome) {
-        //    if (this.Room.state !== C.ROOM_STATE_NORMAL || this.creep.hits < this.creep.hitsMax) {
-        //        this.moveToRoom(this.HomeRoom.name);
-        //        return true;
-        //    }
-        //}
+        if (this.creep.hits < this.creep.hitsMax) {
+            if (!this.AtHome) {
+                this.moveTo(this.moveToRoom(this.HomeRoom.name, false));
+                return true;
+            }
+            else {
+                let flag = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
+                if (flag) {
+                    this.moveTo(flag);
+                }
+            }
+        }
+
         return false;
     }
 
@@ -190,9 +196,13 @@ class CreepWorker extends CreepBase {
             return ERR_BUSY;
         }
 
+        let carriedAmount = this.creep.carry[resourceType];
+        if (carriedAmount <= 0) {
+            return ERR_NOT_ENOUGH_RESOURCES;
+        }
+
         let res = this.creep.drop(resourceType);
         if (res === OK) {
-            let carriedAmount = this.creep.carry[resourceType];
             if (resourceType === RESOURCE_ENERGY) {
                 this._energy = this._energy - carriedAmount;
             }
@@ -217,7 +227,7 @@ class CreepWorker extends CreepBase {
 
         let res = this.creep.pickup(target);
         if (res === OK) {
-            let creepSpace = this._capacity - this._startCarry;
+            let creepSpace = this._capacity - this._carry - this._energy;
             if (target.resourceType === RESOURCE_ENERGY) {
                 this._energy = this._energy + Math.min(target.amount, creepSpace);
             }

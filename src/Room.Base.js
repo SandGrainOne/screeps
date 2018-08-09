@@ -55,11 +55,11 @@ class RoomBase {
             };
         }
 
-        if (!this._mem.wallcount) {
+        if (this._mem.wallcount) {
             this._mem.wallcount = 0;
         }
 
-        if (!this._mem.rampcount) {
+        if (this._mem.rampcount) {
             this._mem.rampcount = 0;
         }
     }

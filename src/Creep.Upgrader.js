@@ -23,16 +23,16 @@ class CreepUpgrader extends CreepWorker {
      */
     work() {
         if (this.AtWork && this.StartEnergy > 0) {
-            if (this.Room.Controller && this.Room.Controller.my) {
-                let rangeToController = this.creep.pos.getRangeTo(this.Room.Controller);
+            if (this.Room.isMine) {
+                let rangeToController = this.creep.pos.getRangeTo(this.Room.controller);
                 if (rangeToController <= 3) {
-                    this.upgrade(this.Room.Controller);
+                    this.upgrade(this.Room.controller);
                 }
             }
         }
 
         if (this.AtHome && this.EndEnergy < this.Capacity) {
-            let storage = this.Room.Storage;
+            let storage = this.Room.storage;
             if (storage && storage.store.energy > 0 && this.creep.pos.isNearTo(storage)) {
                 this.withdraw(storage, RESOURCE_ENERGY);
             }
@@ -46,8 +46,8 @@ class CreepUpgrader extends CreepWorker {
         }
 
         if (this.AtWork && this.EndEnergy < this.Capacity) {
-            if (this.Room.Resources.Sources.length > 0) {
-                let sources = this.creep.pos.findInRange(this.Room.Resources.Sources, 1);
+            if (this.Room.sources.length > 0) {
+                let sources = this.creep.pos.findInRange(this.Room.sources, 1);
                 if (sources[0] && this.creep.pos.isNearTo(sources[0])) {
                     this.harvest(sources[0]);
                 }
@@ -69,15 +69,14 @@ class CreepUpgrader extends CreepWorker {
                 this.moveToRoom(this.WorkRoom.name);
             }
             else {
-                let controller = this.WorkRoom.Controller.my ? this.WorkRoom.Controller : null;
-                if (controller) {
-                    let rangeToController = this.creep.pos.getRangeTo(controller);
+                if (this.Room.isMine) {
+                    let rangeToController = this.creep.pos.getRangeTo(this.Room.controller);
                     if (rangeToController > 3) {
-                        moveTarget = controller;
+                        moveTarget = this.Room.controller;
                     }
                 }
                 else {
-                    this.creep.say("contrler!?");
+                    return false;
                 }
             }
         }
@@ -89,8 +88,8 @@ class CreepUpgrader extends CreepWorker {
                 if (this.AtWork && this.Room.Links.Controller && this.creep.pos.isNearTo(this.Room.Links.Controller)) {
                     moveTarget = this.Room.Links.Controller;
                 }
-                else if (this.Room.Storage && this.creep.pos.isNearTo(this.Room.Storage)) {
-                    moveTarget = this.Room.Storage;
+                else if (this.Room.storage && this.creep.pos.isNearTo(this.Room.storage)) {
+                    moveTarget = this.Room.storage;
                 }
 
                 if (!moveTarget && this.AtWork) {
@@ -100,13 +99,13 @@ class CreepUpgrader extends CreepWorker {
                     }
                 }
                 if (!moveTarget) {
-                    let storage = this.Room.Storage;
+                    let storage = this.Room.storage;
                     if (storage && storage.store.energy > 0 && !this.creep.pos.isNearTo(storage)) {
                         moveTarget = storage;
                     }
                 }
                 if (!moveTarget && this.AtWork) {
-                    let source = this.creep.pos.findClosestByPath(this.Room.Resources.Sources);
+                    let source = this.creep.pos.findClosestByPath(this.Room.sources);
                     
                     if (source && !this.creep.pos.isNearTo(source)) {
                         moveTarget = source;

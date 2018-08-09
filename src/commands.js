@@ -1,4 +1,7 @@
-Empire.createCreep("settler", null, "Askim", "MMLL", "E77N88", "E77N89")
+Empire.createCreep("settler", null, "Askim", "MMLL", "E77N88", "E77N89");
+Empire.createCreep("chemist", null, "Askim", "CCCCMM", "E78N85", "E78N85");
+Empire.createCreep("attacker", null, "Askim", "TTTTTTTTTTMMMMMMMMMMAMAMAMAMAMAMAMAMAMAM", "E77N85", "E75N85");
+Empire.createCreep("builder", null, "Rygge", "WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM", "E79N86", "E78N86")
 
 Game.spawns.Askim.createCreep([CLAIM, MOVE, MOVE, MOVE, MOVE], null, { job: "settler", workroom: "E79N86", homeroom: "E79N86" })
 
@@ -19,6 +22,5 @@ let body = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, HEA
 Game.spawns.Askim.createCreep([TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, HEAL, MOVE, HEAL, MOVE, HEAL, MOVE, HEAL, MOVE], null, { job: "healer", rooms: { home: "E76N89", work: "E76N89" } });
 
 
-
-JSON.stringify(Game.market.getOrderById("58dd3d1e7431e2a026e96bd8"))
-Game.market.deal("58dd3d1e7431e2a026e96bd8", 20000, "E78N85")
+JSON.stringify(Game.market.getOrderById("58e155d4d4d4aeec739fec33"))
+Game.market.deal("58e155d4d4d4aeec739fec33", 20000, "E77N85")

@@ -15,34 +15,189 @@ class RoomReal extends RoomBase {
      */
     constructor(room) {
         super(room.name);
-        this.room = room;
+        this._room = room;
         this._visible = true;
+
+        // Tick cache
+        this._cache = {};
     }
 
-    get Controller() {
-        if (this.room.controller) {
-            return this.room.controller;
+    /**
+     * Gets the room controller if it exists. Otherwise undefined.
+     */
+    get controller() {
+        return this._room.controller;
+    }
+
+    /**
+     * Gets a value indicating whether the room is owned by current user.
+     */
+    get isMine() {
+        return (this.controller !== undefined) && this.controller.my;
+    }
+
+    /**
+     * Gets the room storage if it exists. Otherwise undefined.
+     */
+    get storage() {
+        return this._room.storage;
+    }
+
+    /**
+     * Gets the room terminal if it exists. Otherwise undefined.
+     */
+    get terminal() {
+        return this._room.terminal;
+    }
+
+    /**
+     * Gets an array with all sources in the room.
+     */
+    get sources() {
+        if (this._cache.sources !== undefined) {
+            return this._cache.sources;
         }
-        return null;
+        let sources = this._room.find(FIND_SOURCES);
+        return this._cache.sources = sources;
     }
 
-    get Terminal() {
-        if (this.room.terminal) {
-            return this.room.terminal;
+    /**
+     * Gets a value indicating whether the room has a minable mineral node. This takes into consideration
+     * that the mineral node has minerals and that the extractor is usable by current user.
+     */
+    get hasMinerals() {
+        return this._mem.hasHarvestableMinerals || false;
+    }
+
+    /**
+     * Gets the room mineral node if it is mineable.
+     * Always use hasMinerals before calling this.
+     */
+    get minerals() {
+        if (this._cache.minerals !== undefined) {
+            return this._cache.minerals;
         }
-        return null;
+        if (this.hasMinerals) {
+            return this._cache.minerals = this._room.find(FIND_MINERALS)[0];
+        }
+        return undefined;
     }
 
-    reserveTarget(targetId, creepName) {
-        if (!this._mem.reservations[targetId]) {
-            this._mem.reservations[targetId] = { creepName: creepName, ttl: 2 };
+    /**
+     * Gets the room extractor node if it is mineable.
+     * Always use hasMinerals before calling this.
+     */
+    get extractor() {
+        if (this._cache.extractor !== undefined) {
+            return this._cache.extractor;
+        }
+        if (this.hasMinerals) {
+            return this._cache.extractor = this._room.find(FIND_STRUCTURES, { filter: (s) => s.structureType === STRUCTURE_EXTRACTOR })[0];
+        }
+        return undefined;
+    }
+
+    /**
+     * Gets an array with all containers in the room sorted decending based the amount stored.
+     */
+    get containers() {
+        if (this._cache.containers !== undefined) {
+            return this._cache.containers;
+        }
+        let containers = this._room.find(FIND_STRUCTURES, { filter: (s) => s.structureType === STRUCTURE_CONTAINER });
+        if (containers.length > 1) {
+            containers.sort((a, b) => _.sum(b.store) - _.sum(a.store));
+        }
+        return this._cache.containers = containers;
+    }
+
+    /**
+     * Gets an array with all drops in the room sorted decending based the amount of resources.
+     */
+    get drops() {
+        if (this._cache.drops !== undefined) {
+            return this._cache.drops;
+        }
+        let drops = this._room.find(FIND_DROPPED_RESOURCES);
+        if (drops.length > 1) {
+            // TODO: Weight some resources more valuable than others?
+            // (b.resourceType !== RESOURCE_ENERGY ? 100 : 0)
+            drops.sort((a, b) => _.sum(b.amount) - _.sum(a.amount));
+        }
+        return this._cache.drops = drops;
+    }
+
+    /**
+     * Gets an array with all towers in the room sorted ascending based the amount of energy in the towers.
+     */
+    get towers() {
+        if (this._cache.towers !== undefined) {
+            return this._cache.towers;
+        }
+        let towers = this._room.find(FIND_MY_STRUCTURES, { filter: (s) => s.structureType === STRUCTURE_TOWER });
+        if (towers.length > 1) {
+            towers.sort((a, b) => a.energy - b.energy);
+        }
+        return this._cache.towers = towers;
+    }
+
+    /**
+     * Gets an array with all construction sites in the room.
+     */
+    get constructionSites() {
+        if (this._cache.constructionSites !== undefined) {
+            return this._cache.constructionSites;
+        }
+        let constructionSites = this._room.find(FIND_CONSTRUCTION_SITES);
+        return this._cache.constructionSites = constructionSites;
+    }
+
+    /**
+     * Attempt to reserve a game object or something with a unique id to prevent other
+     * creeps, towers, etc from targeting the same thing. A reservation will time out and 
+     * be released after 2 ticks. This means a reservation must be renewed.
+     * 
+     * @param {string} id - A unique id identifying what is being reserved.
+     * @param {string} creepName - The name of the creep making the reservation.
+     */
+    reserve(id, creepName) {
+        if (!this._mem.reservations[id]) {
+            this._mem.reservations[id] = { creepName: creepName, ttl: 2 };
             return true;
         }
-        if (this._mem.reservations[targetId].creepName === creepName) {
-            this._mem.reservations[targetId].ttl = 2;
+        if (this._mem.reservations[id].creepName === creepName) {
+            this._mem.reservations[id].ttl = 2;
             return true;
         }
         return false;
+    }
+
+    populate() {
+        this._mem.jobs = { 
+            settlers: 0,
+            builders: 0,
+            upgraders: 0,
+            haulers: 0,
+            miners: 0,
+            mineralminers: 0,
+            refuelers: 0
+        };
+
+        this._mem.jobs.miners = this.sources.length;
+
+        if (this.hasMinerals) {
+            this._mem.jobs.mineralminers = 1;
+        }
+
+        if (this._room.controller && this._room.controller.reservation) {
+            if (this._room.controller.reservation.username === C.USERNAME && this._room.controller.reservation.ticksToEnd < 4000){
+                this._mem.jobs.settlers = 1;
+            }
+        }
+
+        if (this.storage) {
+            this._mem.jobs.refuelers = 2;
+        }
     }
 
     /**
@@ -59,25 +214,9 @@ class RoomReal extends RoomBase {
         this._mem.update.next = Game.time + 50 + Math.floor(Math.random() * 10);
         this._mem.update.last = Game.time;
 
-        // Storing resource information to memory.
-        this._mem.resources = {};
-        this._mem.resources.sources = [];
-        for (let source of this.room.find(FIND_SOURCES)) {
-            this._mem.resources.sources.push(source.id);
-        }
-        this._mem.resources.minerals = null;
-        this._mem.resources.extractor = null;
-        let mineralNodes = this.room.find(FIND_MINERALS);
-        if (mineralNodes.length > 0) {
-            this._mem.resources.minerals = mineralNodes[0].id;
-        }
-
         this._mem.structures = {};
         this._mem.structures.spawns = [];
         this._mem.structures.extensions = [];
-        this._mem.structures.towers = [];
-        this._mem.structures.containers = [];
-        this._mem.structures.tempstorage = null;
         this._mem.structures.links = {};
         this._mem.structures.links.storage = null;
         this._mem.structures.links.controller = null;
@@ -91,23 +230,20 @@ class RoomReal extends RoomBase {
         // Need to handle Labs multiple times in order to identify the roles.
         let labs = [];
 
-        for (let structure of this.room.find(FIND_STRUCTURES)) {
+        for (let structure of this._room.find(FIND_STRUCTURES)) {
 
-            if (structure.structureType === STRUCTURE_CONTAINER) {
-                if (!this.room.storage && structure.pos.findInRange(FIND_MY_SPAWNS, 1).length > 0) {
-                    this._mem.structures.tempstorage = structure.id;
-                }
-                else {
-                    this._mem.structures.containers.push(structure.id);
-                }
-            }
-
-            // Some rooms have public extractors
             if (structure.structureType === STRUCTURE_EXTRACTOR) {
-                this._mem.resources.extractor = structure.id;
+                // Check that we have access to the extractor and that the
+                // mineral node has something to harvest.
+                if (structure.owner === undefined || structure.my) {
+                    let minerals = structure.pos.lookFor(LOOK_MINERALS);
+                    if (minerals.length > 0 && minerals[0].mineralAmount > 0) {
+                        this._mem.hasHarvestableMinerals = true;
+                    }
+                }
             }
 
-            if (!this.room.controller || !this.room.controller.my) {
+            if (!this.isMine) {
                 continue;
             }
 
@@ -120,13 +256,9 @@ class RoomReal extends RoomBase {
                 this._mem.structures.extensions.push(structure.id);
             }
 
-            if (structure.structureType === STRUCTURE_TOWER) {
-                this._mem.structures.towers.push(structure.id);
-            }
-
             if (structure.structureType === STRUCTURE_LINK) {
-                let rangeToStorage = structure.pos.getRangeTo(this.room.storage);
-                let rangeToController = structure.pos.getRangeTo(this.room.controller);
+                let rangeToStorage = structure.pos.getRangeTo(this.storage);
+                let rangeToController = structure.pos.getRangeTo(this.controller);
 
                 if (Math.min(rangeToStorage, rangeToController) > 5) {
                     this._mem.structures.links.inputs.push(structure.id);
@@ -145,33 +277,20 @@ class RoomReal extends RoomBase {
             }
         }
 
-        if (this.name === "E77N85" && this.room.controller && this.room.controller.my) {
-            if (labs.length === 3) {
-                this._mem.structures.labs.rOne = labs[0].id;
-                this._mem.structures.labs.rTwo = labs[1].id;
-                this._mem.structures.labs.producers.push(labs[2].id);
-            }
-            else if (labs.length === 6) {
-                labs.sort(function(a, b) { return _.sum(a.pos.x + a.pos.y * 10) - _.sum(b.pos.x + b.pos.y * 10) });
-                this._mem.structures.labs.producers.push(labs[0].id);
-                this._mem.structures.labs.producers.push(labs[1].id);
-                this._mem.structures.labs.rOne = labs[2].id;
-                this._mem.structures.labs.rTwo = labs[3].id;
-                this._mem.structures.labs.producers.push(labs[4].id);
-                this._mem.structures.labs.producers.push(labs[5].id);
-            }
-            else if (labs.length === 10) {
-                labs.sort(function(a, b) { return _.sum(a.pos.x + a.pos.y * 10) - _.sum(b.pos.x + b.pos.y * 10) });
-                this._mem.structures.labs.producers.push(labs[0].id);
-                this._mem.structures.labs.producers.push(labs[1].id);
-                this._mem.structures.labs.producers.push(labs[2].id);
-                this._mem.structures.labs.producers.push(labs[3].id);
-                this._mem.structures.labs.rOne = labs[4].id;
-                this._mem.structures.labs.rTwo = labs[5].id;
-                this._mem.structures.labs.producers.push(labs[6].id);
-                this._mem.structures.labs.producers.push(labs[7].id);
-                this._mem.structures.labs.producers.push(labs[8].id);
-                this._mem.structures.labs.producers.push(labs[9].id);
+        if (labs.length > 2) {
+            labs.sort(function(a, b) { return (a.pos.x + a.pos.y * 10) - (b.pos.x + b.pos.y * 10) });
+            let r1 = Math.floor((labs.length - 1) / 2) - 1;
+            let r2 = r1 + Math.ceil((r1 + 2) / 2);
+            for (let i = 0; i < labs.length; i++) {
+                if (i === r1) {
+                    this._mem.structures.labs.rOne = labs[i].id;
+                }
+                else if (i === r2) {
+                    this._mem.structures.labs.rTwo = labs[i].id;
+                }
+                else {
+                    this._mem.structures.labs.producers.push(labs[i].id);
+                }
             }
         }
     }
@@ -186,56 +305,6 @@ class RoomReal extends RoomBase {
     }
 
     prepare() {
-        this.Resources = {};
-        this.Resources.Sources = [];
-        if (this._mem.resources) {
-            if (this._mem.resources.sources) {
-                for (let sourceId of this._mem.resources.sources) {
-                    let source = Game.getObjectById(sourceId);
-                    if (source) {
-                        this.Resources.Sources.push(source);
-                    }
-                }
-            }
-            if (this._mem.resources.minerals && this._mem.resources.extractor) {
-                let mineralNode = Game.getObjectById(this._mem.resources.minerals);
-                let extractor = Game.getObjectById(this._mem.resources.extractor);
-                if (mineralNode && mineralNode.mineralAmount > 0 && extractor) {
-                    this.Resources.Minerals = mineralNode;
-                    this.Resources.Extractor = extractor;
-                }
-            }
-        }
-
-        this.Resources.Drops = [];
-        for (let resourceDrop of this.room.find(FIND_DROPPED_RESOURCES)) {
-            if (resourceDrop.resourceType !== RESOURCE_ENERGY || resourceDrop.amount > 30) {
-                let atContainer = false;
-                for (let structure of resourceDrop.pos.lookFor(LOOK_STRUCTURES)) {
-                    if (structure.structureType === STRUCTURE_CONTAINER) {
-                        atContainer = true;
-                    }
-                }
-                if (!atContainer) {
-                    this.Resources.Drops.push(resourceDrop);
-                }
-            }
-        }
-
-        // Create a quick access array for all containers.
-        this.Containers = [];
-        if (this._mem.structures && this._mem.structures.containers) {
-            for (let containerId of this._mem.structures.containers) {
-                let container = Game.getObjectById(containerId);
-                if (container) {
-                    this.Containers.push(container);
-                }
-            }
-            if (this.Containers.length > 1) {
-                this.Containers.sort(function(a, b) { return _.sum(b.store) - _.sum(a.store) });
-            }
-        }
-
         // Create a quick access array for all spawns.
         this.Spawns = [];
         if (this._mem.structures && this._mem.structures.spawns) {
@@ -255,38 +324,6 @@ class RoomReal extends RoomBase {
                 if (extension && extension.energy < extension.energyCapacity) {
                     this.Extensions.push(extension);
                 }
-            }
-        }
-
-        // Create a quick access property for the real or temporary storage.
-        this.Storage = null;
-        if (this.room.storage) {
-            this.Storage = this.room.storage;
-        }
-        else if (this._mem.structures.tempstorage) {
-            let tempStorage = Game.getObjectById(this._mem.structures.tempstorage);
-            if (tempStorage) {
-                this.Storage =  tempStorage;
-            }
-        }
-        else if (this._mem.tempstorage) {
-            let tempStorage = Game.getObjectById(this._mem.tempstorage);
-            if (tempStorage) {
-                this.Storage =  tempStorage;
-            }
-        }
-
-        // Create a quick access array for towers.
-        this.Towers = [];
-        if (this._mem.structures && this._mem.structures.towers) {
-            for (let towerId of this._mem.structures.towers) {
-                let tower = Game.getObjectById(towerId);
-                if (tower) {
-                    this.Towers.push(tower);
-                }
-            }
-            if (this.Towers.length > 1) {
-                this.Towers.sort(function(a, b) { return a.energy - b.energy });
             }
         }
 
@@ -320,12 +357,24 @@ class RoomReal extends RoomBase {
 
         this.Labs = {};
         this.Labs.All = [];
+        this.Labs.compoundOne = null;
+        this.Labs.compoundTwo = null;
+        this.Labs.producers = [];
         this.Labs.Refuel = [];
         if (this._mem.structures.labs.all.length > 0) {
             for (let labId of this._mem.structures.labs.all) {
                 let lab = Game.getObjectById(labId);
                 if (lab) {
                     this.Labs.All.push(lab);
+                    if (labId === this._mem.structures.labs.rOne) {
+                        this.Labs.compoundOne = lab;
+                    }
+                    else if (labId === this._mem.structures.labs.rTwo) {
+                        this.Labs.compoundTwo = lab;
+                    }
+                    else {
+                        this.Labs.producers.push(lab);
+                    }
                     if (lab.energy < lab.energyCapacity - 400) {
                         this.Labs.Refuel.push(lab);
                     }
@@ -333,20 +382,12 @@ class RoomReal extends RoomBase {
             }
         }
 
-        this.BuildSites = [];
-        let sites = this.room.find(FIND_CONSTRUCTION_SITES);
-        if (sites.length > 0) {
-            for (let site of sites) {
-                this.BuildSites.push(site);
-            }
-        }
-
         this.Repairs = [];
-        let structures = this.room.find(FIND_STRUCTURES);
+        let structures = this._room.find(FIND_STRUCTURES);
         if (structures.length > 0) {
             for (let structure of structures) {
                 if (structure.structureType === STRUCTURE_WALL || structure.structureType === STRUCTURE_RAMPART) {
-                    if (this.room.controller && this.room.controller.my) {
+                    if (this.isMine) {
                         if (structure.hits < 150000) {
                             this.Repairs.push(structure);
                         }
@@ -364,7 +405,7 @@ class RoomReal extends RoomBase {
             }
         }
 
-        let hostileCreeps = this.room.find(FIND_HOSTILE_CREEPS);
+        let hostileCreeps = this._room.find(FIND_HOSTILE_CREEPS);
         if (hostileCreeps.length > 0) {
             this._mem.state = C.ROOM_STATE_INVADED;
         }
@@ -372,40 +413,13 @@ class RoomReal extends RoomBase {
             this._mem.state = C.ROOM_STATE_NORMAL;
         }
 
-        this._mem.jobs = { 
-            settlers: 0,
-            builders: 0,
-            upgraders: 0,
-            haulers: 0,
-            miners: 0,
-            mineralminers: 0,
-            refuelers: 0
-        };
-
-        this._mem.jobs.miners = this._mem.resources.sources.length;
-
-        if (this.Resources.Minerals) {
-            this._mem.jobs.mineralminers = 1;
-            this._mem.jobs.haulers = 1;
-        }
-
-        if (this.room.controller && this.room.controller.reservation) {
-            if (this.room.controller.reservation.username === C.USERNAME && this.room.controller.reservation.ticksToEnd < 4000){
-                this._mem.jobs.settlers = 1;
-            }
-        }
-
-        if (this.Storage) {
-            this._mem.jobs.refuelers = 2;
-        }
-
-        let wallCount = this.room.find(FIND_STRUCTURES, { filter: (s) => s.structureType === STRUCTURE_WALL }).length;
+        let wallCount = this._room.find(FIND_STRUCTURES, { filter: (s) => s.structureType === STRUCTURE_WALL }).length;
         if (wallCount > 0) {
             if (this._mem.wallcount > wallCount) {
-                if (this.room.controller && this.room.controller.my && !this.room.controller.safeMode) {
-                    let hostiles = this.room.find(FIND_HOSTILE_CREEPS).length;
+                if (this.isMine && !this._room.controller.safeMode) {
+                    let hostiles = this._room.find(FIND_HOSTILE_CREEPS).length;
                     if (hostiles > 1) {
-                        this.room.controller.activateSafeMode();
+                        this._room.controller.activateSafeMode();
                     }
                 }
             }
@@ -415,13 +429,13 @@ class RoomReal extends RoomBase {
             }
         }
 
-        let rampCount = this.room.find(FIND_STRUCTURES, { filter: (s) => s.structureType === STRUCTURE_RAMPART }).length;
+        let rampCount = this._room.find(FIND_STRUCTURES, { filter: (s) => s.structureType === STRUCTURE_RAMPART }).length;
         if (rampCount > 0) {
             if (this._mem.rampcount > rampCount) {
-                if (this.room.controller && this.room.controller.my && !this.room.controller.safeMode) {
-                    let hostiles = this.room.find(FIND_HOSTILE_CREEPS).length;
+                if (this.isMine && !this._room.controller.safeMode) {
+                    let hostiles = this._room.find(FIND_HOSTILE_CREEPS).length;
                     if (hostiles > 1) {
-                        this.room.controller.activateSafeMode();
+                        this._room.controller.activateSafeMode();
                     }
                 }
             }
@@ -432,12 +446,30 @@ class RoomReal extends RoomBase {
         }
     }
 
+    runReactions() {
+        if (this.Labs.producers.length > 0) {
+            for (let producer of this.Labs.producers) {
+                if ((producer.cooldown || 0) === 0) {
+                    producer.runReaction(this.Labs.compoundOne,this.Labs.compoundTwo);
+                }
+            }
+        }
+    }
+
     defend() {
-        if (this.Towers.length === 0) {
+        if (this.towers.length === 0) {
             return;
         }
 
-        for (let tower of this.Towers) {
+        for (let tower of this.towers) {
+
+            let hostiles = tower.room.find(FIND_HOSTILE_CREEPS);
+            let hostileCreep = tower.pos.findClosestByRange(hostiles);
+
+            if (hostileCreep !== null && hostileCreep.pos.y < 49) {
+                tower.attack(hostileCreep);
+                continue;
+            }
 
             let damagedCreeps = tower.room.find(FIND_MY_CREEPS, {
                 filter: (creep) => {
@@ -450,41 +482,11 @@ class RoomReal extends RoomBase {
                 continue;
             }
 
-            let hostiles = tower.room.find(FIND_HOSTILE_CREEPS);
-            let hostileCreep = tower.pos.findClosestByRange(hostiles);
-
-            if (hostileCreep !== null && hostileCreep.pos.y < 49) {
-                tower.attack(hostileCreep);
-                continue;
-            }
-
             if (tower.energy < tower.energyCapacity - 200) {
                 continue;
             }
 
-            let rampartToRepair = tower.pos.findClosestByRange(FIND_STRUCTURES, { 
-                filter: (s) => { 
-                    return s.structureType === STRUCTURE_RAMPART && (s.hits < 400000);
-                } 
-            });
-
-            if (rampartToRepair !== null) {
-                tower.repair(rampartToRepair);
-                continue;
-            }
-
-            let wallToRepair = tower.pos.findClosestByRange(FIND_STRUCTURES, { 
-                filter: (wall) => { 
-                    return wall.structureType === STRUCTURE_WALL && (wall.hits < 400000);
-                } 
-            });
-
-            if (wallToRepair !== null) {
-                tower.repair(wallToRepair);
-                continue;
-            } 
-
-            let containerToRepair = tower.pos.findClosestByPath(FIND_STRUCTURES, { 
+            let containerToRepair = tower.pos.findClosestByRange(FIND_STRUCTURES, { 
                 filter: function (s) { 
                     return s.structureType === STRUCTURE_CONTAINER && (s.hits < s.hitsMax); 
                 } 
@@ -495,7 +497,29 @@ class RoomReal extends RoomBase {
                 continue;
             } 
 
-            let roadToRepair = tower.pos.findClosestByPath(FIND_STRUCTURES, { 
+            let rampartToRepair = tower.pos.findClosestByRange(FIND_STRUCTURES, { 
+                filter: (s) => { 
+                    return s.structureType === STRUCTURE_RAMPART && (s.hits < 600000);
+                } 
+            });
+
+            if (rampartToRepair !== null) {
+                tower.repair(rampartToRepair);
+                continue;
+            }
+
+            let wallToRepair = tower.pos.findClosestByRange(FIND_STRUCTURES, { 
+                filter: (wall) => { 
+                    return wall.structureType === STRUCTURE_WALL && (wall.hits < 600000);
+                } 
+            });
+
+            if (wallToRepair !== null) {
+                tower.repair(wallToRepair);
+                continue;
+            } 
+
+            let roadToRepair = tower.pos.findClosestByRange(FIND_STRUCTURES, { 
                 filter: function (road) { 
                     return road.structureType === STRUCTURE_ROAD && (road.hits < road.hitsMax); 
                 } 

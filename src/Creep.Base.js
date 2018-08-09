@@ -47,15 +47,22 @@ class CreepBase {
     /**
      * Gets the name of the creep.
      */
-    get Name() {
+    get name() {
         return this.creep.name;
     }
 
     /**
      * Gets the name of the job assigned to the creep.
      */
-    get Job() {
+    get job() {
         return this.mem.job.name;
+    }
+
+    /**
+     * Gets the current task
+     */
+    get task() {
+        return this.mem.job.task;
     }
 
     /**
@@ -80,6 +87,13 @@ class CreepBase {
     }
 
     /**
+     * Gets a value indicating whether the creep is crossing room borders in line of work.
+     */
+    get isRemoting() {
+        return this.mem.rooms.home !== this.mem.rooms.work;
+    }
+
+    /**
      * Run all creep logic. If this function returns true, the creep should not be asked
      * to perform additional actions this tick.
      * 
@@ -90,8 +104,12 @@ class CreepBase {
             return true;
         }
 
-        if (this.renew()) {
-            return true;
+        if (this.mustRecycle()) {
+            return this._performRecycle();
+        }
+
+        if (this.mustRenew()) {
+            return this._performRenew();
         }
         
         if (this.retreat()) {
@@ -102,17 +120,84 @@ class CreepBase {
             return true;
         }
 
+        this.creep.say("❔");
+
         return false;
     }
-    
+
     /**
-     * Perform the required checks to see if the creep should be renewed and if so, then
-     * stear the creep to a place where a renew can occur.
+     * Check if the creep should be recycled. This base method checks the recycle value in the creep memory.
      * 
-     * @returns {Boolean} true if the creep is being renewed
+     * @returns {Boolean} true if the creep should be recycled.
      */
-    renew() {
+    mustRecycle() {
+        if (this.mem.recycle) {
+            return true;
+        }
         return false;
+    }
+
+    /**
+     * Perform the actual recycling. This includes moving to the home room, finding a spawn and calling recycle.
+     */
+    _performRecycle() {
+        if (!this.AtHome) {
+            this.moveTo(this.moveToRoom(this.mem.rooms.home, false));
+        }
+        else {
+            if (this.Room.Spawns.length > 0) {
+                let spawns = this.creep.pos.findInRange(this.Room.Spawns, 1);
+                if (spawns.length > 0) {
+                    spawns[0].recycleCreep(this.creep);
+                }
+                else {
+                    let spawn = this.creep.pos.findClosestByRange(this.Room.Spawns);
+                    if (spawn) {
+                        this.moveTo(spawn);
+                    }
+                    else {
+                        this.creep.say("spawn!?");
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Check if the creep should be renewed. This base method always return false.
+     * 
+     * @returns {Boolean} true if the creep should be renewed.
+     */
+    mustRenew() {
+        return false;
+    }
+
+    /**
+     * Perform the actual renewing. This includes moving to the home room, finding a spawn and calling renew.
+     */
+    _performRenew() {
+        if (!this.AtHome) {
+            this.moveTo(this.moveToRoom(this.HomeRoom.name, false));
+        }
+        else {
+            if (this.Room.Spawns.length > 0) {
+                let spawns = this.creep.pos.findInRange(this.Room.Spawns, 1);
+                if (spawns.length > 0) {
+                    spawns[0].renewCreep(this.creep);
+                }
+                else {
+                    let spawn = this.creep.pos.findClosestByRange(this.Room.Spawns);
+                    if (spawn) {
+                        this.moveTo(spawn);
+                    }
+                    else {
+                        this.creep.say("spawn!?");
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     /**
