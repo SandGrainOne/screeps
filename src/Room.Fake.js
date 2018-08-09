@@ -1,37 +1,33 @@
 'use strict';
 
+let RoomBase = require('Room.Base');
+
 /**
  * This class is used to create a fake room from memory if a room is out of view.
  */
-class RoomFake {
+class RoomFake extends RoomBase {
     /**
      * Initializes a new instance of the RoomFake class with the specified room.
      * 
      * @param {string} name - The name of the room
      */
     constructor(name) {
-        this.name = name;
-        this.mem = Memory.rooms[name];
+        super(name);
     }
 
-    /**
-     * Gets the name of the room.
-     */
-    get Name() {
-        return this.name;
-    }
-
-    /**
-     * Gets the state of the room.
-     */
-    get State() {
-        if (this.mem) {
-            return this.mem.state;
+    getSourceNode(creepName) {
+        let sources = this.mem.resources.sources;
+        for (let source of sources) {
+            if (source.miner === creepName) {
+                return { id: source.id, pos: source.pos };
+            }
         }
-        return "normal";
-    }
-
-    getMiningNode(name) {
+        for (let source of sources) {
+            if (!source.miner) {
+                source.miner = creepName;
+                return { id: source.id, pos: source.pos };
+            }
+        }
         return null;
     }
 }

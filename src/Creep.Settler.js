@@ -1,12 +1,12 @@
 'use strict';
 
-let CreepBase = require('Creep.Base');
+let CreepSoldier = require('Creep.Soldier');
 
 /**
  * Wrapper class for creeps with logic for a settler.
  * Primary purpose of these creeps are to claim or reserve a controller in other rooms.
  */
-class CreepSettler extends CreepBase {   
+class CreepSettler extends CreepSoldier {   
     /**
      * Initializes a new instance of the CreepSettler class with the specified creep.
      * 
@@ -26,6 +26,7 @@ class CreepSettler extends CreepBase {
             if (this.creep.reserveController(this.creep.room.controller)) {
                 this.creep.moveTo(this.creep.room.controller);
             }
+            this.creep.signController(this.creep.room.controller, "");
         }
 
         return true;

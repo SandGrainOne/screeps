@@ -27,9 +27,8 @@ class CreepDefender extends CreepSoldier {
             let flagRetreat = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
             if (flagRetreat) {
                 this.creep.moveTo(flagRetreat);
+                return true;
             }
-
-            return true;
         }
         
         let hostileCreep = this.creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
@@ -43,10 +42,8 @@ class CreepDefender extends CreepSoldier {
             }
             
             if (rangeToCreep < 3){
-                let x = this.creep.pos.x - hostileCreep.pos.x;
-                let y = this.creep.pos.y - hostileCreep.pos.y;
-                
-                this.creep.moveTo(this.creep.pos.x + x, this.creep.pos.y + y);
+                let flagRetreat = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
+                this.creep.moveTo(flagRetreat);
             }
 
             return true;

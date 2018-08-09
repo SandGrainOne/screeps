@@ -1,6 +1,6 @@
 'use strict';
 
-let RoomBase = require('Room.Base');
+let RoomBaseV2 = require('Room.BaseV2');
 
 class RoomFactory {
     /**
@@ -11,13 +11,13 @@ class RoomFactory {
     wrap(room) {
         switch (room.memory.type) {
             case 'owned':
-                return new RoomBase(room);
+                return new RoomBaseV2(room);
 
             case 'reserved':
-                return new RoomBase(room);
+                return new RoomBaseV2(room);
             
             default:
-                return new RoomBase(room);
+                return new RoomBaseV2(room);
         }
     }
 }

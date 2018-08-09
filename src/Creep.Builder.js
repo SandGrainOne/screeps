@@ -43,33 +43,14 @@ class CreepBuilder extends CreepWorker {
         else {
             if (this.creep.carry.energy > 0) {
                 if (this.moveOut()) {
-                    let containerToRepair = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                        filter: function (structure) { 
-                            return structure.structureType === STRUCTURE_CONTAINER && (structure.hits < structure.hitsMax); 
+                    if (this.Room.Storage && this.Room.Storage.structureType === STRUCTURE_CONTAINER) {
+                        if (this.Room.Storage.hits < this.Room.Storage.hitsMax) {
+                            if (this.creep.repair(this.Room.Storage) === ERR_NOT_IN_RANGE) {
+                                this.creep.moveTo(this.Room.Storage);
+                            }
+                            return true;
                         }
-                    });
-                    
-                    if (containerToRepair !== null) {
-                        if (this.creep.repair(containerToRepair) === ERR_NOT_IN_RANGE) {
-                            this.creep.moveTo(containerToRepair);
-                        }
-                        
-                        return true;
                     }
-                    
-                    let rampartToRepair = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                        filter: function (wall) { 
-                            return wall.structureType === STRUCTURE_RAMPART && (wall.hits < 120000); 
-                        } 
-                    });
-                    
-                    if (rampartToRepair !== null) {
-                        if (this.creep.repair(rampartToRepair) === ERR_NOT_IN_RANGE) {
-                            this.creep.moveTo(rampartToRepair);
-                        }
-
-                        return true;
-                    } 
                     
                     let target = this.creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
 
@@ -95,9 +76,23 @@ class CreepBuilder extends CreepWorker {
                         return true;
                     }
 
+                    let rampartToRepair = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
+                        filter: function (wall) { 
+                            return wall.structureType === STRUCTURE_RAMPART && (wall.hits < 150000); 
+                        } 
+                    });
+                    
+                    if (rampartToRepair !== null) {
+                        if (this.creep.repair(rampartToRepair) === ERR_NOT_IN_RANGE) {
+                            this.creep.moveTo(rampartToRepair);
+                        }
+
+                        return true;
+                    } 
+
                     let wallToRepair = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
                         filter: function (wall) { 
-                            return wall.structureType === STRUCTURE_WALL && (wall.hits < 100000); 
+                            return wall.structureType === STRUCTURE_WALL && (wall.hits < 150000); 
                         } 
                     });
                     

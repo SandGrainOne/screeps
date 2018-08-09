@@ -22,6 +22,76 @@ class CreepUpgrader extends CreepWorker {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
+        let energy = this.creep.carry.energy;
+        let workParts = this.creep.getActiveBodyparts(WORK);
+
+        if (energy > 0) {
+            let controller = this.Room.Controller.my ? this.Room.Controller : null;
+            if (controller) {
+                let rangeToController = this.creep.pos.getRangeTo(controller);
+                if (rangeToController <= 3) {
+                    let upgradeResult = this.creep.upgradeController(controller);
+                    if (upgradeResult === OK) {
+                        energy = energy - workParts;
+                    }
+                }
+            }
+        }
+
+        if (energy < this.creep.carryCapacity) {
+            let storage = this.Room.Storage;
+            if (storage && storage.store.energy > 0 && this.creep.pos.isNearTo(storage)) {
+                let withdrawResult = this.creep.withdraw(storage, RESOURCE_ENERGY);
+                if (withdrawResult === OK) {
+                    let energyStored = storage.store.energy;
+                    let space = this.creep.carryCapacity - energy;
+                    energy = energy + Math.min(space, energyStored);
+                }
+            }
+        }
+
+        if (energy < this.creep.carryCapacity) {
+            let link = this.Room.Links.Controller;
+            if (link && link.energy > 0 && this.creep.pos.isNearTo(link)) {
+                let withdrawResult = this.creep.withdraw(link, RESOURCE_ENERGY);
+                if (withdrawResult === OK) {
+                    let energyStored = link.energy;
+                    let space = this.creep.carryCapacity - energy;
+                    energy = energy + Math.min(space, energyStored);
+                }
+            }
+        }
+
+        if (energy < this.creep.carryCapacity) {
+            // Look for a source? Needed in the very start of a new room before storage and links.
+            // Look for other containers? Probably not. First container should always be storage.
+        }
+
+        if (energy >= this.creep.carryCapacity) {
+            this.IsWorking = true;
+        }
+
+        if (energy <= 0) {
+            this.IsWorking = false;
+        }
+
+        let moveTarget = null;
+        if (this.IsWorking) {
+            let controller = this.WorkRoom.Controller.my ? this.WorkRoom.Controller : null;
+            if (controller) {
+                let rangeToController = this.creep.pos.getRangeTo(controller);
+                if (rangeToController > 3) {
+                    moveTarget = controller;
+                }
+            }
+            else {
+                this.creep.say("contrler!?");
+            }
+        }
+        else {
+            let rangeToStorage = this.creep.pos.getRangeTo(this.HomeRoom.Storage);
+        }
+
         if (this.Task === "charging") {
             if (this.creep.carry.energy < this.creep.carryCapacity)  {
                 if (this.moveHome()) {
@@ -42,17 +112,14 @@ class CreepUpgrader extends CreepWorker {
         }
         else {
             if (this.creep.carry.energy > 0)  {
-                if (this.moveOut()) {
-                    let target = this.creep.room.controller;
-                
-                    if (this.creep.upgradeController(target) === ERR_NOT_IN_RANGE) {
-                        this.creep.moveTo(target);
-                    }
-                }
             }
             else {
                 this.Task = "charging";
             }
+        }
+
+        if (moveTarget) {
+            this.moveTo(moveTarget);
         }
         
         return true;

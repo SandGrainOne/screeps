@@ -5,7 +5,15 @@
  */
 let constants = {
     "USERNAME": "SandGrainOne",
+
+    "ROOM_TYPE_OWNED": "owned",
+    "ROOM_TYPE_RESERVED": "reserved",
+    "ROOM_TYPE_OTHER": "other",
+
     "ROOM_STATE_NORMAL": "normal",
+    "ROOM_STATE_INVADED": "invaded",
+    "ROOM_STATE_ATTACKED": "attacked",
+
     "BODY": {
         "W3N78": "W3N78"
     },

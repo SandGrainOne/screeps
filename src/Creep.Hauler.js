@@ -24,27 +24,77 @@ class CreepHauler extends CreepWorker {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
+        let carry = _.sum(this.creep.carry);
+        let pickedUpDrops = false;
+        
+        if (this.creep.hits < this.creep.hitsMax) {
+            this.moveHome();
+            return true;
+        }
+        
+        if (carry < this.creep.carryCapacity) {
+            let drops = this.creep.pos.findInRange(FIND_DROPPED_RESOURCES, 1);
+
+            if (drops.length > 1) {
+                for (let drop of drops) {
+                    if (drop.resourceType !== RESOURCE_ENERGY) { // Wait with energy for last.
+                        if (this.creep.pickup(drop) === OK) {
+                            carry = Math.min(carry + drop.amount, this.creep.carryCapacity);
+                            pickedUpDrops = true;
+                        }
+                    }
+                }
+            }
+            
+            if (drops.length === 1) {
+                if (this.creep.pickup(drops[0]) === OK) {
+                    carry = Math.min(carry + drops[0].amount, this.creep.carryCapacity);
+                    pickedUpDrops = true;
+                }
+            }
+        }
+
+        if (!pickedUpDrops && carry < this.creep.carryCapacity) {
+            for (let container of this.creep.pos.findInRange(this.Room.getContainers(), 1)) {
+                //Object.keys(container.store).length;
+                for(let resourceType in container.store) {
+                    let amount = container.store[resourceType];
+                    if (amount > 0) {
+                        if (this.creep.withdraw(container, resourceType) === OK) {
+                            carry = Math.min(carry + amount, this.creep.carryCapacity);
+                        }
+                    }
+                }
+            }
+        }
+
         if (this.Task === "hauling")  {
-            if (this.creep.carry.energy < this.creep.carryCapacity) {
+            if (carry < this.creep.carryCapacity) {
                 if (this.moveOut()) {
-                    let container = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                        filter: function (s) { 
-                            return s.structureType === STRUCTURE_CONTAINER && s.store.energy > 600; 
+                    
+                    let drops = this.creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES, { 
+                        filter: function (d) { 
+                            return d.amount > 20; 
                         } 
                     });
-
-                    if (container !== null) {
-                        if (this.creep.withdraw(container, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                            this.creep.moveTo(container);
+                    
+                    if (drops) {
+                        if (!this.creep.pos.isNearTo(drops)) {
+                            this.moveTo(drops);
                         }
                         return true;
                     }
                     
-                    let drop = this.creep.pos.findClosestByPath(FIND_DROPPED_ENERGY);
+                    let container = null;
+                    for (let c of this.WorkRoom.getContainers()) {
+                        if (!container || _.sum(c.store) > _.sum(container.store)) {
+                            container = c;
+                        }
+                    }
 
-                    if (drop && drop.amount > 50) {
-                        if (this.creep.pickup(drop) === ERR_NOT_IN_RANGE)  {
-                            this.creep.moveTo(drop);
+                    if (container !== null) {
+                        if (!this.creep.pos.isNearTo(container)) {
+                            this.moveTo(container);
                         }
                         return true;
                     }
@@ -55,20 +105,30 @@ class CreepHauler extends CreepWorker {
             }
         }
         else {
-            if (this.creep.carry.energy > 0) {
+            if (carry > 0) {
                 if (this.moveHome()) {
-                    let link = this.creep.pos.findClosestByPath(this.Room.getSendingLinks())
-                    if (link && this.creep.pos.getRangeTo(link) <= 5 && link.energy < 600) {
-                        if (this.creep.transfer(link, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                            this.creep.moveTo(link);
+                    let storage = this.Room.Storage;
+
+                    if (storage) {
+                        if (this.creep.pos.isNearTo(storage)) {
+                            let space = storage.storeCapacity - _.sum(storage.store);
+                            for(let resourceType in this.creep.carry) {
+                                if (this.creep.transfer(storage, resourceType) === OK) {
+                                    let amount = this.creep.carry[resourceType];
+                                    let transfered = Math.min(space, amount);
+                                }
+                            }
+                        }
+                        else {
+                            this.moveTo(storage);
                         }
                         return true;
                     }
-                    
+
                     let spawn = this.creep.pos.findClosestByPath(FIND_MY_SPAWNS);
                     if (spawn !== null && spawn.energy < spawn.energyCapacity) {
                         if (this.creep.transfer(spawn, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                            this.creep.moveTo(spawn);
+                            this.moveTo(spawn);
                         }
                         return true;
                     }
@@ -80,7 +140,7 @@ class CreepHauler extends CreepWorker {
                     });
                     if (extension != undefined) {
                         if (this.creep.transfer(extension, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                            this.creep.moveTo(extension);
+                            this.moveTo(extension);
                         }
                         return true;
                     }
@@ -93,19 +153,7 @@ class CreepHauler extends CreepWorker {
 
                     if (tower != undefined) {
                         if (this.creep.transfer(tower, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                            this.creep.moveTo(tower);
-                        }
-                        return true;
-                    }
-
-                    let storage = this.creep.room.storage;
-                    
-                    if (storage !== undefined) {
-                        if (this.creep.pos.isNearTo(storage)) {
-                            this.creep.transfer(storage, RESOURCE_ENERGY);
-                        }
-                        else {
-                            this.creep.moveTo(storage);
+                            this.moveTo(tower);
                         }
                         return true;
                     }
@@ -118,13 +166,13 @@ class CreepHauler extends CreepWorker {
 
                     if (container !== undefined) {
                         if (this.creep.transfer(container, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                            this.creep.moveTo(container);
+                            this.moveTo(container);
                         }
                         return true;
                     }
 
                     if (spawn !== null && !this.creep.pos.inRangeTo(spawn, 2)) {
-                        this.creep.moveTo(spawn);
+                        this.moveTo(spawn);
                         return true;
                     }
                 }

@@ -12,6 +12,8 @@ let CreepUpgrader = require('Creep.Upgrader');
 let CreepRefueler = require('Creep.Refueler');
 let CreepDefender = require('Creep.Defender');
 let CreepAttacker = require('Creep.Attacker');
+let CreepBalancer = require('Creep.Balancer');
+let CreepDismantler = require('Creep.Dismantler');
 
 class CreepFactory {
     /**
@@ -53,6 +55,12 @@ class CreepFactory {
                 
             case 'settler':
                 return new CreepSettler(creep);
+                
+            case 'balancer':
+                return new CreepBalancer(creep);
+                
+            case 'dismantler':
+                return new CreepDismantler(creep);
             
             default:
                 return new CreepBase(creep);

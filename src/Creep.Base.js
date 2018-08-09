@@ -2,7 +2,7 @@
 
 let C = require('constants');
 
-let RoomBase = require('Room.Base');
+let RoomBaseV2 = require('Room.BaseV2');
 let RoomFake = require('Room.Fake');
 
 /**
@@ -17,7 +17,7 @@ class CreepBase {
     constructor(creep) {
         this.creep = creep;
         this.mem = creep.memory;
-        this.init();
+        this.baseInit();
     }
 
     /**
@@ -32,6 +32,13 @@ class CreepBase {
      */
     get TicksToLive() {
         return this.creep.ticksToLive;
+    }
+
+    /**
+     * Gets the creeps job name.
+     */
+    get Job() {
+        return this.men.job;
     }
 
     /**
@@ -58,7 +65,7 @@ class CreepBase {
         if (this.creep.spawning) {
             return true;
         }
-
+        
         if (this.renew()) {
             return true;
         }
@@ -90,7 +97,8 @@ class CreepBase {
      * @returns {Boolean} true if the retreat was required and the creep is on the move
      */
     retreat() {
-        if (this.Room.State !== "normal") {
+        //return false;
+        if (this.Room.State !== C.ROOM_STATE_NORMAL) {
             this.creep.say("help");
             this.moveHome();
             return true;
@@ -113,8 +121,7 @@ class CreepBase {
      * @returns {object} true if the creep is in the home room already.
      */
     moveHome(){
-        if (this.moveToRoom(this.HomeRoom)) {
-            this.moveIn();
+        if (this.moveToRoomOld(this.HomeRoom)) {
             return true;
         }
         return false;
@@ -128,69 +135,80 @@ class CreepBase {
      * @returns {object} true if the creep is in the work room already.
      */
     moveOut(sneak) {
-        if (this.moveToRoom(this.WorkRoom)) {
-            if (!sneak) {
-                this.moveIn();
-            }
+        if (this.moveToRoomOld(this.WorkRoom)) {
             return true;
         }
         return false;
     }
 
     /**
-     * The creep will move to the given room.
+     * The creep will move to the given room. Use this if the creep don't have a full RoomPosition.
+     * 
+     * @param {RoomBase} room - The room that the creep want to move to.
      * 
      * @returns {object} true if the creep is in the given room already.
      */
-    moveToRoom(room) {
-        // Don't move into a room under siege.
-        if (room.State !== "normal") {
-            let flag = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
-            if (flag) {
-                this.creep.moveTo(flag);
-            }
-            return false;
-        }
-
-        if (this.Room.Name !== room.Name) {
+    moveToRoomOld(room) {
+        if (room.Name !== this.Room.Name) {
             let exitDir = this.creep.room.findExitTo(room.Name);
-
-            let roomExits = C.EXIT[this.Room.Name];
-            if (roomExits && roomExits[exitDir]) {
-                this.creep.moveTo(roomExits[exitDir].x, roomExits[exitDir].y, { maxRooms: 1 });
-            }
-            else {
-                let exit = this.creep.pos.findClosestByRange(exitDir);
-                this.creep.moveTo(exit);
-            }
+            let exit = this.creep.pos.findClosestByRange(exitDir);
+            this.moveTo(exit);
             return false;
         }
         return true;
     }
 
     /**
-     * Make the creep move off the exit zone and into the room. This move will normally
-     * be replaced by any other movement action performed by work logic.
+     * The creep will move to the given room. Use this if the creep don't have a full RoomPosition.
+     * 
+     * @param {RoomBase} room - The room that the creep want to move to.
+     * 
+     * @returns {object} true if the creep is in the given room already.
      */
-    moveIn() {
-        if (this.creep.pos.x === 0) {
-            this.creep.moveTo(this.creep.pos.x + 1, this.creep.pos.y);
+    moveToRoom(room) {
+        let exitDir = this.creep.room.findExitTo(room.Name);
+        let exit = this.creep.pos.findClosestByRange(exitDir);
+        return this.moveTo(exit);
+    }
+
+    /**
+     * Customized movement method that wraps the default moveTo function.
+     */
+    moveTo(target) {
+        if (this.creep.fatigue > 0) {
+            return ERR_TIRED;
         }
-        if (this.creep.pos.x === 49) {
-            this.creep.moveTo(this.creep.pos.x - 1, this.creep.pos.y);
+
+        let pos = target.pos ? target.pos : target;
+        
+        let room = new RoomFake(pos.roomName);
+        //console.log(room.Name);
+        //console.log(room.State);
+
+        if (room.State !== C.ROOM_STATE_NORMAL) {
+            //console.log(this.Name);
+            let flag = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
+            //console.log(flag)
+            if (flag) {
+                let moveResult = this.creep.moveTo(flag);
+                //console.log(moveResult);
+                return moveResult;
+            }
+            return OK;
         }
-        if (this.creep.pos.y === 0) {
-            this.creep.moveTo(this.creep.pos.x, this.creep.pos.y + 1);
+
+        let ops = { 
+            ignoreCreeps: false,
+            visualizePathStyle: { fill: 'transparent', stroke: '#fff', lineStyle: 'dashed', strokeWidth: 0.1, opacity: 0.2 } 
         }
-        if (this.creep.pos.y === 49) {
-            this.creep.moveTo(this.creep.pos.x, this.creep.pos.y - 1);
-        }
+
+        return this.creep.moveTo(pos, ops);
     }
 
     /**
      * Prepare the creep short and long term memory.
      */
-    init() {
+    baseInit() {
         if (!this.mem.homeroom) {
             this.mem.homeroom = this.creep.room.name;
         }
@@ -203,20 +221,10 @@ class CreepBase {
 
         this.mem.ticksToLive = this.creep.ticksToLive;
 
-        this.Room = this.getRoom(this.creep.room.name);
-        this.HomeRoom = this.getRoom(this.mem.homeroom);
-        this.WorkRoom = this.getRoom(this.mem.workroom);
-    }
-
-    /**
-     * Attempt to get the room from the list of visible rooms and wrap it in room type specific logic.
-     */
-    getRoom(name) {
-        let room = Game.rooms[name];
-        if (room) {
-            return new RoomBase(room);
-        }
-        return new RoomFake(name);
+        this.mem.rooms = {};
+        this.mem.rooms.current = this.creep.room.name;
+        this.mem.rooms.home = this.mem.homeroom;
+        this.mem.rooms.work = this.mem.workroom;
     }
 }
 

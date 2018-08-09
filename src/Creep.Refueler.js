@@ -24,20 +24,23 @@ class CreepRefueler extends CreepWorker {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
+        if (!this.moveHome()) return true;
         if (this.creep.carry.energy > 0) { 
-            let tower = this.creep.pos.findClosestByPath(FIND_MY_STRUCTURES, { 
-                filter: function (s) { 
-                    return s.structureType === STRUCTURE_TOWER && (s.energy < s.energyCapacity - 200); 
-                } 
-            });
-
-            if (tower) {
-                if (this.creep.transfer(tower, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                    this.creep.moveTo(tower);
+            if (this.Room.State !== C.ROOM_STATE_NORMAL) {
+                let tower = this.creep.pos.findClosestByPath(FIND_MY_STRUCTURES, { 
+                    filter: function (s) { 
+                        return s.structureType === STRUCTURE_TOWER && (s.energy < s.energyCapacity - 200); 
+                    } 
+                });
+    
+                if (tower) {
+                    if (this.creep.transfer(tower, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+                        this.creep.moveTo(tower);
+                    }
+                    return true;
                 }
-                return true;
             }
-                    
+            
             let spawn = this.creep.pos.findClosestByPath(FIND_MY_SPAWNS);
             if (spawn !== null && spawn.energy < spawn.energyCapacity) {
                 if (this.creep.transfer(spawn, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
@@ -57,10 +60,23 @@ class CreepRefueler extends CreepWorker {
                 }
                 return true;
             }
+            
+            let tower = this.creep.pos.findClosestByPath(FIND_MY_STRUCTURES, { 
+                filter: function (s) { 
+                    return s.structureType === STRUCTURE_TOWER && (s.energy < s.energyCapacity - 200); 
+                } 
+            });
+
+            if (tower) {
+                if (this.creep.transfer(tower, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+                    this.creep.moveTo(tower);
+                }
+                return true;
+            }
         }
         else {
-            let storage = this.creep.room.storage;            
-            if (storage !== undefined) {
+            let storage = this.Room.Storage;            
+            if (storage) {
                 if (this.creep.pos.isNearTo(storage)) {
                     this.creep.withdraw(storage, RESOURCE_ENERGY);
                 }

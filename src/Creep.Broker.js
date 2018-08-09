@@ -24,25 +24,23 @@ class CreepBroker extends CreepWorker {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
-        if (this.creep.carry.energy > 0) {
-            let storage = this.creep.room.storage;
-            
-            if (storage !== undefined) {
-                if (this.creep.pos.isNearTo(storage)) {
-                    this.creep.transfer(storage, RESOURCE_ENERGY);
-                }
-                else {
-                    this.creep.moveTo(storage);
-                }
-            }
+        let storage = this.Room.Storage;
+        let link = this.creep.pos.findClosestByPath(this.Room.getReceivingLinks());
+        
+        if (link && this.creep.pos.isNearTo(link)) {
+            this.creep.withdraw(link, RESOURCE_ENERGY);
         }
-        else {
-            let link = this.creep.pos.findClosestByPath(this.Room.getReceivingLinks())
-            if (link && link.energy) {
-                if (this.creep.withdraw(link, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                    this.creep.moveTo(link);
-                }
-            }
+
+        if (storage && this.creep.pos.isNearTo(storage)) {
+            this.creep.transfer(storage, RESOURCE_ENERGY);
+        }
+        
+        if (storage && !this.creep.pos.isNearTo(storage)) {
+            this.moveTo(storage);
+        }
+        
+        if (link && !this.creep.pos.isNearTo(link)) {
+            this.moveTo(link);
         }
         
         return true;
