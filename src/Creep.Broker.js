@@ -34,14 +34,13 @@ class CreepBroker extends CreepWorker {
         let terminal = this.Room.terminal;
 
         if (!storage || (!storageLink && !terminal)) {
-            this.creep.say("todo?");
             return false;
         }
 
         let performedWithdraw = false;
 
         if (this.NextCarry < this.Capacity && !performedWithdraw) {
-            if (storageLink && storageLink.energy > 300 && this.creep.pos.isNearTo(storageLink)) {
+            if (storageLink && storageLink.energy > 200 && this.creep.pos.isNearTo(storageLink)) {
                 if (this.withdraw(storageLink, RESOURCE_ENERGY) === OK ) {
                     performedWithdraw = true;
                 }
@@ -51,13 +50,14 @@ class CreepBroker extends CreepWorker {
         if (this.NextCarry < this.Capacity && !performedWithdraw && this.creep.pos.isNearTo(storage)) {
             // Do not move stuff out of the storage if the terminal is full.
             if (terminal && _.sum(terminal.store) < terminal.storeCapacity * 0.9) {
-                for (let resourceType in storage.store) {
-                    let storeLimit = C.STORAGE_THRESHOLD_MINERAL * 1.1;
+                for (var resourceType in storage.store) {
+                    // Taking energy from the storage is handled by refuelers.
                     if (resourceType === RESOURCE_ENERGY) {
-                        storeLimit = C.STORAGE_THRESHOLD_ENERGY * 1.1;
+                        continue;
                     }
 
-                    if (storage.store[resourceType] > storeLimit) {
+                    // Moving all resources except energy to the terminal.
+                    if (storage.store[resourceType] > 0) {
                         if (this.withdraw(storage, resourceType) === OK) {
                             performedWithdraw = true;
                             break;
@@ -67,39 +67,28 @@ class CreepBroker extends CreepWorker {
             }
         }
 
-        if (terminal && this.NextCarry < this.Capacity && !performedWithdraw && this.creep.pos.isNearTo(terminal)) {
-            for (let resourceType in terminal.store) {
-                let storeLimit = C.STORAGE_THRESHOLD_MINERAL * 0.9;
-                if (resourceType === RESOURCE_ENERGY) {
-                    storeLimit = C.STORAGE_THRESHOLD_ENERGY * 0.9;
-                }
-
-                // Only reason to withdraw from the terminal would be if the storage is below its threshold.
-                if ((storage.store[resourceType] || 0 ) < storeLimit) {
-                    if (this.withdraw(terminal, resourceType) === OK) {
-                        performedWithdraw = true;
-                        break;
-                    }
-                }
-            }
-        }
-
         if (this.NextCarry > 0 && this.creep.pos.isNearTo(storage)) {
-            for (let resourceType in this.creep.carry) {
-                let storeLimit = C.STORAGE_THRESHOLD_MINERAL * 0.9;
+            for (var resourceType in this.creep.carry) { /*
                 if (resourceType === RESOURCE_ENERGY) {
-                    storeLimit = C.STORAGE_THRESHOLD_ENERGY * 0.9;
-                }
+                    if (storageLink && storageLink.energy < 400 && this.creep.pos.isNearTo(storageLink)) {
+                        if (this.transfer(storageLink, RESOURCE_ENERGY) === OK) {
+                            break;
+                        }
+                    }
+                }*/
 
-                if ((storage.store[resourceType] || 0) < storeLimit) {
+                if (resourceType === RESOURCE_ENERGY) {
                     if (this.transfer(storage, resourceType) === OK) {
                         break;
                     }
                 }
 
-                if (terminal && this.creep.pos.isNearTo(terminal)) {
-                    if (this.transfer(terminal, resourceType) === OK) {
-                        break;
+                // Moving energy to the terminal is handled by the refuelers.
+                if (resourceType !== RESOURCE_ENERGY) {
+                    if (terminal && this.creep.pos.isNearTo(terminal)) {
+                        if (this.transfer(terminal, resourceType) === OK) {
+                            break;
+                        }
                     }
                 }
             }

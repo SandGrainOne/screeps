@@ -29,7 +29,7 @@ class CreepChemist extends CreepWorker {
             return true;
         }
 
-        if (!this.Room.storage || !this.Room.Labs.compoundOne || !this.Room.Labs.compoundTwo || this.Room.Labs.producers.length <= 0) {
+        if (!this.Room.terminal || !this.Room.Labs.compoundOne || !this.Room.Labs.compoundTwo || this.Room.Labs.producers.length <= 0) {
             return false;
         }
         
@@ -48,11 +48,11 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.Room.name === "E79N85") {
-            reaction = { compoundOne: RESOURCE_OXYGEN, compoundTwo: RESOURCE_LEMERGIUM };
+            reaction = { compoundOne: RESOURCE_HYDROXIDE, compoundTwo: RESOURCE_LEMERGIUM_OXIDE };
         }
 
         if (this.Room.name === "E79N86") {
-            reaction = { compoundOne: RESOURCE_UTRIUM, compoundTwo: RESOURCE_HYDROGEN };
+            reaction = { compoundOne: RESOURCE_ZYNTHIUM_KEANITE, compoundTwo: RESOURCE_UTRIUM_LEMERGITE };
         }
 
         let emptyCreep = false;
@@ -79,15 +79,15 @@ class CreepChemist extends CreepWorker {
         }
 
         if (emptyCreep) {
-            if (this.creep.pos.isNearTo(this.Room.storage)) {
+            if (this.creep.pos.isNearTo(this.Room.terminal)) {
                 for (let resourceType in this.creep.carry) {
-                    if (this.transfer(this.Room.storage, resourceType) === OK) {
+                    if (this.transfer(this.Room.terminal, resourceType) === OK) {
                         break;
                     }
                 }
             }
             else {
-                this.moveTo(this.Room.storage);
+                this.moveTo(this.Room.terminal);
             }
             return true;
         }
@@ -121,11 +121,25 @@ class CreepChemist extends CreepWorker {
         if (this.NextCarry <= 0) {
             for (let compound in reaction) {
                 if (this.Room.Labs[compound].mineralAmount <= 0) {
-                    if (this.creep.pos.isNearTo(this.Room.storage)) {
-                        this.withdraw(this.Room.storage, reaction[compound]);
+                    if (this.creep.pos.isNearTo(this.Room.terminal)) {
+                        this.withdraw(this.Room.terminal, reaction[compound]);
                     }
                     else {
-                        this.moveTo(this.Room.storage);
+                        this.moveTo(this.Room.terminal);
+                    }
+                    return true;
+                }
+            }
+        }
+
+        if (this.NextCarry < this.Capacity) {
+            for (var producer of this.Room.Labs.producers) {
+                if (producer.mineralType !== REACTIONS[reaction.compoundOne][reaction.compoundTwo]){                    
+                    if (this.creep.pos.isNearTo(producer)) {
+                        this.withdraw(producer, producer.mineralType);
+                    }
+                    else {
+                        this.moveTo(producer);
                     }
                     return true;
                 }
@@ -149,10 +163,10 @@ class CreepChemist extends CreepWorker {
             for (let resourceType in this.creep.carry) {
                 if (this.creep.carry[resourceType] > 0) {
                     // Creep holds wrong type of resource. Get rid of it.
-                    this.moveTo(this.Room.storage);
+                    this.moveTo(this.Room.terminal);
                     
-                    if (this.creep.pos.isNearTo(this.Room.storage)) {
-                        this.transfer(this.Room.storage, resourceType);
+                    if (this.creep.pos.isNearTo(this.Room.terminal)) {
+                        this.transfer(this.Room.terminal, resourceType);
                         break;
                     }
                 }

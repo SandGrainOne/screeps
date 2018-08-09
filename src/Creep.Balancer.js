@@ -34,7 +34,7 @@ class CreepBalancer extends CreepWorker {
         if (this.Strength > 0 && this.StartEnergy >= Math.min(this.Strength, this.Capacity)) {
             let foundStructures = this.creep.pos.lookFor(LOOK_STRUCTURES);
             if (foundStructures.length > 0) {
-                for (let structure of foundStructures) {
+                for (var structure of foundStructures) {
                     if (structure.structureType === STRUCTURE_ROAD) {
                         if (structure.hits < structure.hitsMax) {
                             if (this.repair(structure) === OK) {
@@ -59,7 +59,7 @@ class CreepBalancer extends CreepWorker {
             if (this.Room.Links.Inputs.length > 0) {
                 let links = this.creep.pos.findInRange(this.Room.Links.Inputs, 1);
                 if (links.length > 0) {
-                    for (let link of links) {
+                    for (var link of links) {
                         if (this.transfer(link, RESOURCE_ENERGY) === OK ) {
                             break;
                         }
@@ -69,7 +69,7 @@ class CreepBalancer extends CreepWorker {
 
             let storage = this.Room.storage;
             if (storage && this.creep.pos.isNearTo(storage)) {
-                for (let resourceType in this.creep.carry) {
+                for (var resourceType in this.creep.carry) {
                     if (this.transfer(storage, resourceType) === OK) {
                         break;
                     }
@@ -109,7 +109,7 @@ class CreepBalancer extends CreepWorker {
                     if (this.Room.Links.Inputs.length > 0) {
                         let links = this.creep.pos.findInRange(this.Room.Links.Inputs, 1);
                         if (links.length > 0) {
-                            for (let link of links) {
+                            for (var link of links) {
                                 if (link.energy < link.energyCapacity) {
                                     moveTarget = link;
                                     break;

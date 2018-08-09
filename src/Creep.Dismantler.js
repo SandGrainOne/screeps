@@ -83,7 +83,7 @@ class CreepDismantler extends CreepWorker {
                 if (storage) {
                     if (this.creep.pos.isNearTo(storage)) {
                         let space = storage.storeCapacity - _.sum(storage.store);
-                        for(let resourceType in this.creep.carry) {
+                        for (var resourceType in this.creep.carry) {
                             if (this.creep.transfer(storage, resourceType) === OK) {
                                 let amount = this.creep.carry[resourceType];
                                 let transfered = Math.min(space, amount);

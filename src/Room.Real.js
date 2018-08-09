@@ -221,11 +221,14 @@ class RoomReal extends RoomBase {
         this._mem.structures.links.storage = null;
         this._mem.structures.links.controller = null;
         this._mem.structures.links.inputs = [];
+        this._mem.structures.links.all = [];
         this._mem.structures.labs = {};
         this._mem.structures.labs.all = [];
         this._mem.structures.labs.rOne = null;
         this._mem.structures.labs.rTwo = null;
         this._mem.structures.labs.producers = [];
+        
+        this._mem.hasHarvestableMinerals = false;
 
         // Need to handle Labs multiple times in order to identify the roles.
         let labs = [];
@@ -257,6 +260,8 @@ class RoomReal extends RoomBase {
             }
 
             if (structure.structureType === STRUCTURE_LINK) {
+                this._mem.structures.links.all.push(structure.id);
+
                 let rangeToStorage = structure.pos.getRangeTo(this.storage);
                 let rangeToController = structure.pos.getRangeTo(this.controller);
 
@@ -332,6 +337,7 @@ class RoomReal extends RoomBase {
         this.Links.Controller = null;
         this.Links.Storage = null;
         this.Links.Inputs = [];
+        this.Links.All = [];
         if (this._mem.structures && this._mem.structures.links) {
             if (this._mem.structures.links.controller) {
                 let controllerLink = Game.getObjectById(this._mem.structures.links.controller);
@@ -350,6 +356,14 @@ class RoomReal extends RoomBase {
                     let inputLink = Game.getObjectById(linkId);
                     if (inputLink) {
                         this.Links.Inputs.push(inputLink);
+                    }
+                }
+            }
+            if (this._mem.structures.links.all) {
+                for (let linkId of this._mem.structures.links.all) {
+                    let link = Game.getObjectById(linkId);
+                    if (link) {
+                        this.Links.All.push(link);
                     }
                 }
             }
@@ -388,7 +402,7 @@ class RoomReal extends RoomBase {
             for (let structure of structures) {
                 if (structure.structureType === STRUCTURE_WALL || structure.structureType === STRUCTURE_RAMPART) {
                     if (this.isMine) {
-                        if (structure.hits < 150000) {
+                        if (structure.hits < 600000) {
                             this.Repairs.push(structure);
                         }
                     }
@@ -533,39 +547,72 @@ class RoomReal extends RoomBase {
     }
 
     linking() {
-        if (this.Links.Inputs.length === 0) {
-            return;
-        }
-
-        let roomLinks = [];
-        if (this.Links.Controller) {
-            roomLinks.push(this.Links.Controller);
-        }
-        if (this.Links.Storage) {
-            roomLinks.push(this.Links.Storage);
-        }
-
-        for (let inputLink of this.Links.Inputs) {
-            if (inputLink.cooldown > 0 || inputLink.energy < 100) {
-                continue;
+        if (this.name === "") { //E78N85
+            if (this.Links.All.length <= 0) {
+                return;
             }
 
-            for (let roomLink of roomLinks) {
-                if (roomLink.energy < roomLink.energyCapacity / 2) {
-                    let amount = Math.min(inputLink.energy, roomLink.energyCapacity - roomLink.energy)
-                    let res = inputLink.transferEnergy(roomLink, amount);
-                    break;
+            let total = _.sum(this.Links.All, (l) => l.energy);
+            let average = total / this.Links.All.length;
+
+            let linkBelow = null;
+            let linkAbove = null;
+
+            for (let link of this.Links.All) {
+                if (link.energy < average) {
+                    if (linkBelow === null || linkBelow.energy > link.energy) {
+                        linkBelow = link;
+                    }
+                }
+                if (link.energy > average) {
+                    if (linkAbove === null || linkAbove.energy < link.energy) {
+                        if (link.cooldown === 0) {
+                            linkAbove = link;
+                        }
+                    }
                 }
             }
-        }
+            
+            if (linkAbove && linkBelow) {
+                let amount = Math.min(400, linkBelow.energy)
+                linkAbove.transferEnergy(linkBelow, amount);
+            }
+        } 
+        else {
+            if (this.Links.Inputs.length === 0) {
+                return;
+            }
 
-        if (this.Links.Controller && this.Links.Storage) {
-            let storageLink = this.Links.Storage;
-            if (storageLink.cooldown === 0 && storageLink.energy > 0) {
-                let controllerLink = this.Links.Controller;
-                if (controllerLink.energy < controllerLink.energyCapacity / 2) {
-                    let amount = Math.min(storageLink.energy, controllerLink.energyCapacity - controllerLink.energy)
-                    let res = storageLink.transferEnergy(controllerLink, amount);
+            let roomLinks = [];
+            if (this.Links.Controller) {
+                roomLinks.push(this.Links.Controller);
+            }
+            if (this.Links.Storage) {
+                roomLinks.push(this.Links.Storage);
+            }
+
+            for (let inputLink of this.Links.Inputs) {
+                if (inputLink.cooldown > 0 || inputLink.energy < 100) {
+                    continue;
+                }
+
+                for (let roomLink of roomLinks) {
+                    if (roomLink.energy < roomLink.energyCapacity / 2) {
+                        let amount = Math.min(inputLink.energy, roomLink.energyCapacity - roomLink.energy)
+                        let res = inputLink.transferEnergy(roomLink, amount);
+                        break;
+                    }
+                }
+            }
+
+            if (this.Links.Controller && this.Links.Storage) {
+                let storageLink = this.Links.Storage;
+                if (storageLink.cooldown === 0 && storageLink.energy > 0) {
+                    let controllerLink = this.Links.Controller;
+                    if (controllerLink.energy < controllerLink.energyCapacity / 2) {
+                        let amount = Math.min(storageLink.energy, controllerLink.energyCapacity - controllerLink.energy)
+                        let res = storageLink.transferEnergy(controllerLink, amount);
+                    }
                 }
             }
         }

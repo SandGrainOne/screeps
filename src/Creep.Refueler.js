@@ -39,6 +39,14 @@ class CreepRefueler extends CreepWorker {
             }
         }
 
+        if (this.EndEnergy > 0 && this.Room.terminal) {
+            if (this.Room.terminal.store.energy < C.TERMINAL_THRESHOLD_ENERGY && this.Room.storage.store.energy > 200000) {
+                if (this.creep.pos.isNearTo(this.Room.terminal)) {
+                    this.transfer(this.Room.terminal, RESOURCE_ENERGY);
+                }
+            }
+        }
+
         if (this.EndEnergy > 0 && this.Room.towers.length > 0) { 
             // Towers are sorted. The one with less remaining energy first.
             let tower = this.Room.towers[0];
@@ -73,6 +81,12 @@ class CreepRefueler extends CreepWorker {
             if (!moveTarget && this.Room.Extensions.length > 0) {
                 // All structures in the Extensions array have room for energy. Pick the closest.
                 moveTarget = this.creep.pos.findClosestByRange(this.Room.Extensions);
+            }
+
+            if (!moveTarget && this.Room.terminal) {
+                if (this.Room.terminal.store.energy < 40000 && this.Room.storage.store.energy > 200000) {
+                    moveTarget = this.Room.terminal;
+                }
             }
 
             if (!moveTarget && this.Room.towers.length > 0) {

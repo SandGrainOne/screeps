@@ -144,6 +144,38 @@ class Empire {
         }
     }
 
+    balanceEnergy(){
+        let poorest = null;
+        let poorestAmount = 3000000;
+        let richest = null;
+        let richestAmount = 0;
+
+        for (var room of this.rooms) {
+            if (!room.isVisible || !room.storage || !room.terminal) {
+                // Room can not take part in the energy game this tick.
+                continue;
+            }
+
+            let roomEnergy = room.storage.store.energy + room.terminal.store.energy;
+
+            if (poorest === null || roomEnergy < poorestAmount) {
+                poorestAmount = roomEnergy;
+                poorest = room;
+            }
+
+            if (richest === null || roomEnergy > richestAmount) {
+                richestAmount = roomEnergy;
+                richest = room;
+            }
+        }
+
+        if (richestAmount - poorestAmount > 100000) {
+            if (richest.terminal.store.energy > 20000 && poorest.terminal.store.storeCapacity - _.sum(poorest.terminal.store) > 40000) {
+                richest.terminal.send(RESOURCE_ENERGY, 10000, poorest.name);
+            }
+        }
+    }
+
     createCreep(job, task, spawnName, bodyCode, homeRoom, workRoom) {
         if (!Game.spawns[spawnName]) {
             console.log("Error: No spawn with the name '" + spawnName + "'.")
