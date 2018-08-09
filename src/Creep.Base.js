@@ -2,7 +2,6 @@
 
 let C = require('constants');
 
-let RoomBaseV2 = require('Room.BaseV2');
 let RoomBase = require('Room.Base');
 
 /**
@@ -27,17 +26,11 @@ class CreepBase {
         this.mem.rooms.current = this.creep.room.name;
 
         if (!this.mem.rooms.home) {
-            this.mem.rooms.home = this.mem.homeroom ? this.mem.homeroom : this.creep.room.name;
-        }
-        if (this.mem.homeroom) {
-            delete this.mem.homeroom;
+            this.mem.rooms.home = this.creep.room.name;
         }
 
         if (!this.mem.rooms.work) {
-            this.mem.rooms.work = this.mem.workroom ? this.mem.workroom : this.mem.rooms.home;
-        }
-        if (this.mem.workroom) {
-            delete this.mem.workroom;
+            this.mem.rooms.work = this.creep.room.name;
         }
 
         if (!this.mem.task) {
@@ -78,6 +71,20 @@ class CreepBase {
      */
     set Task(value) {
         this.mem.task = value;
+    }
+
+    /**
+     * Gets a value indicating whether the creep is in the work room.
+     */
+    get AtWork() {
+        return this.Room.Name === this.WorkRoom.Name;
+    }
+
+    /**
+     * Gets a value indicating whether the creep is in the home room.
+     */
+    get AtHome() {
+        return this.Room.Name === this.HomeRoom.Name;
     }
 
     /**
@@ -185,6 +192,12 @@ class CreepBase {
      * @returns {object} true if the creep is in the given room already.
      */
     moveToRoom(room) {
+        // Micro manage where creeps go to exit a room while looking for a specific room.
+        if (C.EXIT[this.Room.Name] && C.EXIT[this.Room.Name][room.Name]) {
+            let coords = C.EXIT[this.Room.Name][room.Name];
+            return this.moveTo(new RoomPosition(coords.x, coords.y, this.Room.Name));
+        }
+        
         let exitDir = this.creep.room.findExitTo(room.Name);
         let exit = this.creep.pos.findClosestByRange(exitDir);
         return this.moveTo(exit);

@@ -29,7 +29,7 @@ class CreepBalancer extends CreepWorker {
         if (carry > 0) { 
             if (this.moveHome()) {
                 if (carry === this.creep.carry.energy) {
-                    let link = this.creep.pos.findClosestByPath(this.Room.getSendingLinks())
+                    let link = this.creep.pos.findClosestByPath(this.Room.Links.Inputs)
                     if (link && this.creep.pos.getRangeTo(link) <= 5 && link.energy < 600) {
                         let transferResult = this.creep.transfer(link, RESOURCE_ENERGY);
                         if (transferResult === ERR_NOT_IN_RANGE) {
@@ -37,7 +37,7 @@ class CreepBalancer extends CreepWorker {
                             return true;
                         }
                     }
-                }                
+                }
                 let storage = this.Room.Storage;
                 if (storage) {
                     if (this.creep.pos.isNearTo(storage)) {

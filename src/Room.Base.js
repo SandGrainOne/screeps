@@ -14,7 +14,12 @@ class RoomBase {
      */
     constructor(name) {
         this.name = name;
-        this.mem = Memory.rooms[name];
+        if (Memory.rooms[name]) {
+            this.mem = Memory.rooms[name];
+        }
+        else {
+            this.mem = {};
+        }
         this.init();
     }
 
@@ -39,23 +44,6 @@ class RoomBase {
         return this.mem.type;
     }
 
-    get Containers() {
-        let containers = [];
-        if (this.mem.structures && this.mem.structures.containers) {
-            for (let containerInfo of this.mem.structures.containers) {
-                let container = Game.getObjectById(containerInfo.id);
-                if (container) {
-                    containers.push(container);
-                }
-            }
-        }
-        return containers;
-    }
-
-    getContainers() {
-        return [];
-    }
-
     /**
      * Initializes the room memory with default values.
      */
@@ -76,22 +64,6 @@ class RoomBase {
 
         if (!this.mem.targets) {
             this.mem.targets = {};
-        }
-
-        if (!this.mem.resources) {
-            this.mem.resources = {};
-            this.mem.resources.sources = [];
-            this.mem.resources.minerals = [];
-            this.mem.resources.refresh = true;
-        }
-
-        if (!this.mem.structures) {
-            this.mem.structures = {};
-            this.mem.structures.containers = [];
-            this.mem.structures.links = {};
-            this.mem.structures.links.storage = null;
-            this.mem.structures.links.controller = null;
-            this.mem.structures.links.inputs = [];
         }
     }
 

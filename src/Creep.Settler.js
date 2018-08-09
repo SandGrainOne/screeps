@@ -23,9 +23,25 @@ class CreepSettler extends CreepSoldier {
      */
     work() {
         if (this.moveOut()) {
-            if (this.creep.reserveController(this.creep.room.controller)) {
-                this.creep.moveTo(this.creep.room.controller);
+            if (this.Name === "Charlotte") {
+                if (!this.creep.pos.isNearTo(this.creep.room.controller)) {
+                    this.creep.moveTo(this.creep.room.controller);
+                }
+                else {
+                    let result = this.creep.signController(this.creep.room.controller, "Mine, pls :)");
+                    console.log(result);
+                }
+                //this.creep.say("Claim!");
+                //if (this.creep.claimController(this.creep.room.controller)) {
+                //    this.creep.moveTo(this.creep.room.controller);
+                //}
             }
+            else {
+                if (this.creep.reserveController(this.creep.room.controller)) {
+                    this.creep.moveTo(this.creep.room.controller);
+                }
+            }
+            
             this.creep.signController(this.creep.room.controller, "");
         }
 

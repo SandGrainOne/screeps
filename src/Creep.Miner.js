@@ -23,10 +23,12 @@ class CreepMiner extends CreepWorker {
                 return Game.getObjectById(this.mem.resourceid);
             }
         }
-        for (let source of this.Room.Sources) {
-            if (this.Room.reserveTarget(source.id, this.Name)) {
-                this.mem.resourceid = source.id;
-                return source;
+        if (this.Room.Resources.Sources.length > 0) {
+            for (let source of this.Room.Resources.Sources) {
+                if (this.Room.reserveTarget(source.id, this.Name)) {
+                    this.mem.resourceid = source.id;
+                    return source;
+                }
             }
         }
         return null;
@@ -38,23 +40,21 @@ class CreepMiner extends CreepWorker {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
-        let workParts = this.creep.getActiveBodyparts(WORK);
         let standsOnContainer = false;
+        let performedWork = false;
 
-        if (this.Energy > 0) {
+        if (this.AtWork && this.StartEnergy > Math.min(this.Strength * 5, this.Capacity)) {
             let foundStructures = this.creep.pos.lookFor(LOOK_STRUCTURES);
             if (foundStructures.length > 0) {
                 for (let structure of foundStructures) {
                     if (structure.structureType === STRUCTURE_CONTAINER) {
+                        standsOnContainer = true;
                         if (structure.hits < structure.hitsMax) {
-                            let repairResult = this.creep.repair(structure);
-                            if (repairResult === OK) {
-                                this.Energy = Math.max(0, this.Energy - workParts);
-                                this.Carry = Math.max(0, this.Carry - workParts);
+                            if (this.repair(structure) === OK) {
+                                performedWork = true;
                                 break;
                             }
                         }
-                        standsOnContainer = true;
                     }
                 }
             }
@@ -64,77 +64,74 @@ class CreepMiner extends CreepWorker {
                     // There can only ever be one construction site in a single space.
                     // The miner should only help with the construction of a container.
                     if (foundSites[0].structureType === STRUCTURE_CONTAINER) {
-                        let buildResult = this.creep.build(foundSites[0]);
-                        if (buildResult === OK) {
-                            this.Energy = Math.max(0, this.Energy - workParts * 5)
-                            this.Carry = Math.max(0, this.Carry - workParts * 5)
+                        if (this.build(foundSites[0]) === OK) {
+                            performedWork = true;
                         }
                     }
                 }
             }
         }
 
-        if (this.Carry <= this.creep.carryCapacity) {
+        // The creep can't both repair/build and harvest in the same tick.
+        if (!performedWork && this.AtWork && this.EndCarry <= this.Capacity) {
             let source = this.Source;
             if (source && this.creep.pos.isNearTo(source)) {
-                let harvestResult = this.creep.harvest(source);
-                if (harvestResult === OK) {
-                    this.Energy = Math.min(this.creep.carryCapacity, this.Energy + workParts * 2);
-                    this.Carry = Math.min(this.creep.carryCapacity, this.Carry + workParts * 2);
-                }
+                this.harvest(source);
             }
         }
 
-        if (standsOnContainer && this.Carry >= this.creep.carryCapacity - workParts * 2) {
-            for (let resourceType in this.creep.carry) {
-                let dropResult = this.creep.drop(resourceType);
-                if (dropResult === OK) {
-                    let amount = this.creep.carry[resourceType];
-                    if (resourceType === RESOURCE_ENERGY) {
-                        this.Energy = this.Energy - amount;
+        if (this.EndCarry >= this.Capacity) {
+            if (standsOnContainer) {
+                for (let resourceType in this.creep.carry) {
+                    if (this.creep.carry[resourceType] <= 0) {
+                        continue;
                     }
-                    this.Carry = this.Carry - amount;
+                    if (this.drop(resourceType) === OK) {
+                        break;
+                    }
                 }
             }
-        }
-
-        if (this.Carry >= this.creep.carryCapacity - workParts * 2) {
-            for (let structure of this.creep.pos.findInRange(FIND_STRUCTURES, 1)) {
-                if (structure.structureType === STRUCTURE_CONTAINER || structure.structureType === STRUCTURE_STORAGE) {
-                    let space = structure.storeCapacity - _.sum(structure.store);
-                    for (let resourceType in this.creep.carry) {
-                        if (this.creep.transfer(structure, resourceType) === OK) {
-                            let amount = this.creep.carry[resourceType];
-                            let transfered = Math.min(space, amount);
-                            if (resourceType === RESOURCE_ENERGY) {
-                                this.Energy = this.Energy - transfered;
+            else if (this.AtHome) {
+                if (this.Room.Containers.length > 0) {
+                    let containers = this.creep.pos.findInRange(this.Room.Containers, 1);
+                    if (containers.length > 0) {
+                        let space = containers[0].storeCapacity - _.sum(containers[0].store);
+                        for (let resourceType in this.creep.carry) {
+                            if (this.transfer(containers[0], resourceType) === OK) {
+                                break;
                             }
-                            this.Carry = this.Carry - transfered;
                         }
                     }
                 }
 
-                if (structure.structureType === STRUCTURE_SPAWN || structure.structureType === STRUCTURE_EXTENSION || structure.structureType === STRUCTURE_LINK) {
-                    let space = structure.energyCapacity - structure.energy;
-                    if (this.creep.transfer(structure, RESOURCE_ENERGY) === OK) {
-                        let transfered = Math.min(space, this.Energy);
-                        this.Energy = this.Energy - transfered;
-                        this.Carry = this.Carry - transfered;
+                let links = this.creep.pos.findInRange(this.Room.Links.Inputs, 1);
+                if (links.length > 0) {
+                    let space = links[0].energyCapacity - links[0].energy;
+                    if (this.transfer(links[0], RESOURCE_ENERGY) === OK) {
+                        let transfered = Math.min(space, this.StartEnergy);
+                    }
+                }
+
+                let storage = this.Room.Storage;
+                if (storage && this.creep.pos.isNearTo(storage)) {
+                    let space = storage.storeCapacity - _.sum(storage.store);
+                    for (let resourceType in this.creep.carry) {
+                        if (this.transfer(storage, resourceType) === OK) {
+                            break;
+                        }
                     }
                 }
             }
         }
 
-        if (this.Carry <= 0) {
-            this.IsWorking = true;
+        if (this.Name === " ") {
+            console.log("StartCarry: " + this.StartCarry);
+            console.log("EndCarry  : " + this.EndCarry);
         }
 
-        if (this.Carry >= this.creep.carryCapacity) {
-            this.IsWorking = false;
-        }
+        let moveTarget = null;
 
-        if (this.IsWorking) {
-            // Find and move to a place to mine.
+        if (this.EndCarry < this.Capacity) {
             if (!this.AtWork) {
                 this.moveToRoom(this.WorkRoom);
             }
@@ -142,7 +139,17 @@ class CreepMiner extends CreepWorker {
                 let source = this.Source;
                 if (source) {
                     if (!this.creep.pos.isNearTo(source)) {
-                        this.moveTo(source);
+                        moveTarget = source;
+                    }
+                    else if (!standsOnContainer && this.Room.Containers.length > 0){
+                        // Need to reposition to on top of the container.
+                        let containers = source.pos.findInRange(this.Room.Containers, 1);
+                        if (containers.length === 1) {
+                            moveTarget = containers[0];
+                        }
+                        else if (containers.length > 1) {
+                            // TODO: See room E78N62
+                        }
                     }
                 }
                 else {
@@ -156,17 +163,23 @@ class CreepMiner extends CreepWorker {
             }
             else {
                 if (this.Room.Storage) {
-                    this.moveTo(this.Room.Storage);
+                    moveTarget = this.Room.Storage;
                 }
                 else {
-                    let spawn = this.creep.pos.findClosestByPath(FIND_MY_SPAWNS);
-                    if (spawn) {
-                        if (!this.creep.pos.isNearTo(spawn)) {
-                            this.moveTo(spawn);
+                    // This should only happen early on before there is a temporary or real storage.
+                    // The this.Extensions array only holds extensions with available space.
+                    let extension = this.creep.pos.findClosestByRange(this.Extensions);
+                    if (extension) {
+                        if (!this.creep.pos.isNearTo(extension)) {
+                            moveTarget = extension;
                         }
                     }
                 }
             }
+        }
+
+        if (moveTarget) {
+            this.moveTo(moveTarget);
         }
 
         return true;

@@ -22,99 +22,87 @@ class CreepUpgrader extends CreepWorker {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
-        let energy = this.creep.carry.energy;
-        let workParts = this.creep.getActiveBodyparts(WORK);
-
-        if (energy > 0) {
-            let controller = this.Room.Controller.my ? this.Room.Controller : null;
-            if (controller) {
-                let rangeToController = this.creep.pos.getRangeTo(controller);
+        if (this.AtWork && this.StartEnergy > 0) {
+            if (this.Room.Controller && this.Room.Controller.my) {
+                let rangeToController = this.creep.pos.getRangeTo(this.Room.Controller);
                 if (rangeToController <= 3) {
-                    let upgradeResult = this.creep.upgradeController(controller);
-                    if (upgradeResult === OK) {
-                        energy = energy - workParts;
-                    }
+                    this.upgrade(this.Room.Controller);
                 }
             }
         }
 
-        if (energy < this.creep.carryCapacity) {
+        if (this.StartEnergy < this.Capacity) {
             let storage = this.Room.Storage;
             if (storage && storage.store.energy > 0 && this.creep.pos.isNearTo(storage)) {
-                let withdrawResult = this.creep.withdraw(storage, RESOURCE_ENERGY);
-                if (withdrawResult === OK) {
-                    let energyStored = storage.store.energy;
-                    let space = this.creep.carryCapacity - energy;
-                    energy = energy + Math.min(space, energyStored);
-                }
+                this.withdraw(storage, RESOURCE_ENERGY);
             }
         }
 
-        if (energy < this.creep.carryCapacity) {
+        if (this.StartEnergy < this.Capacity) {
             let link = this.Room.Links.Controller;
             if (link && link.energy > 0 && this.creep.pos.isNearTo(link)) {
-                let withdrawResult = this.creep.withdraw(link, RESOURCE_ENERGY);
-                if (withdrawResult === OK) {
-                    let energyStored = link.energy;
-                    let space = this.creep.carryCapacity - energy;
-                    energy = energy + Math.min(space, energyStored);
-                }
+                this.withdraw(link, RESOURCE_ENERGY);
             }
         }
 
-        if (energy < this.creep.carryCapacity) {
+        if (this.StartEnergy < this.Capacity) {
             // Look for a source? Needed in the very start of a new room before storage and links.
             // Look for other containers? Probably not. First container should always be storage.
         }
 
-        if (energy >= this.creep.carryCapacity) {
+        if (this.EndEnergy >= this.Capacity) {
             this.IsWorking = true;
         }
 
-        if (energy <= 0) {
+        if (this.EndEnergy <= 0) {
             this.IsWorking = false;
         }
 
         let moveTarget = null;
+
         if (this.IsWorking) {
-            let controller = this.WorkRoom.Controller.my ? this.WorkRoom.Controller : null;
-            if (controller) {
-                let rangeToController = this.creep.pos.getRangeTo(controller);
-                if (rangeToController > 3) {
-                    moveTarget = controller;
-                }
+            if (!this.AtWork) {
+                this.moveToRoom(this.WorkRoom);
             }
             else {
-                this.creep.say("contrler!?");
+                let controller = this.WorkRoom.Controller.my ? this.WorkRoom.Controller : null;
+                if (controller) {
+                    let rangeToController = this.creep.pos.getRangeTo(controller);
+                    if (rangeToController > 3) {
+                        moveTarget = controller;
+                    }
+                }
+                else {
+                    this.creep.say("contrler!?");
+                }
             }
         }
         else {
-            let rangeToStorage = this.creep.pos.getRangeTo(this.HomeRoom.Storage);
-        }
-
-        if (this.Task === "charging") {
-            if (this.creep.carry.energy < this.creep.carryCapacity)  {
-                if (this.moveHome()) {
-                    if (!this.findStoredEnergy()) {
-                        let source = this.creep.pos.findClosestByPath(FIND_SOURCES);
-                        
-                        if (source !== null) {
-                            if (this.creep.harvest(source) === ERR_NOT_IN_RANGE) {
-                                this.creep.moveTo(source);
-                            }
+            if (!this.AtHome) {
+                this.moveToRoom(this.HomeRoom);
+            }
+            else {
+                if (!moveTarget) {
+                    let link = this.Room.Links.Controller;
+                    if (link && link.energy > 0 && !this.creep.pos.isNearTo(link)) {
+                        moveTarget = link;
+                    }
+                }
+                if (!moveTarget) {
+                    let storage = this.Room.Storage;
+                    if (storage && storage.store.energy > 0 && !this.creep.pos.isNearTo(storage)) {
+                        moveTarget = storage;
+                    }
+                }
+                if (!moveTarget) {
+                    let source = this.creep.pos.findClosestByPath(this.Room.Resources.Sources);
+                    
+                    if (source && !this.creep.pos.isNearTo(source)) {
+                        if (this.creep.harvest(source) === ERR_NOT_IN_RANGE) {
+                            moveTarget = source;
                         }
                     }
                 }
-            }
-            else {
-                this.Task = "upgrading";
-            }
-        }
-        else {
-            if (this.creep.carry.energy > 0)  {
-            }
-            else {
-                this.Task = "charging";
             }
         }
 

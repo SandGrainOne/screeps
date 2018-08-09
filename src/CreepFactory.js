@@ -86,45 +86,19 @@ class CreepFactory {
         return smartCreep;
     }
 
+    /**
+     * Build a body based on a shortened code.
+     * 
+     * Eg: 
+     * WCMM => [WORK, CARRY, MOVE, MOVE]
+     * LLMM => [CLAIM, CLAIM, MOVE, MOVE]
+     */
     buildBody(codeChain) {
         let body = [];
 
         let codes = Array.from(codeChain);
         for (let code of codes) {
             body.push(C.BODY_PART_CODES[code]);
-        }
-
-        return body;
-    }
-
-    buildBodyAdvanced(bodyChain) {
-        let body = [];
-
-        let chain = Array.from(bodyChain);
-
-        let partCode = null;
-        let bodyPart = null;
-        let partCount = 0;
-
-        let index = 0;
-        
-        while (index < chain.length) {
-            console.log(index);
-            console.log(chain[index]);
-
-            if (C.BODY_PART_CODES[chain[index]]) {
-                bodyPart = C.BODY_PART_CODES[chain[index]];
-                console.log(bodyPart);
-            }
-
-            let partCount = 1;
-            if (index + 1 < chain.length) {
-                if (chain[index + 1] === "x") {
-                    index++
-                }
-            }
-
-            index++;
         }
 
         return body;

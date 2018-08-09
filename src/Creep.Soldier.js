@@ -30,7 +30,6 @@ class CreepSoldier extends CreepBase {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
-        this.moveHome();
         return false;
     }
 }

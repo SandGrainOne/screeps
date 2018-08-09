@@ -24,7 +24,31 @@ class CreepRefueler extends CreepWorker {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
-        if (!this.moveHome()) return true;
+        if (!this.AtWork) {
+            this.moveToRoom(this.WorkRoom);
+            return true;
+        }
+
+        if (this.Room.Storage && this.creep.pos.isNearTo(this.Room.Storage)) {
+            let result = this.creep.withdraw(this.Room.Storage, RESOURCE_ENERGY);
+        }
+
+        if (this.Room.Towers.length > 0) { 
+            // Towers are sorted. The one with less remaining energy first.
+            let tower = this.Room.Towers[0];
+            if (this.creep.pos.isNearTo(tower)) {
+                let result = this.creep.transfer(tower, RESOURCE_ENERGY);
+            }
+        }
+
+        if (this.Room.Extensions.length > 0) {
+            // The extensions array hold only extensions and spawns with space for energy.
+            let extensions = this.creep.pos.findInRange(this.Extensions, 1);
+            if (extensions.length > 0) {
+                let result = this.creep.transfer(extensions[0], RESOURCE_ENERGY);
+            }
+        }
+
         if (this.creep.carry.energy > 0) { 
             if (this.Room.State !== C.ROOM_STATE_NORMAL) {
                 let tower = this.creep.pos.findClosestByPath(FIND_MY_STRUCTURES, { 
@@ -75,17 +99,14 @@ class CreepRefueler extends CreepWorker {
             }
         }
         else {
-            let storage = this.Room.Storage;            
+            let storage = this.Room.Storage;
             if (storage) {
-                if (this.creep.pos.isNearTo(storage)) {
-                    this.creep.withdraw(storage, RESOURCE_ENERGY);
-                }
-                else {
+                if (!this.creep.pos.isNearTo(storage)) {
                     this.creep.moveTo(storage);
                 }
             }
         }
-        
+
         return true;
     }
 }

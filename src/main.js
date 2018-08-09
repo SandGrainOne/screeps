@@ -3,11 +3,10 @@
 let code = require('code');
 
 let RoomBase = require('Room.Base');
-let RoomBaseV2 = require('Room.BaseV2');
+let RoomReal = require('Room.Real');
 
 let Population = require('Population');
 let CreepFactory = require('CreepFactory');
-let RoomFactory = require('RoomFactory');
 
 module.exports.loop = function () {
     // Ensure that the hive is up to date with what the code expects.
@@ -17,13 +16,11 @@ module.exports.loop = function () {
     let pop = new Population();
     pop.populate();
 
-    let roomFactory = new RoomFactory();
     let knownRooms = {};
     for (let roomName in Game.rooms) {
-        knownRooms[roomName] = roomFactory.wrap(Game.rooms[roomName]);
+        knownRooms[roomName] = new RoomReal(Game.rooms[roomName]);
         knownRooms[roomName].update();
     }
-
     for (let roomName in Memory.rooms) {
         if (!knownRooms[roomName]) {
             knownRooms[roomName] = new RoomBase(roomName);
@@ -32,7 +29,6 @@ module.exports.loop = function () {
     }
 
     let creepFactory = new CreepFactory(knownRooms);
-
     for (let creepName in Game.creeps) {
         let smartCreep = creepFactory.wrap(Game.creeps[creepName]);
         if (smartCreep.act()) {
@@ -40,11 +36,8 @@ module.exports.loop = function () {
         }
     }
 
-    //console.log( JSON.stringify( creepFactory.buildBodyAdvanced("Wx5CCMM") ));
-
     for (let roomName in Game.rooms) {
         let room = Game.rooms[roomName];
-        let smartRoom = roomFactory.wrap(Game.rooms[roomName]);
         
         if (room.name === "E77N86") {
             let homeRoom = "E77N85";
@@ -59,7 +52,7 @@ module.exports.loop = function () {
                     let res = roomSpawn.createCreep(body, null, { job: "upgrader", rooms: { home: homeRoom, work: workRoom } });
                 }
 
-                if ((!roomPop.builders ? 0 : roomPop.builders.length) < 1) {
+                if ((!roomPop.builders ? 0 : roomPop.builders.length) < 0) {
                     let body = creepFactory.buildBody("WWCCCCMMMMMM");
                     let res = roomSpawn.createCreep(body, null, { job: "builder", rooms: { home: homeRoom, work: workRoom } });
                 }
@@ -70,7 +63,7 @@ module.exports.loop = function () {
                 //}
                 
                 if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 3) {
-                    let body = creepFactory.buildBody("CCCCCCCCCCCCCCCCMMMMMMMM");
+                    let body = creepFactory.buildBody("WCCCCCCCCCCCCCCMMMMMMMMMMMMMMMM");
                     let res = roomSpawn.createCreep(body, null, { job: "hauler", rooms: { home: homeRoom, work: workRoom } });
                 }
                 
@@ -89,12 +82,17 @@ module.exports.loop = function () {
             if (roomSpawn && !roomSpawn.spawning) {
                 let roomPop = pop[workRoom];
 
+                if ((!roomPop.balancers ? 0 : roomPop.balancers.length) < 0) {
+                    let body = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "balancer", rooms: { home: "E78N85", work: workRoom } });
+                }
+
                 if ((!roomPop.builders ? 0 : roomPop.builders.length) < 1) {
                     let body = [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
                     let res = roomSpawn.createCreep(body, null, { job: "builder", rooms: { home: homeRoom, work: workRoom } });
                 }
 
-                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 1) {
+                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 2) {
                     let body = [WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
                     let res = roomSpawn.createCreep(body, null, { job: "upgrader", rooms: { home: homeRoom, work: workRoom } });
                 }
@@ -130,7 +128,7 @@ module.exports.loop = function () {
                 }
 
                 if ((!roomPop.refuelers ? 0 : roomPop.refuelers.length) < room.memory.jobs.refuelers) {
-                    let body = [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE];
+                    let body = [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE];
                     let res = roomSpawn.createCreep(body, null, { job: "refueler", rooms: { home: homeRoom, work: workRoom } });
                 }
             }
@@ -150,11 +148,11 @@ module.exports.loop = function () {
                 }
 
                 if ((!roomPop.builders ? 0 : roomPop.builders.length) < 1) {
-                    let body = [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
+                    let body = [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
                     let res = roomSpawn.createCreep(body, null, { job: "builder", rooms: { home: homeRoom, work: workRoom } });
                 }
 
-                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 2) {
+                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 1) {
                     let body = [WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
                     let res = roomSpawn.createCreep(body, null, { job: "upgrader", rooms: { home: homeRoom, work: workRoom } });
                 }
@@ -214,8 +212,8 @@ module.exports.loop = function () {
                     let res = roomSpawn.createCreep(body, null, { job: "settler", rooms: { home: homeRoom, work: workRoom } });
                 }
                 
-                if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 4) {
-                    let body = creepFactory.buildBody("CCCCCCCCCCCCCCCCMMMMMMMM");
+                if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 3) {
+                    let body = creepFactory.buildBody("CCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMMWM");
                     let res = roomSpawn.createCreep(body, null, { job: "hauler", rooms: { home: homeRoom, work: workRoom } });
                 }
                 
@@ -244,8 +242,8 @@ module.exports.loop = function () {
                     let res = roomSpawn.createCreep(body, null, { job: "builder", rooms: { home: homeRoom, work: workRoom } });
                 }
 
-                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 2) {
-                    let body = [WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
+                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 1) {
+                    let body = [WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
                     let res = roomSpawn.createCreep(body, null, { job: "upgrader", rooms: { home: homeRoom, work: workRoom } });
                 }
 
@@ -352,14 +350,14 @@ module.exports.loop = function () {
                     return road.structureType === STRUCTURE_ROAD && (road.hits < road.hitsMax); 
                 } 
             });
-            
+
             if (roadToRepair !== null) {
                 tower.repair(roadToRepair);
                 continue;
             }
         }
     }
-    
+
     let fromLink = Game.getObjectById("5897cb82f074eac46eeb087f");
     let toLink = Game.getObjectById("589d95f9063cc27e37648007");
 
@@ -368,7 +366,7 @@ module.exports.loop = function () {
             let result = fromLink.transferEnergy(toLink, Math.min(fromLink.energy, toLink.energyCapacity - toLink.energy));
         }
     }
-    
+
     fromLink = Game.getObjectById("589a4b4fff0e700f15aaa76d");
     toLink = Game.getObjectById("589a431371b628f71a4292d7");
 
@@ -377,7 +375,7 @@ module.exports.loop = function () {
             let result = fromLink.transferEnergy(toLink, Math.min(fromLink.energy, toLink.energyCapacity - toLink.energy));
         }
     }
-    
+
     fromLink = Game.getObjectById("58a82d5c41af22461a2d48f1");
     toLink = Game.getObjectById("58a60d21b73b6a3dedee4dec");
 
@@ -386,4 +384,41 @@ module.exports.loop = function () {
             let result = fromLink.transferEnergy(toLink, Math.min(fromLink.energy, toLink.energyCapacity - toLink.energy));
         }
     }
+
+    fromLink = Game.getObjectById("58b83e84b390cb1a93e25209");
+    toLink = Game.getObjectById("58a60d21b73b6a3dedee4dec");
+
+    if (fromLink && !fromLink.cooldown && toLink) {
+        if (fromLink.energy > 100 && toLink.energy < toLink.energyCapacity / 2) {
+            let result = fromLink.transferEnergy(toLink, Math.min(fromLink.energy, toLink.energyCapacity - toLink.energy));
+        }
+    }
+
+    fromLink = Game.getObjectById("58ae28a20bcb7a605ea55704");
+    toLink = Game.getObjectById("589d95f9063cc27e37648007");
+
+    if (fromLink && !fromLink.cooldown && toLink) {
+        if (fromLink.energy > 100 && toLink.energy < toLink.energyCapacity / 2) {
+            let result = fromLink.transferEnergy(toLink, Math.min(fromLink.energy, toLink.energyCapacity - toLink.energy));
+        }
+    }
+
+    fromLink = Game.getObjectById("58b5206fafc1cf314b4929d4");
+    toLink = Game.getObjectById("589d95f9063cc27e37648007");
+
+    if (fromLink && !fromLink.cooldown && toLink) {
+        if (fromLink.energy > 100 && toLink.energy < toLink.energyCapacity / 2) {
+            let result = fromLink.transferEnergy(toLink, Math.min(fromLink.energy, toLink.energyCapacity - toLink.energy));
+        }
+    }
+
+    fromLink = Game.getObjectById("58b71b04b8a048a430803fa2");
+    toLink = Game.getObjectById("58a15c24e86fa64666de8b75");
+
+    if (fromLink && !fromLink.cooldown && toLink) {
+        if (fromLink.energy > 100 && toLink.energy < toLink.energyCapacity / 2) {
+            let result = fromLink.transferEnergy(toLink, Math.min(fromLink.energy, toLink.energyCapacity - toLink.energy));
+        }
+    }
+
 }

@@ -25,25 +25,20 @@ let constants = {
         "T": TOUGH
     },
 
-    "BODY": {
-        "W3N78": "W3N78"
-    },
     "EXIT": {
-        "W3N79": {
-            "7": { x: 0, y: 22 } // LEFT
+        // Recommended exit locations when going from one room to another.
+        // Keep it to a minimum of entries,  to cases where creeps otherwise would do massive detours.
+        // Better to improve path finding in other ways.
+        "E79N86": {
+            "E79N85": { x: 49, y: 37 }
         },
-        "W4N78": {
-            "7": { x: 0, y: 33 } // LEFT
+        "E77N85": {
+            "E77N89": { x: 19, y: 0 },
+            "E74N89": { x: 19, y: 0 }
         },
-        "W4N79": {
-            "3": { x: 49, y: 22 } // RIGHT
-        },
-        "W5N78": {
-            "1": { x: 17, y: 0 }, // TOP
-            "3": { x: 49, y: 33 } // RIGHT
-        },
-        "W5N79": {
-            "5": { x: 17, y: 49 } // BOTTOM
+        "E77N86": {
+            "E77N89": { x: 31, y: 0 },
+            "E74N89": { x: 31, y: 0 }
         }
     }
 }

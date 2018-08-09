@@ -14,22 +14,26 @@ class SmartCreep {
     constructor(creep) {
         this.creep = creep;
         this.mem = creep.memory;
+
         this.mem.ticksToLive = this.creep.ticksToLive;
         
-        if (!this.mem.homeroom) {
-            this.mem.homeroom = this.creep.room.name;
+        if (!this.mem.rooms) {
+            this.mem.rooms = {};
         }
-        if (!this.mem.workroom) {
-            this.mem.workroom = this.mem.homeroom;
+
+        this.mem.rooms.current = this.creep.room.name;
+
+        if (!this.mem.rooms.home) {
+            this.mem.rooms.home = this.creep.room.name;
         }
+
+        if (!this.mem.rooms.work) {
+            this.mem.rooms.work = this.creep.room.name;
+        }
+
         if (!this.mem.task) {
             this.mem.task = "none";
         } 
-
-        this.mem.rooms = {};
-        this.mem.rooms.current = this.creep.room.name;
-        this.mem.rooms.home = this.mem.homeroom;
-        this.mem.rooms.work = this.mem.workroom;
     }
 
     /**

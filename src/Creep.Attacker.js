@@ -22,6 +22,14 @@ class CreepAttacker extends CreepSoldier {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
+        if (this.Name === "Mila") {
+            let flagAttack = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_RED });
+
+            if (flagAttack) {
+                this.creep.moveTo(flagAttack);
+            }
+            return true;
+        }
 
         // Retreat ?
         if (this.creep.hits < this.creep.hitsMax / 2) {
@@ -34,20 +42,19 @@ class CreepAttacker extends CreepSoldier {
         
         let hostileCreep = this.creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
         if (hostileCreep) {
-            //if (this.Room.Controller && this.Room.Controller.my && this.Room.mem.rampcount > 0) {
-            //    let ramps = hostileCreep.pos.findInRange(FIND_MY_STRUCTURES, 1, { filter: (s) => s.structureType === STRUCTURE_RAMPART })
-            //    
-            //    if (ramps.length > 0) {
-            //        if (!this.creep.pos.isEqualTo(ramps[0])) {
-            //           this.creep.moveTo(ramps[0]);
-            //        }
-            //    }
-            //    this.creep.attack(hostileCreep);
-            //} 
-            //else {
+            if (this.Room.Controller && this.Room.Controller.my && this.Room.mem.rampcount > 0) {
+                let ramps = hostileCreep.pos.findInRange(FIND_MY_STRUCTURES, 1, { filter: (s) => s.structureType === STRUCTURE_RAMPART })
+                if (ramps.length > 0) {
+                    if (!this.creep.pos.isEqualTo(ramps[0])) {
+                       this.creep.moveTo(ramps[0]);
+                    }
+                }
+                this.creep.attack(hostileCreep);
+            } 
+            else {
                 this.creep.attack(hostileCreep);
                 this.creep.moveTo(hostileCreep);
-            //}
+            }
             return true;
         }
 
@@ -59,11 +66,6 @@ class CreepAttacker extends CreepSoldier {
                 let moveResult = this.creep.moveTo(enemyStructure);
             }
             return true;
-        }
-
-        let weakWall = Game.getObjectById("5883395fb8c1723d1a6eba55");
-        if (weakWall) {
-            this.creep.attack(weakWall);
         }
 
         // Attack ?

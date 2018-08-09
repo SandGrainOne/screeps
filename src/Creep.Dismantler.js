@@ -34,27 +34,40 @@ class CreepDismantler extends CreepWorker {
         if (this.IsWorking) {
             if (this.moveOut()) {
                 if (carry >= this.creep.carryCapacity) {
-                    this.IsWorking = false;
+                    //this.IsWorking = false;
                 }
-
-                let structure = this.creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, { 
-                    filter: (s) => s.structureType === STRUCTURE_EXTRACTOR
+        
+                let tower = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
+                    filter: function (structure) { 
+                        return structure.structureType === STRUCTURE_TOWER; 
+                    } 
                 });
-                if (structure) {
-                    if (this.creep.dismantle(structure) === ERR_NOT_IN_RANGE) {
-                        this.creep.moveTo(structure);
+
+                if (tower) {
+                    if (this.creep.dismantle(tower) === ERR_NOT_IN_RANGE) {
+                        this.creep.moveTo(tower);
+                    }
+                    return true;
+                } 
+
+                let spawn = this.creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, { 
+                    filter: (s) => s.structureType === STRUCTURE_SPAWN
+                });
+                if (spawn) {
+                    if (this.creep.dismantle(spawn) === ERR_NOT_IN_RANGE) {
+                        this.creep.moveTo(spawn);
                     }
                     return true;
                 }
         
-                let container = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                    filter: function (structure) { 
-                        return structure.structureType === STRUCTURE_CONTAINER; 
+                let building = this.creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, { 
+                    filter: function (s) { 
+                        return s.structureType !== STRUCTURE_CONTROLLER; 
                     } 
                 });
-                if (container) {
-                    if (this.creep.dismantle(container) === ERR_NOT_IN_RANGE) {
-                        this.creep.moveTo(container);
+                if (building) {
+                    if (this.creep.dismantle(building) === ERR_NOT_IN_RANGE) {
+                        this.creep.moveTo(building);
                     }
                     return true;
                 } 
