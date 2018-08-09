@@ -243,16 +243,42 @@ class CreepWorker extends CreepBase {
 
         let targetSpace = 0;
         if (target.storeCapacity) {
-            // Containers, Storage, Terminal, etc
+            // Containers, Storage, Terminal, etc. Can hold anything. Resource type irrelevant
             targetSpace = target.storeCapacity - _.sum(target.store);
         }
-        else if (target.energyCapacity) {
-            // Links, Labs, Towers, etc
-            targetSpace = target.energyCapacity - target.energy;
+        else {
+            if (resourceType === RESOURCE_ENERGY) {
+                if (target.energyCapacity) {
+                    // Links, Labs (energy), Spawns, Towers, etc. 
+                    targetSpace = target.energyCapacity - target.energy;
+                }
+            }
+            else if (resourceType === RESOURCE_POWER) {
+                if (target.powerCapacity) {
+                    // PowerSpawn
+                    targetSpace = target.powerCapacity - target.power;
+                }
+            }
+            else {
+                if (target.mineralCapacity) {
+                    // Labs (mineral)
+                    if (target.mineralType === null || target.mineralType === resourceType) {
+                        targetSpace = target.mineralCapacity - target.mineralAmount;
+                    }
+                }
+            }
         }
 
         let carriedAmount = this.creep.carry[resourceType];
         let amountTransfered = Math.min(targetSpace, carriedAmount);
+
+        if (this.Name === " ") {
+            console.log("target.structureType: " + target.structureType);
+            console.log("resourceType: " + resourceType);
+            console.log("targetSpace: " + targetSpace);
+            console.log("carriedAmount: " + carriedAmount);
+            console.log("amountTransfered: " + amountTransfered);
+        }
 
         if (amountTransfered <= 0) {
             return ERR_NOT_ENOUGH_RESOURCES;
@@ -288,9 +314,25 @@ class CreepWorker extends CreepBase {
             // Containers, Storage, Terminal, etc
             amountStored = target.store[resourceType];
         }
-        else if (target.energy) {
-            // Links, Labs, Towers, etc
-            amountStored = target.energy;
+        else {
+            if (resourceType === RESOURCE_ENERGY) {
+                // Labs(energy), Links, Spawns etc.
+                amountStored = target.energy;
+            }
+            else if (resourceType === RESOURCE_POWER) {
+                if (target.power) {
+                    // PowerSpawn
+                    amountStored = target.power;
+                }
+            }
+            else {
+                if (target.mineralAmount) {
+                    // Labs (mineral)
+                    if (target.mineralType !== null && target.mineralType === resourceType) {
+                        amountStored = target.mineralAmount;
+                    }
+                }
+            }
         }
 
         let restCapacity = this._capacity - this._carry - this._energy;

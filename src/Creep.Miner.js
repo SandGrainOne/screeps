@@ -17,26 +17,33 @@ class CreepMiner extends CreepWorker {
     }
 
     get ResourceNode() {
-        if (this.mem.resourceid) {
-            // Renew reservation.
-            if (this.Room.reserveTarget(this.mem.resourceid, this.Name)) {
-                return Game.getObjectById(this.mem.resourceid);
+        if (this.Job === "miner") {
+            if (this.mem.resourceid) {
+                let source = Game.getObjectById(this.mem.resourceid);
+                if (source && (source.energy > 0 || (source.ticksToRegeneration || 300) < 50)) {
+                    if (this.Room.reserveTarget(source.id, this.Name)) {
+                        return source;
+                    }
+                }
             }
-        }
-        if (this.Room.Resources.Sources.length > 0) {
-            for (let source of this.Room.Resources.Sources) {
-                if (this.Room.reserveTarget(source.id, this.Name)) {
-                    this.mem.resourceid = source.id;
-                    return source;
+
+            if (this.Room.Resources.Sources.length > 0) {
+                for (let source of this.Room.Resources.Sources) {
+                    if (source && (source.energy > 0 || (source.ticksToRegeneration || 300) < 50)) {
+                        if (this.Room.reserveTarget(source.id, this.Name)) {
+                            this.mem.resourceid = source.id;
+                            return source;
+                        }
+                    }
                 }
             }
         }
-        //if (this.Room.Resources.Minerals) {
-        //    if (this.Room.reserveTarget(this.Room.Resources.Minerals.id, this.Name)) {
-        //        this.mem.resourceid = this.Room.Resources.Minerals.id;
-        //        return this.Room.Resources.Minerals;
-        //    }
-        //}
+        else if (this.Job === "mineralminer") {
+            if (this.Room.Resources.Minerals) {
+                return this.Room.Resources.Minerals;
+            }
+        }
+
         return null;
     }
     

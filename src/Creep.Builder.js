@@ -116,7 +116,7 @@ class CreepBuilder extends CreepWorker {
         }
         else {
 
-            if (this.AtHome || this.AtWork) {
+            if (!this.Room.Storage && (this.AtHome || this.AtWork)) {
                 if (!moveTarget && this.Room.Containers.length > 0) {
                     let container = this.creep.pos.findClosestByRange(this.Room.Containers);
                     if (container && container.store.energy > 0) {

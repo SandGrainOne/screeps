@@ -1,3 +1,5 @@
+Empire.createCreep("settler", null, "Askim", "MMLL", "E77N88", "E77N89")
+
 Game.spawns.Askim.createCreep([CLAIM, MOVE, MOVE, MOVE, MOVE], null, { job: "settler", workroom: "E79N86", homeroom: "E79N86" })
 
 Game.spawns.Askim.createCreep([TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE], null, { job: "attacker", rooms: { work: "E76N89", home: "E76N89" } });

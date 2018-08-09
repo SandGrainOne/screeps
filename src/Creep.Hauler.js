@@ -69,8 +69,8 @@ class CreepHauler extends CreepWorker {
             }
         }
 
-        if (this.AtHome && this.NextCarry > 0) {
-            if (this.Room.Links.Inputs.length > 0) {
+        if (this.AtHome) {
+            if (this.EndEnergy > 0 && this.Room.Links.Inputs.length > 0) {
                 let links = this.creep.pos.findInRange(this.Room.Links.Inputs, 1);
                 if (links.length > 0) {
                     for (let link of links) {
@@ -144,32 +144,39 @@ class CreepHauler extends CreepWorker {
             }
             else {
                 if (!moveTarget) {
-                    if (this.Room.Links.Inputs.length > 0) {
-                        let links = this.creep.pos.findInRange(this.Room.Links.Inputs, 1);
-                        if (links.length > 0) {
-                            for (let link of links) {
-                                if (link.energy < link.energyCapacity) {
-                                    moveTarget = link;
-                                    break;
-                                }
+                    let range = 50;
+                    // Ensure the creep only carry energy. No need to seek out a link otherwise.
+                    if (this.EndEnergy > 0 && this.EndEnergy === this.NextCarry && this.Room.Links.Inputs.length > 0) {
+                        for (let link of this.Room.Links.Inputs) {
+                            if (link.energy >= link.energyCapacity) {
+                                continue;
                             }
+
+                            let rangeToLink = this.creep.pos.getRangeTo(link);
+                            if (range > rangeToLink) {
+                                range = rangeToLink;
+                                moveTarget = link;
+                            }
+                        }
+                    }
+
+                    if (this.Room.Storage) {
+                        let rangeToStorage = this.creep.pos.getRangeTo(this.Room.Storage);
+                        if (range > 10 || range >= rangeToStorage) {
+                            moveTarget = this.Room.Storage;
                         }
                     }
                 }
 
                 if (!moveTarget) {
-                    if (this.Room.Storage && !this.creep.pos.isNearTo(this.Room.Storage)) {
-                        moveTarget = this.Room.Storage;
-                    }
-                }
-
-                if (!moveTarget) {
                     // This should only happen early on before there is a temporary or real storage.
-                    // The this.Extensions array only holds extensions with available space.
-                    let extension = this.creep.pos.findClosestByRange(this.Extensions);
-                    if (extension) {
-                        if (!this.creep.pos.isNearTo(extension)) {
-                            moveTarget = extension;
+                    // The this.Extensions array only holds extensions and spawns with available space.
+                    if (this.EndEnergy > 0 && this.Room.Extensions.length > 0) {
+                        let extension = this.creep.pos.findClosestByRange(this.Room.Extensions);
+                        if (extension) {
+                            if (!this.creep.pos.isNearTo(extension)) {
+                                moveTarget = extension;
+                            }
                         }
                     }
                 }

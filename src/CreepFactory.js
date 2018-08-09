@@ -39,6 +39,7 @@ class CreepFactory {
 
         switch (job) {
             case 'miner':
+            case 'mineralminer':
                 smartCreep = new CreepMiner(creep);
                 break;
             case 'hauler':

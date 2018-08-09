@@ -14,6 +14,8 @@ let constants = {
     "ROOM_STATE_INVADED": "invaded",
     "ROOM_STATE_ATTACKED": "attacked",
 
+    "RETIREMENT": 10,
+
     "BODY_PART_CODES": {
         "M": MOVE,
         "W": WORK,
@@ -46,6 +48,9 @@ let constants = {
         },
         "E78N89": {
             "E77N88": { x: 0, y: 39 }
+        },
+        "E77N88": {
+            "E78N89": { x: 39, y: 0 }
         }
     }
 }

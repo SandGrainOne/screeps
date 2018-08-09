@@ -89,12 +89,21 @@ class Empire {
                 continue;
             }
 
-            let job = creep.memory.job;
-            if (job.name) {
-                job = job.name;
+            let smartCreep = this._creepFactory.wrap(creep);
+            this._allCreeps.push(smartCreep);
+
+            smartCreep.Room = this.getRoom(creep.room.name);
+            smartCreep.HomeRoom = this.getRoom(creep.memory.rooms.home);
+            smartCreep.WorkRoom = this.getRoom(creep.memory.rooms.work);
+
+            if (smartCreep.IsRetired) {
+                // Don't count creeps that are retired and about to die.
+                continue;
             }
 
-            let workroom = creep.memory.rooms.work;
+            let job = smartCreep.Job;
+            let workroom = smartCreep.WorkRoom.Name;
+
             if (!this._mem.creeps[workroom]) {
                 this._mem.creeps[workroom] = {};
             }
@@ -102,9 +111,6 @@ class Empire {
                 this._mem.creeps[workroom][job + 's'] = [];
             }
             this._mem.creeps[workroom][job + 's'].push(creepName);
-
-            let smartCreep = this._creepFactory.wrap(creep);
-            this._allCreeps.push(smartCreep);
 
             if (!this._creeps[workroom]) {
                 this._creeps[workroom] = {};
@@ -114,10 +120,6 @@ class Empire {
                 this._creeps[workroom][job + 's'] = [];
             }
             this._creeps[workroom][job + 's'].push(smartCreep);
-
-            smartCreep.Room = this.getRoom(creep.room.name);
-            smartCreep.HomeRoom = this.getRoom(creep.memory.rooms.home);
-            smartCreep.WorkRoom = this.getRoom(creep.memory.rooms.work);
         }
     }
 

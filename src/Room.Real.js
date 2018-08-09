@@ -159,15 +159,11 @@ class RoomReal extends RoomBase {
                     }
                 }
             }
-            if (this.mem.resources.minerals) {
+            if (this.mem.resources.minerals && this.mem.resources.extractor) {
                 let mineralNode = Game.getObjectById(this.mem.resources.minerals);
-                if (mineralNode) {
-                    this.Resources.Minerals = mineralNode;
-                }
-            }
-            if (this.mem.resources.extractor) {
                 let extractor = Game.getObjectById(this.mem.resources.extractor);
-                if (extractor) {
+                if (mineralNode && mineralNode.mineralAmount > 0 && extractor) {
+                    this.Resources.Minerals = mineralNode;
                     this.Resources.Extractor = extractor;
                 }
             }
@@ -344,10 +340,16 @@ class RoomReal extends RoomBase {
             upgraders: 0,
             haulers: 0,
             miners: 0,
+            mineralminers: 0,
             refuelers: 0
         };
 
         this.room.memory.jobs.miners = this.mem.resources.sources.length;
+
+        if (this.Resources.Minerals) {
+            this.room.memory.jobs.mineralminers = 1;
+            this.room.memory.jobs.haulers = 1;
+        }
 
         if (this.room.controller && this.room.controller.reservation) {
             if (this.room.controller.reservation.username === C.USERNAME && this.room.controller.reservation.ticksToEnd < 4000){
@@ -424,7 +426,7 @@ class RoomReal extends RoomBase {
 
             let rampartToRepair = tower.pos.findClosestByRange(FIND_STRUCTURES, { 
                 filter: (s) => { 
-                    return s.structureType === STRUCTURE_RAMPART && (s.hits < 250000);
+                    return s.structureType === STRUCTURE_RAMPART && (s.hits < 300000);
                 } 
             });
 
@@ -435,7 +437,7 @@ class RoomReal extends RoomBase {
 
             let wallToRepair = tower.pos.findClosestByRange(FIND_STRUCTURES, { 
                 filter: (wall) => { 
-                    return wall.structureType === STRUCTURE_WALL && (wall.hits < 250000);
+                    return wall.structureType === STRUCTURE_WALL && (wall.hits < 300000);
                 } 
             });
 
@@ -464,6 +466,34 @@ class RoomReal extends RoomBase {
             if (roadToRepair !== null) {
                 tower.repair(roadToRepair);
                 continue;
+            }
+        }
+    }
+
+    linking() {
+        if (this.Links.Inputs.length === 0) {
+            return;
+        }
+
+        let roomLinks = [];
+        if (this.Links.Controller) {
+            roomLinks.push(this.Links.Controller);
+        }
+        if (this.Links.Storage) {
+            roomLinks.push(this.Links.Storage);
+        }
+
+        for (let inputLink of this.Links.Inputs) {
+            if (inputLink.cooldown > 0 || inputLink.energy < 100) {
+                continue;
+            }
+
+            for (let roomLink of roomLinks) {
+                if (roomLink.energy < roomLink.energyCapacity / 2) {
+                    let amount = Math.min(inputLink.energy, roomLink.energyCapacity - roomLink.energy)
+                    let res = inputLink.transferEnergy(roomLink, amount);
+                    break;
+                }
             }
         }
     }

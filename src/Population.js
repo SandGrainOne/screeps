@@ -23,6 +23,12 @@ class Population {
         for (let creepName in Game.creeps) {
 
             let creep = Game.creeps[creepName];
+
+            if (creep.memory.ticksToLive < creep.memory.spawnTime) {
+                // Don't count creeps that are retired and about to die.
+                continue;
+            }
+
             let workroom = creep.memory.rooms.work;
 
             if (!Memory.population[workroom]) {

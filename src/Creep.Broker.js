@@ -56,7 +56,7 @@ class CreepBroker extends CreepWorker {
         }
 
         if (this.NextCarry > 0) {
-            if (storage && storage.store.energy < 400000 && this.creep.pos.isNearTo(storage)) {
+            if (storage && storage.store.energy < 500000 && this.creep.pos.isNearTo(storage)) {
                 this.transfer(storage, RESOURCE_ENERGY);
             }
         }

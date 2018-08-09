@@ -18,6 +18,18 @@ class CreepBase {
         this.mem = creep.memory;
 
         this.mem.ticksToLive = this.creep.ticksToLive;
+        this.mem.spawnTime = this.creep.body.length * 3;
+
+        // Ensure that there is memory space for job related information.
+        if (!this.mem.job) {
+            this.mem.job = {};
+        }
+        if (!this.mem.job.name) {
+            this.mem.job.name = "unassigned";
+        }
+        if (!this.mem.job.task) {
+            this.mem.job.task = "unassigned";
+        }
 
         // Make sure the creep has been given rooms to work in.
         if (!this.mem.rooms) {
@@ -37,6 +49,20 @@ class CreepBase {
      */
     get Name() {
         return this.creep.name;
+    }
+
+    /**
+     * Gets the name of the job assigned to the creep.
+     */
+    get Job() {
+        return this.mem.job.name;
+    }
+
+    /**
+     * Gets a value indicating whether the creep is retired.
+     */
+    get IsRetired() {
+        return this.mem.ticksToLive < (this.mem.spawnTime + this.mem.timeToWork + C.RETIREMENT);
     }
 
     /**
@@ -63,7 +89,11 @@ class CreepBase {
         if (this.creep.spawning) {
             return true;
         }
-        
+
+        if(!this.mem.timeToWork && this.AtWork) {
+            this.mem.timeToWork = CREEP_LIFE_TIME - this.mem.ticksToLive;
+        }
+
         if (this.renew()) {
             return true;
         }
