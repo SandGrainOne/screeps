@@ -1,12 +1,12 @@
 'use strict';
 
-let CreepSoldier = require('Creep.Soldier');
+let CreepWorker = require('Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for a settler.
  * Primary purpose of these creeps are to claim or reserve a controller in other rooms.
  */
-class CreepSettler extends CreepSoldier {   
+class CreepSettler extends CreepWorker {
     /**
      * Initializes a new instance of the CreepSettler class with the specified creep.
      * 
@@ -22,30 +22,38 @@ class CreepSettler extends CreepSoldier {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
-        if (this.moveOut()) {
-            if (this.Name === "Charlotte") {
-                if (!this.creep.pos.isNearTo(this.creep.room.controller)) {
-                    this.creep.moveTo(this.creep.room.controller);
+        if (this.AtWork) {
+            if (this.Room.Controller && this.creep.pos.isNearTo(this.Room.Controller)) {
+                if (this.Name === " ") {
+                    console.log("Hi, I am  .");
+                    //this.creep.claimController(this.Room.Controller);
                 }
                 else {
-                    let result = this.creep.signController(this.creep.room.controller, "Mine, pls :)");
-                    console.log(result);
-                }
-                //this.creep.say("Claim!");
-                //if (this.creep.claimController(this.creep.room.controller)) {
-                //    this.creep.moveTo(this.creep.room.controller);
-                //}
-            }
-            else {
-                if (this.creep.reserveController(this.creep.room.controller)) {
-                    this.creep.moveTo(this.creep.room.controller);
+                    this.creep.reserveController(this.Room.Controller);
                 }
             }
-            
-            this.creep.signController(this.creep.room.controller, "");
+        }
+
+        if (!this.AtWork) {
+            this.moveToRoom(this.WorkRoom);
+        }
+        else {
+            if (this.Room.Controller && !this.creep.pos.isNearTo(this.Room.Controller)) {
+                this.moveTo(this.Room.Controller);
+            }
         }
 
         return true;
+    }
+
+    /**
+     * Perform settler specific retreat logic. Because the lifespan of a settler is so short it might
+     * be best if it stays at the controller and work instead of retreating.
+     * 
+     * @returns {Boolean} true if the retreat was required and the creep is on the move
+     */
+    retreat() {
+        return false;
     }
 }
 

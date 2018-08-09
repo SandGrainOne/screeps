@@ -142,49 +142,6 @@ class CreepBase {
     }
 
     /**
-     * The creep will move to its home room.
-     * 
-     * @returns {object} true if the creep is in the home room already.
-     */
-    moveHome(){
-        if (this.moveToRoomOld(this.HomeRoom)) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * The creep will move to its work room.
-     * 
-     * @param {boolean} sneak - Don't move into the room, but stay on the exit.
-     * 
-     * @returns {object} true if the creep is in the work room already.
-     */
-    moveOut(sneak) {
-        if (this.moveToRoomOld(this.WorkRoom)) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * The creep will move to the given room. Use this if the creep don't have a full RoomPosition.
-     * 
-     * @param {RoomBase} room - The room that the creep want to move to.
-     * 
-     * @returns {object} true if the creep is in the given room already.
-     */
-    moveToRoomOld(room) {
-        if (room.Name !== this.Room.Name) {
-            let exitDir = this.creep.room.findExitTo(room.Name);
-            let exit = this.creep.pos.findClosestByRange(exitDir);
-            this.moveTo(exit);
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * The creep will move to the given room. Use this if the creep don't have a full RoomPosition.
      * 
      * @param {RoomBase} room - The room that the creep want to move to.
@@ -197,7 +154,7 @@ class CreepBase {
             let coords = C.EXIT[this.Room.Name][room.Name];
             return this.moveTo(new RoomPosition(coords.x, coords.y, this.Room.Name));
         }
-        
+
         let exitDir = this.creep.room.findExitTo(room.Name);
         let exit = this.creep.pos.findClosestByRange(exitDir);
         return this.moveTo(exit);
@@ -229,7 +186,9 @@ class CreepBase {
             visualizePathStyle: { fill: 'transparent', stroke: '#fff', lineStyle: 'dashed', strokeWidth: 0.1, opacity: 0.2 } 
         }
 
-        return this.creep.moveTo(pos, ops);
+        let res = this.creep.moveTo(pos, ops);
+        //if (pos.roomName === "E80N85") console.log("moveTo(" +JSON.stringify(pos) + ") = " + res);
+        return res;
     }
 }
 

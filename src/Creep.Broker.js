@@ -31,6 +31,7 @@ class CreepBroker extends CreepWorker {
 
         let storage = this.Room.Storage;
         let storageLink = this.Room.Links.Storage;
+        let terminal = this.Room.Terminal;
 
         if (!storage || !storageLink) {
             this.creep.say("todo?");
@@ -38,6 +39,10 @@ class CreepBroker extends CreepWorker {
 
         if (storageLink && this.creep.pos.isNearTo(storageLink)) {
             this.creep.withdraw(storageLink, RESOURCE_ENERGY);
+        }
+
+        if (terminal && this.creep.pos.isNearTo(storage) && (!storage || storage.store.energy > 400000)) {
+            this.creep.transfer(storage, RESOURCE_ENERGY);
         }
 
         if (storage && this.creep.pos.isNearTo(storage)) {
@@ -50,6 +55,10 @@ class CreepBroker extends CreepWorker {
 
         if (storageLink && !this.creep.pos.isNearTo(storageLink)) {
             this.moveTo(storageLink);
+        }
+
+        if (terminal && !this.creep.pos.isNearTo(terminal)) {
+            this.moveTo(terminal);
         }
 
         return true;

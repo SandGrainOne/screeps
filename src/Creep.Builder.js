@@ -22,94 +22,116 @@ class CreepBuilder extends CreepWorker {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
-        if (this.Task === "charging") {
-            if (this.creep.carry.energy < this.creep.carryCapacity) {
-                if (!this.findStoredEnergy()) {
-                    if (this.moveHome()) {
-                        let source = this.creep.pos.findClosestByPath(FIND_SOURCES);
-                        
-                        if (source !== null) {
-                            if (this.creep.harvest(source) === ERR_NOT_IN_RANGE) {
-                                this.creep.moveTo(source);
-                            }
+        let performedWork = false;
+
+        if (this.AtWork && !performedWork && this.StartEnergy > 0) {
+            if (this.Room.BuildSites.length > 0) {
+                for (let buildSite of this.Room.BuildSites) {
+                    let rangeToBuildSite = this.creep.pos.getRangeTo(buildSite);
+                    if (rangeToBuildSite <= 3) {
+                        if (this.build(buildSite) === OK) {
+                            performedWork = true;
+                            break;
                         }
                     }
                 }
             }
-            else {
-                this.Task = "building";
-            }
-        }
-        else {
-            if (this.creep.carry.energy > 0) {
-                if (this.moveOut()) {
-                    if (this.Room.Storage && this.Room.Storage.structureType === STRUCTURE_CONTAINER) {
-                        if (this.Room.Storage.hits < this.Room.Storage.hitsMax) {
-                            if (this.creep.repair(this.Room.Storage) === ERR_NOT_IN_RANGE) {
-                                this.creep.moveTo(this.Room.Storage);
-                            }
-                            return true;
+            if (!performedWork && this.Room.Repairs.length > 0) {
+                for (let repairs of this.Room.Repairs) {
+                    let rangeToRepairs = this.creep.pos.getRangeTo(repairs);
+                    if (rangeToRepairs <= 3) {
+                        if (this.repair(repairs) === OK) {
+                            performedWork = true;
+                            break;
                         }
-                    }
-                    
-                    let target = this.creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
-
-                    if (target !== null) {                        
-                        if (this.creep.build(target) === ERR_NOT_IN_RANGE) {
-                            this.creep.moveTo(target);
-                        }
-                        
-                        return true;
-                    }
-                    
-                    let roadToRepair = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                        filter: function (road) { 
-                            return road.structureType === STRUCTURE_ROAD && (road.hits < road.hitsMax); 
-                        } 
-                    });
-                    
-                    if (roadToRepair !== null) {
-                        if (this.creep.repair(roadToRepair) === ERR_NOT_IN_RANGE) {
-                            this.creep.moveTo(roadToRepair);
-                        }
-                        
-                        return true;
-                    }
-
-                    let rampartToRepair = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                        filter: function (wall) { 
-                            return wall.structureType === STRUCTURE_RAMPART && (wall.hits < 150000); 
-                        } 
-                    });
-                    
-                    if (rampartToRepair !== null) {
-                        if (this.creep.repair(rampartToRepair) === ERR_NOT_IN_RANGE) {
-                            this.creep.moveTo(rampartToRepair);
-                        }
-
-                        return true;
-                    } 
-
-                    let wallToRepair = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                        filter: function (wall) { 
-                            return wall.structureType === STRUCTURE_WALL && (wall.hits < 150000); 
-                        } 
-                    });
-                    
-                    if (wallToRepair !== null) {
-                        if (this.creep.repair(wallToRepair) === ERR_NOT_IN_RANGE) {
-                            this.creep.moveTo(wallToRepair);
-                        }
-
-                        return true;
                     }
                 }
-            }
-            else {
-                this.Task = "charging";
             }
         }
         
+        let collectedEnergy = false;
+
+        if (this.AtHome && !collectedEnergy && this.StartEnergy < this.Capacity) {
+            let storage = this.Room.Storage;
+            if (storage && storage.store.energy > 0 && this.creep.pos.isNearTo(storage)) {
+                this.withdraw(storage, RESOURCE_ENERGY);
+            }
+        }
+
+        if (this.AtWork && !collectedEnergy && this.StartEnergy < this.Capacity) {
+            if (this.Room.Resources.Sources.length > 0) {
+                let sources = this.creep.pos.findInRange(this.Room.Resources.Sources, 1);
+                if (sources[0] && this.creep.pos.isNearTo(sources[0])) {
+                    this.harvest(sources[0]);
+                }
+            }
+        }
+
+        if (this.Name === " ") {
+            console.log("StartCarry: " + this.StartCarry);
+            console.log("EndCarry  : " + this.EndCarry);
+        }
+
+        if (this.EndEnergy >= this.Capacity) {
+            this.IsWorking = true;
+        }
+
+        if (this.EndEnergy <= 0) {
+            this.IsWorking = false;
+        }
+
+        let moveTarget = null;
+        
+        if (this.IsWorking) {
+            if (!this.AtWork) {
+                this.moveToRoom(this.WorkRoom);
+            }
+            else {
+                if (!moveTarget) {
+                    if (this.Room.BuildSites.length > 0) {
+                        let site = this.creep.pos.findClosestByRange(this.Room.BuildSites);
+                        if (site) {
+                            if (!this.creep.pos.isNearTo(site)) {
+                                moveTarget = site;
+                            }
+                        }
+                    }
+                }
+                
+                if (!moveTarget) {
+                    let repairs = this.creep.pos.findClosestByRange(this.Room.Repairs);
+                    if (repairs) {
+                        if (this.creep.pos.getRangeTo(repairs) > 3) {
+                            moveTarget = repairs;
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            if (!this.AtHome) {
+                this.moveToRoom(this.HomeRoom);
+            }
+            else {
+                if (!moveTarget) {
+                    let storage = this.Room.Storage;
+                    if (storage && storage.store.energy > 0 && !this.creep.pos.isNearTo(storage)) {
+                        moveTarget = storage;
+                    }
+                }
+                if (!moveTarget) {
+                    let source = this.creep.pos.findClosestByPath(this.Room.Resources.Sources);
+                    if (source && !this.creep.pos.isNearTo(source)) {
+                        moveTarget = source;
+                    }
+                }
+            }
+        }
+
+        if (moveTarget) {
+            this.moveTo(moveTarget);
+        }
+
         return true;
     }
 }

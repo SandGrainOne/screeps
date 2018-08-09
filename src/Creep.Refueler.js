@@ -43,9 +43,17 @@ class CreepRefueler extends CreepWorker {
 
         if (this.Room.Extensions.length > 0) {
             // The extensions array hold only extensions and spawns with space for energy.
-            let extensions = this.creep.pos.findInRange(this.Extensions, 1);
+            let extensions = this.creep.pos.findInRange(this.Room.Extensions, 1);
             if (extensions.length > 0) {
                 let result = this.creep.transfer(extensions[0], RESOURCE_ENERGY);
+            }
+        }
+
+        if (this.Room.Labs.Refuel.length > 0) {
+            // The extensions array hold only extensions and spawns with space for energy.
+            let labs = this.creep.pos.findInRange(this.Room.Labs.Refuel, 1);
+            if (labs.length > 0) {
+                let result = this.creep.transfer(labs[0], RESOURCE_ENERGY);
             }
         }
 
@@ -73,13 +81,9 @@ class CreepRefueler extends CreepWorker {
                 return true;
             }
 
-            let extension = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-                filter: function (object) { 
-                    return object.structureType === STRUCTURE_EXTENSION && (object.energy < object.energyCapacity); 
-                } 
-            });
-            if (extension != undefined) {
-                if (this.creep.transfer(extension, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+            let extension = this.creep.pos.findClosestByRange(this.Room.Extensions);
+            if (extension) {
+                if (!this.creep.pos.isNearTo(extension)) {
                     this.creep.moveTo(extension);
                 }
                 return true;
@@ -94,6 +98,14 @@ class CreepRefueler extends CreepWorker {
             if (tower) {
                 if (this.creep.transfer(tower, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                     this.creep.moveTo(tower);
+                }
+                return true;
+            }
+
+            let lab = this.creep.pos.findClosestByRange(this.Room.Labs.Refuel);
+            if (lab) {
+                if (!this.creep.pos.isNearTo(lab)) {
+                    this.creep.moveTo(lab);
                 }
                 return true;
             }

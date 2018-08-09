@@ -16,7 +16,7 @@ class CreepMiner extends CreepWorker {
         super(creep);
     }
 
-    get Source() {
+    get ResourceNode() {
         if (this.mem.resourceid) {
             // Renew reservation.
             if (this.Room.reserveTarget(this.mem.resourceid, this.Name)) {
@@ -29,6 +29,12 @@ class CreepMiner extends CreepWorker {
                     this.mem.resourceid = source.id;
                     return source;
                 }
+            }
+        }
+        if (this.Room.Resources.Minerals) {
+            if (this.Room.reserveTarget(this.Room.Resources.Minerals.id, this.Name)) {
+                this.mem.resourceid = this.Room.Resources.Minerals.id;
+                return this.Room.Resources.Minerals;
             }
         }
         return null;
@@ -74,9 +80,16 @@ class CreepMiner extends CreepWorker {
 
         // The creep can't both repair/build and harvest in the same tick.
         if (!performedWork && this.AtWork && this.EndCarry <= this.Capacity) {
-            let source = this.Source;
-            if (source && this.creep.pos.isNearTo(source)) {
-                this.harvest(source);
+            let resourceNode = this.ResourceNode;
+            if (resourceNode && this.creep.pos.isNearTo(resourceNode)) {
+                if (resourceNode.mineralType) {
+                    if (this.Room.Resources.Extractor && this.Room.Resources.Extractor.cooldown <= 0) {
+                        this.harvest(resourceNode);
+                    }
+                } 
+                else {
+                    this.harvest(resourceNode);
+                }
             }
         }
 
@@ -136,14 +149,14 @@ class CreepMiner extends CreepWorker {
                 this.moveToRoom(this.WorkRoom);
             }
             else {
-                let source = this.Source;
-                if (source) {
-                    if (!this.creep.pos.isNearTo(source)) {
-                        moveTarget = source;
+                let resourceNode = this.ResourceNode;
+                if (resourceNode) {
+                    if (!this.creep.pos.isNearTo(resourceNode)) {
+                        moveTarget = resourceNode;
                     }
                     else if (!standsOnContainer && this.Room.Containers.length > 0){
                         // Need to reposition to on top of the container.
-                        let containers = source.pos.findInRange(this.Room.Containers, 1);
+                        let containers = resourceNode.pos.findInRange(this.Room.Containers, 1);
                         if (containers.length === 1) {
                             moveTarget = containers[0];
                         }

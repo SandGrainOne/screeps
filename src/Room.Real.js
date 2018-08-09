@@ -25,6 +25,13 @@ class RoomReal extends RoomBase {
         return null;
     }
 
+    get Terminal() {
+        if (this.room.terminal) {
+            return this.room.terminal;
+        }
+        return null;
+    }
+
     reserveTarget(targetId, creepName) {
         if (!this.mem.targets[targetId]) {
             this.mem.targets[targetId] = { creepName: creepName, ttl: 2 };
@@ -52,7 +59,6 @@ class RoomReal extends RoomBase {
         // Create a quick access array of all the room sources.
         this.Resources = {};
         this.Resources.Sources = [];
-        this.Resources.Minerals = [];
         if (this.mem.resources) {
             if (this.mem.resources.sources) {
                 for (let sourceId of this.mem.resources.sources) {
@@ -63,11 +69,15 @@ class RoomReal extends RoomBase {
                 }
             }
             if (this.mem.resources.minerals) {
-                for (let mineralId of this.mem.resources.minerals) {
-                    let mineral = Game.getObjectById(mineralId);
-                    if (mineral) {
-                        this.Resources.Minerals.push(mineral);
-                    }
+                let mineralNode = Game.getObjectById(this.mem.resources.minerals);
+                if (mineralNode) {
+                    this.Resources.Minerals = mineralNode;
+                }
+            }
+            if (this.mem.resources.extractor) {
+                let extractor = Game.getObjectById(this.mem.resources.extractor);
+                if (extractor) {
+                    this.Resources.Extractor = extractor;
                 }
             }
         }
@@ -123,20 +133,6 @@ class RoomReal extends RoomBase {
             }
         }
 
-        // Create a quick access array for towers.
-        this.Towers = [];
-        if (this.mem.structures && this.mem.structures.towers) {
-            for (let towerId of this.mem.structures.towers) {
-                let tower = Game.getObjectById(towerId);
-                if (tower) {
-                    this.Towers.push(tower);
-                }
-            }
-            if (this.Towers.length > 1) {
-                this.Towers.sort(function(a, b) { return a.energy - b.energy });
-            }
-        }
-
         // Create a quick access property for the real or temporary storage.
         this.Storage = null;
         if (this.room.storage) {
@@ -152,6 +148,20 @@ class RoomReal extends RoomBase {
             let tempStorage = Game.getObjectById(this.mem.tempstorage);
             if (tempStorage) {
                 this.Storage =  tempStorage;
+            }
+        }
+
+        // Create a quick access array for towers.
+        this.Towers = [];
+        if (this.mem.structures && this.mem.structures.towers) {
+            for (let towerId of this.mem.structures.towers) {
+                let tower = Game.getObjectById(towerId);
+                if (tower) {
+                    this.Towers.push(tower);
+                }
+            }
+            if (this.Towers.length > 1) {
+                this.Towers.sort(function(a, b) { return a.energy - b.energy });
             }
         }
 
@@ -179,6 +189,52 @@ class RoomReal extends RoomBase {
                     if (inputLink) {
                         this.Links.Inputs.push(inputLink);
                     }
+                }
+            }
+        }
+
+        this.Labs = {};
+        this.Labs.All = [];
+        this.Labs.Refuel = [];
+        if (this.mem.structures.labs.all.length > 0) {
+            for (let labId of this.mem.structures.labs.all) {
+                let lab = Game.getObjectById(labId);
+                if (lab) {
+                    this.Labs.All.push(lab);
+                    if (lab.energy < lab.energyCapacity - 400) {
+                        this.Labs.Refuel.push(lab);
+                    }
+                }
+            }
+        }
+
+        this.BuildSites = [];
+        let sites = this.room.find(FIND_CONSTRUCTION_SITES);
+        if (sites.length > 0) {
+            for (let site of sites) {
+                this.BuildSites.push(site);
+            }
+        }
+
+        this.Repairs = [];
+        let structures = this.room.find(FIND_STRUCTURES);
+        if (structures.length > 0) {
+            for (let structure of structures) {
+                if (structure.structureType === STRUCTURE_WALL || structure.structureType === STRUCTURE_RAMPART) {
+                    if (this.room.controller && this.room.controller.my) {
+                        if (structure.hits < 150000) {
+                            this.Repairs.push(structure);
+                        }
+                    }
+                }
+                else {
+                    if (structure.hits < structure.hitsMax) {
+                        this.Repairs.push(structure);
+                    }
+                }
+
+                if (this.Repairs.length >= 5) {
+                    break;
                 }
             }
         }
@@ -263,9 +319,11 @@ class RoomReal extends RoomBase {
         for (let source of this.room.find(FIND_SOURCES)) {
             this.mem.resources.sources.push(source.id);
         }
-        this.mem.resources.minerals = [];
-        for (let mineral of this.room.find(FIND_MINERALS)) {
-            this.mem.resources.minerals.push(mineral.id);
+        this.mem.resources.minerals = null;
+        this.mem.resources.extractor = null;
+        let mineralNodes = this.room.find(FIND_MINERALS);
+        if (mineralNodes.length > 0) {
+            this.mem.resources.minerals = mineralNodes[0].id;
         }
         
         if (!this.mem.wallcount) {
@@ -286,8 +344,24 @@ class RoomReal extends RoomBase {
         this.mem.structures.links.storage = null;
         this.mem.structures.links.controller = null;
         this.mem.structures.links.inputs = [];
+        this.mem.structures.labs = {};
+        this.mem.structures.labs.all = [];
         
         for (let structure of this.room.find(FIND_STRUCTURES)) {
+
+            if (structure.structureType === STRUCTURE_CONTAINER) {
+                if (!this.room.storage && structure.pos.findInRange(FIND_MY_SPAWNS, 1).length > 0) {
+                    this.mem.structures.tempstorage = structure.id;
+                }
+                else {
+                    this.mem.structures.containers.push(structure.id);
+                }
+            }
+
+            if (!structure.my) {
+                continue;
+            }
+
             if (structure.structureType === STRUCTURE_SPAWN) {
                 this.mem.structures.spawns.push(structure.id);
                 this.mem.structures.extensions.push(structure.id);
@@ -299,15 +373,6 @@ class RoomReal extends RoomBase {
 
             if (structure.structureType === STRUCTURE_TOWER) {
                 this.mem.structures.towers.push(structure.id);
-            }
-
-            if (structure.structureType === STRUCTURE_CONTAINER) {
-                if (!this.room.storage && structure.pos.findInRange(FIND_MY_SPAWNS, 1).length > 0) {
-                    this.mem.structures.tempstorage = structure.id;
-                }
-                else {
-                    this.mem.structures.containers.push(structure.id);
-                }
             }
 
             if (structure.structureType === STRUCTURE_LINK) {
@@ -323,6 +388,14 @@ class RoomReal extends RoomBase {
                 else {
                     this.mem.structures.links.storage = structure.id;
                 }
+            }
+
+            if (structure.structureType === STRUCTURE_EXTRACTOR) {
+                this.mem.resources.extractor = structure.id;
+            }
+
+            if (structure.structureType === STRUCTURE_LAB) {
+                this.mem.structures.labs.all.push(structure.id);
             }
         }
     }

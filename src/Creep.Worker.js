@@ -70,6 +70,13 @@ class CreepWorker extends CreepBase {
     }
 
     /**
+     * Gets the amount of resources callculated to be carried by the creep at the end of the work cycle.
+     */
+    get CargoAmount() {
+        return this._carry + this._energy;
+    }
+
+    /**
      * Gets a value indicating whether the creep is working.
      */
     get IsWorking() {
@@ -98,6 +105,12 @@ class CreepWorker extends CreepBase {
         return false;
     }
 
+    /**
+     * This function is a wrapper for creep.build().
+     * It helps keep track of the amount of cargo currently in the creep.
+     * 
+     * @param {ConstructionSite} target - The target construction site.
+     */
     build(target) {
         let res = this.creep.build(target);
         if (res === OK) {
@@ -106,6 +119,12 @@ class CreepWorker extends CreepBase {
         return res;
     }
 
+    /**
+     * This function is a wrapper for creep.repair().
+     * It helps keep track of the amount of cargo currently in the creep.
+     * 
+     * @param {Structure} target - The target structure to repair.
+     */
     repair(target) {
         let res = this.creep.repair(target);
         if (res === OK) {
@@ -114,6 +133,12 @@ class CreepWorker extends CreepBase {
         return res;
     }
 
+    /**
+     * This function is a wrapper for creep.upgradeController().
+     * It helps keep track of the amount of cargo currently in the creep.
+     * 
+     * @param {StructureController} target - The controller to upgrade.
+     */
     upgrade(target) {
         let res = this.creep.upgradeController(target);
         if (res === OK) {
@@ -122,6 +147,12 @@ class CreepWorker extends CreepBase {
         return res;
     }
 
+    /**
+     * This function is a wrapper for creep.harvest().
+     * It helps keep track of the amount of cargo currently in the creep.
+     * 
+     * @param {Source|Mineral} target - The mineral node to harvest from.
+     */
     harvest(target) {
         let res = this.creep.harvest(target);
         if (res === OK) {
@@ -129,12 +160,18 @@ class CreepWorker extends CreepBase {
                 this._energy = this._energy + (this._strength * 2);
             }        
             if (target instanceof Mineral) {
-                this._carry = this._carry + (this._strength * 2);
+                this._carry = this._carry + (this._strength);
             }
         }
         return res;
     }
 
+    /**
+     * This function is a wrapper for creep.drop().
+     * It helps keep track of the amount of cargo currently in the creep.
+     * 
+     * @param {string} resourceType - One of the RESOURCE_* constants indicating what resource to drop.
+     */
     drop(resourceType) {
         let res = this.creep.drop(resourceType);
         if (res === OK) {
@@ -149,6 +186,12 @@ class CreepWorker extends CreepBase {
         return res;
     }
 
+    /**
+     * This function is a wrapper for creep.pickup().
+     * It helps keep track of the amount of cargo currently in the creep.
+     * 
+     * @param {Resource} target - The resource drop to pick up from the ground.
+     */
     pickup(target) {
         let res = this.creep.pickup(target);
         if (res === OK) {
@@ -163,81 +206,78 @@ class CreepWorker extends CreepBase {
         return res;
     }
 
+    /**
+     * This function is a wrapper for creep.transfer().
+     * It helps keep track of the amount of cargo currently in the creep.
+     * 
+     * @param {Structure} target - The structure to transfer the resource to.
+     * @param {string} resourceType - One of the RESOURCE_* constants indicating what resource to drop.
+     */
     transfer(target, resourceType) {
-        let res = this.creep.transfer(target, resourceType);
-        if (res === OK) {
-            let targetSpace = 0;
-            if (target.storeCapacity) {
-                targetSpace = target.storeCapacity - _.sum(target.store);
-            }
-            else if (target.energyCapacity) {
-                targetSpace = target.energyCapacity - target.energy;
-            }
-
-            let carriedAmount = this.creep.carry[resourceType];
-            let transfered = Math.min(targetSpace, carriedAmount);
-
-            if (resourceType === RESOURCE_ENERGY) {
-                this._energy = this._energy - transfered;
-            }
-            else {
-                this._carry = this._carry - transfered;
-            }
+        let targetSpace = 0;
+        if (target.storeCapacity) {
+            // Containers, Storage, Terminal, etc
+            targetSpace = target.storeCapacity - _.sum(target.store);
         }
-        return res;
-    }
+        else if (target.energyCapacity) {
+            // Links, Labs, Towers, etc
+            targetSpace = target.energyCapacity - target.energy;
+        }
 
-    withdraw(target, resourceType) {
-        let res = this.creep.withdraw(target, resourceType);
+        let carriedAmount = this.creep.carry[resourceType];
+        let amountTransfered = Math.min(targetSpace, carriedAmount);
+
+        if (amountTransfered <= 0) {
+            return ERR_NOT_ENOUGH_RESOURCES;
+        }
+
+        let res = this.creep.transfer(target, resourceType, amountTransfered);
         if (res === OK) {
-            let storedAmount = 0;
-            if (target.store) {
-                storedAmount = target.store[resourceType];
-            }
-            else if (target.energy) {
-                storedAmount = target.energy;
-            }
-
-            let creepSpace = this.Capacity - this.EndCarry;
-            let transfered = Math.min(storedAmount, creepSpace);
-
             if (resourceType === RESOURCE_ENERGY) {
-                this._energy = this._energy + transfered;
+                this._energy = this._energy - amountTransfered;
             }
             else {
-                this._carry = this._carry + transfered;
+                this._carry = this._carry - amountTransfered;
             }
         }
         return res;
     }
 
     /**
-     * Logic that tries to find a source of stored energy in current room and withdraw as much as possible.
+     * This function is a wrapper for creep.withdraw().
+     * It helps keep track of the amount of cargo currently in the creep.
+     * 
+     * @param {Structure} target - The structure to withdraw resources from.
+     * @param {string} resourceType - One of the RESOURCE_* constants indicating what resource to drop.
      */
-    findStoredEnergy() {
-        let roomStorage = this.Room.Storage;
-
-        if (roomStorage && roomStorage.store[RESOURCE_ENERGY] > 0) {
-            if (this.creep.withdraw(roomStorage, RESOURCE_ENERGY) !== OK) {
-                this.creep.moveTo(roomStorage);
-            }
-            return true;
+    withdraw(target, resourceType) {
+        let amountStored = 0;
+        if (target.store) {
+            // Containers, Storage, Terminal, etc
+            amountStored = target.store[resourceType];
         }
-        
-        let container = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
-            filter: function (structure) { 
-                return structure.structureType === STRUCTURE_CONTAINER && (structure.store.energy > 0); 
-            } 
-        });
-
-        if (container !== null) {
-            if (this.creep.withdraw(container, RESOURCE_ENERGY) !== OK) {
-                this.creep.moveTo(container);
-            }
-            return true;
+        else if (target.energy) {
+            // Links, Labs, Towers, etc
+            amountStored = target.energy;
         }
-        
-        return false;
+
+        let restCapacity = this.Capacity - this.CargoAmount;
+        let amountTransfered = Math.min(amountStored, restCapacity);
+
+        if (amountTransfered <= 0) {
+            return ERR_NOT_ENOUGH_RESOURCES;
+        }
+
+        let res = this.creep.withdraw(target, resourceType, amountTransfered);
+        if (res === OK) {
+            if (resourceType === RESOURCE_ENERGY) {
+                this._energy = this._energy + amountTransfered;
+            }
+            else {
+                this._carry = this._carry + amountTransfered;
+            }
+        }
+        return res;
     }
 }
 

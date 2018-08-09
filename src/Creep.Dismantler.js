@@ -32,7 +32,7 @@ class CreepDismantler extends CreepWorker {
         let carry = _.sum(this.creep.carry);
 
         if (this.IsWorking) {
-            if (this.moveOut()) {
+            if (this.moveToRoom(this.WorkRoom)) {
                 if (carry >= this.creep.carryCapacity) {
                     //this.IsWorking = false;
                 }
@@ -74,7 +74,7 @@ class CreepDismantler extends CreepWorker {
             }
         }
         else {
-            if (this.moveHome()) {
+            if (this.moveToRoom(this.HomeRoom)) {
                 if (carry === 0) {
                     this.IsWorking = true;
                 }

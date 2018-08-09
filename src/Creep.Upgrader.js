@@ -31,23 +31,29 @@ class CreepUpgrader extends CreepWorker {
             }
         }
 
-        if (this.StartEnergy < this.Capacity) {
+        let collectedEnergy = false;
+
+        if (this.AtHome && !collectedEnergy && this.StartEnergy < this.Capacity) {
             let storage = this.Room.Storage;
             if (storage && storage.store.energy > 0 && this.creep.pos.isNearTo(storage)) {
                 this.withdraw(storage, RESOURCE_ENERGY);
             }
         }
 
-        if (this.StartEnergy < this.Capacity) {
+        if (this.AtWork && !collectedEnergy && this.StartEnergy < this.Capacity) {
             let link = this.Room.Links.Controller;
             if (link && link.energy > 0 && this.creep.pos.isNearTo(link)) {
                 this.withdraw(link, RESOURCE_ENERGY);
             }
         }
 
-        if (this.StartEnergy < this.Capacity) {
-            // Look for a source? Needed in the very start of a new room before storage and links.
-            // Look for other containers? Probably not. First container should always be storage.
+        if (this.AtWork && !collectedEnergy && this.StartEnergy < this.Capacity) {
+            if (this.Room.Resources.Sources.length > 0) {
+                let sources = this.creep.pos.findInRange(this.Room.Resources.Sources, 1);
+                if (sources[0] && this.creep.pos.isNearTo(sources[0])) {
+                    this.harvest(sources[0]);
+                }
+            }
         }
 
         if (this.EndEnergy >= this.Capacity) {
@@ -98,9 +104,7 @@ class CreepUpgrader extends CreepWorker {
                     let source = this.creep.pos.findClosestByPath(this.Room.Resources.Sources);
                     
                     if (source && !this.creep.pos.isNearTo(source)) {
-                        if (this.creep.harvest(source) === ERR_NOT_IN_RANGE) {
-                            moveTarget = source;
-                        }
+                        moveTarget = source;
                     }
                 }
             }
