@@ -39,25 +39,23 @@ class RoomBase {
         return this.mem.type;
     }
 
-    getSourceNode(creepName) {
-        let sources = this.mem.resources.sources;
-        for (let source of sources) {
-            if (source.miner === creepName) {
-                return { id: source.id, pos: source.pos };
+    get Containers() {
+        let containers = [];
+        if (this.mem.structures && this.mem.structures.containers) {
+            for (let containerInfo of this.mem.structures.containers) {
+                let container = Game.getObjectById(containerInfo.id);
+                if (container) {
+                    containers.push(container);
+                }
             }
         }
-        for (let source of sources) {
-            if (!source.miner) {
-                source.miner = creepName;
-                return { id: source.id, pos: source.pos };
-            }
-        }
-        return null;
+        return containers;
     }
 
     getContainers() {
         return [];
     }
+
     /**
      * Initializes the room memory with default values.
      */
@@ -68,8 +66,16 @@ class RoomBase {
 
         if (!this.mem.update) {
             this.mem.update = {};
+        }
+        if (!this.mem.update.last) {
             this.mem.update.last = 0;
+        }
+        if (!this.mem.update.next) {
             this.mem.update.next = 0;
+        }
+
+        if (!this.mem.targets) {
+            this.mem.targets = {};
         }
 
         if (!this.mem.resources) {

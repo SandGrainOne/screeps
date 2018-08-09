@@ -1,5 +1,7 @@
 'use strict';
 
+let C = require('constants');
+
 let CreepBase = require('Creep.Base');
 let CreepMiner = require('Creep.Miner');
 let CreepHauler = require('Creep.Hauler');
@@ -17,54 +19,115 @@ let CreepDismantler = require('Creep.Dismantler');
 
 class CreepFactory {
     /**
+     * Initializes a new instance of the CreepBase class with the specified creep.
+     */
+    constructor(knownRooms) {
+        this.KnownRooms = knownRooms;
+    }
+
+    /**
      * Add a layer of job specific logic to the given creep.
      * 
      * @param {Creep} creep - The creep to be wrapped.
      */
     wrap(creep) {
+        let smartCreep = null;
+
         switch (creep.memory.job) {
             case 'miner':
-                return new CreepMiner(creep);
-                
+                smartCreep = new CreepMiner(creep);
+                break;
             case 'hauler':
-                return new CreepHauler(creep);
-                
+                smartCreep =  new CreepHauler(creep);
+                break;
             case 'broker':
-                return new CreepBroker(creep);
-                
+                smartCreep =  new CreepBroker(creep);
+                break;
             case 'refueler':
-                return new CreepRefueler(creep);
-                
+                smartCreep =  new CreepRefueler(creep);
+                break;
             case 'builder':
-                return new CreepBuilder(creep);
-                
+                smartCreep =  new CreepBuilder(creep);
+                break;
             case 'upgrader':
-                return new CreepUpgrader(creep);
-                
+                smartCreep =  new CreepUpgrader(creep);
+                break;
             case 'defender':
-                return new CreepDefender(creep);
-                
+                smartCreep =  new CreepDefender(creep);
+                break;
             case 'healer':
-                return new CreepHealer(creep);
-                
+                smartCreep =  new CreepHealer(creep);
+                break;
             case 'attacker':
-                return new CreepAttacker(creep);
-                
+                smartCreep =  new CreepAttacker(creep);
+                break;
             case 'soldier':
-                return new CreepSoldier(creep);
-                
+                smartCreep =  new CreepSoldier(creep);
+                break;
             case 'settler':
-                return new CreepSettler(creep);
-                
+                smartCreep =  new CreepSettler(creep);
+                break;
             case 'balancer':
-                return new CreepBalancer(creep);
-                
+                smartCreep =  new CreepBalancer(creep);
+                break;
             case 'dismantler':
-                return new CreepDismantler(creep);
-            
-            default:
-                return new CreepBase(creep);
+                smartCreep =  new CreepDismantler(creep);
+                break;
         }
+
+        if (!smartCreep) {
+            smartCreep = new CreepBase(creep);
+        }
+
+        smartCreep.Room = this.KnownRooms[smartCreep.creep.memory.rooms.current];
+        smartCreep.HomeRoom = this.KnownRooms[smartCreep.creep.memory.rooms.home];
+        smartCreep.WorkRoom = this.KnownRooms[smartCreep.creep.memory.rooms.work];
+
+        return smartCreep;
+    }
+
+    buildBody(codeChain) {
+        let body = [];
+
+        let codes = Array.from(codeChain);
+        for (let code of codes) {
+            body.push(C.BODY_PART_CODES[code]);
+        }
+
+        return body;
+    }
+
+    buildBodyAdvanced(bodyChain) {
+        let body = [];
+
+        let chain = Array.from(bodyChain);
+
+        let partCode = null;
+        let bodyPart = null;
+        let partCount = 0;
+
+        let index = 0;
+        
+        while (index < chain.length) {
+            console.log(index);
+            console.log(chain[index]);
+
+            if (C.BODY_PART_CODES[chain[index]]) {
+                bodyPart = C.BODY_PART_CODES[chain[index]];
+                console.log(bodyPart);
+            }
+
+            let partCount = 1;
+            if (index + 1 < chain.length) {
+                if (chain[index + 1] === "x") {
+                    index++
+                }
+            }
+
+            index++;
+        }
+
+        return body;
     }
 }
 

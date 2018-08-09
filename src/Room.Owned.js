@@ -7,7 +7,7 @@ let RoomBase = require('Room.Base');
 /**
  * Wrapper class with basic logic for rooms.
  */
-class RoomBaseV2 extends RoomBase {
+class RoomOwned extends RoomBase {
     /**
      * Initializes a new instance of the RoomBase class with the specified room.
      * 
@@ -33,18 +33,6 @@ class RoomBaseV2 extends RoomBase {
             return Game.getObjectById(this.mem.tempstorage);
         }
         return null;
-    }
-
-    reserveTarget(targetId, creepName) {
-        if (!this.mem.targets[targetId]) {
-            this.mem.targets[targetId] = { creepName: creepName, ttl: 2 };
-            return true;
-        }
-        if (this.mem.targets[targetId].creepName === creepName) {
-            this.mem.targets[targetId].ttl = 2;
-            return true;
-        }
-        return false;
     }
 
     getContainers() {
@@ -84,50 +72,12 @@ class RoomBaseV2 extends RoomBase {
             }
         }
 
-        for (let targetId in this.mem.targets) {
-            this.mem.targets[targetId].ttl = this.mem.targets[targetId].ttl - 1;
-            if (this.mem.targets[targetId].ttl === 0) {
-                delete this.mem.targets[targetId];
-            }
-        }
-
-        this.Sources = [];
-        if (this.mem.resources) {
-            if (this.mem.resources.sources) {
-                for (let sourceInfo of this.mem.resources.sources) {
-                    let source = Game.getObjectById(sourceInfo.id);
-                    if (source) {
-                        this.Sources.push(source);
-                    }
-                }
-            }
-        }
-
         this.Links = {};
-        this.Links.Controller = null;
-        this.Links.Storage = null;
+        this.Links.Controller = Game.getObjectById(this.mem.structures.links.controller);
+        this.Links.Storage = Game.getObjectById(this.mem.structures.links.storage);
         this.Links.Inputs = [];
-        if (this.mem.structures && this.mem.structures.links) {
-            if (this.mem.structures.links.controller) {
-                let controllerLink = Game.getObjectById(this.mem.structures.links.controller);
-                if (controllerLink) {
-                    this.Links.Controller = controllerLink;
-                }
-            }
-            if (this.mem.structures && this.mem.structures.links && this.mem.structures.links.storage) {
-                let storageLink = Game.getObjectById(this.mem.structures.links.storage);
-                if (storageLink) {
-                    this.Links.Storage = storageLink;
-                }
-            }
-            if (this.mem.structures && this.mem.structures.links && this.mem.structures.links.inputs) {
-                for (let linkId of this.mem.structures.links.inputs) {
-                    let inputLink = Game.getObjectById(linkId);
-                    if (inputLink) {
-                        this.Links.Inputs.push(inputLink);
-                    }
-                }
-            }
+        for (let linkId of this.mem.structures.links.inputs) {
+            this.Links.Inputs.push(Game.getObjectById(linkId));
         }
 
         let hostileCreeps = this.room.find(FIND_HOSTILE_CREEPS);
@@ -271,4 +221,4 @@ class RoomBaseV2 extends RoomBase {
     }
 }
 
-module.exports = RoomBaseV2;
+module.exports = RoomOwned;

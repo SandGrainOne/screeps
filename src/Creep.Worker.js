@@ -1,5 +1,7 @@
 'use strict';
 
+let C = require('constants');
+
 let CreepBase = require('Creep.Base');
 
 /**
@@ -44,6 +46,29 @@ class CreepWorker extends CreepBase {
      */
     get AtHome() {
         return this.Room.Name === this.HomeRoom.Name;
+    }
+
+    get IsRemoteWorker() {
+        return this.WorkRoom.Name !== this.HomeRoom.Name;
+    }
+
+    /**
+     * Perform a retreat if there is an enemy creep in the room or if it is hurt.
+     * 
+     * @returns {Boolean} true if the retreat was required and the creep is on the move
+     */
+    retreat() {
+        if (!this.AtHome) {
+            if (this.Room.State !== C.ROOM_STATE_NORMAL) {
+                this.moveHome();
+                return true;
+            }
+            if (this.creep.hits < this.creep.hitsMax) {
+                this.moveHome();
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

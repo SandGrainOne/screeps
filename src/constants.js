@@ -14,6 +14,17 @@ let constants = {
     "ROOM_STATE_INVADED": "invaded",
     "ROOM_STATE_ATTACKED": "attacked",
 
+    "BODY_PART_CODES": {
+        "M": MOVE,
+        "W": WORK,
+        "C": CARRY,
+        "A": ATTACK,
+        "R": RANGED_ATTACK,
+        "H": HEAL,
+        "L": CLAIM,
+        "T": TOUGH
+    },
+
     "BODY": {
         "W3N78": "W3N78"
     },

@@ -12,203 +12,276 @@ let RoomFactory = require('RoomFactory');
 module.exports.loop = function () {
     // Ensure that the hive is up to date with what the code expects.
     code.update();
-    
-    let pop = new Population();
-    let creepFactory = new CreepFactory();
-    let roomFactory = new RoomFactory();
-    
+
     // Build up a structure with creeps organized in rooms and jobs.
-    // It is important to do this before everything else.
+    let pop = new Population();
     pop.populate();
 
+    let roomFactory = new RoomFactory();
     let knownRooms = {};
-    for (let roomName in Memory.rooms) {
-        let room = Game.rooms[roomName];
-        if (room) {
-            knownRooms[roomName] = new RoomBaseV2(room);
-        }
-        else {
-            knownRooms[roomName] = new RoomBase(roomName);
-        }
+    for (let roomName in Game.rooms) {
+        knownRooms[roomName] = roomFactory.wrap(Game.rooms[roomName]);
         knownRooms[roomName].update();
     }
 
-    // Let all creeps perform their actions.
+    for (let roomName in Memory.rooms) {
+        if (!knownRooms[roomName]) {
+            knownRooms[roomName] = new RoomBase(roomName);
+            knownRooms[roomName].update();
+        }
+    }
+
+    let creepFactory = new CreepFactory(knownRooms);
+
     for (let creepName in Game.creeps) {
         let smartCreep = creepFactory.wrap(Game.creeps[creepName]);
-        smartCreep.Room = knownRooms[smartCreep.creep.memory.rooms.current];
-        smartCreep.HomeRoom = knownRooms[smartCreep.creep.memory.rooms.home];
-        smartCreep.WorkRoom = knownRooms[smartCreep.creep.memory.rooms.work];
         if (smartCreep.act()) {
             continue;
         }
     }
 
+    //console.log( JSON.stringify( creepFactory.buildBodyAdvanced("Wx5CCMM") ));
+
     for (let roomName in Game.rooms) {
         let room = Game.rooms[roomName];
         let smartRoom = roomFactory.wrap(Game.rooms[roomName]);
         
-        if (room.name === "E77N85") {
-            let roomSpawn = room.find(FIND_MY_SPAWNS)[0];
+        if (room.name === "E77N86") {
+            let homeRoom = "E77N85";
+            let workRoom = room.name;
+            let roomSpawn = Game.rooms[homeRoom].find(FIND_MY_SPAWNS)[0];
             
             if (roomSpawn && !roomSpawn.spawning) {
-                let roomPop = pop[room.name];
+                let roomPop = pop[workRoom];
+
+                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 1) {
+                    let body = creepFactory.buildBody("WCM");
+                    let res = roomSpawn.createCreep(body, null, { job: "upgrader", rooms: { home: homeRoom, work: workRoom } });
+                }
 
                 if ((!roomPop.builders ? 0 : roomPop.builders.length) < 1) {
-                    let res = roomSpawn.createCreep([WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE], null, { job: "builder" });
-                }
-                
-                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 2) {
-                    let res = roomSpawn.createCreep([WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE], null, { job: "upgrader" });
-                }
-                
-                if ((!roomPop.healers ? 0 : roomPop.healers.length) < 0) {
-                    let res = roomSpawn.createCreep([TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, HEAL, MOVE, HEAL, MOVE, HEAL, MOVE, HEAL, MOVE], null, { job: "healer" });
-                }
-                
-                if ((!roomPop.defenders ? 0 : roomPop.defenders.length) < 0) {
-                    let res = roomSpawn.createCreep([TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE], null, { job: "defender" });
-                }
-                
-                if ((!roomPop.attackers ? 0 : roomPop.attackers.length) < 0) {
-                    let res = roomSpawn.createCreep([TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE], null, { job: "attacker" });
+                    let body = creepFactory.buildBody("WWCCCCMMMMMM");
+                    let res = roomSpawn.createCreep(body, null, { job: "builder", rooms: { home: homeRoom, work: workRoom } });
                 }
 
-                if ((!roomPop.brokers ? 0 : roomPop.brokers.length) < 0) {
-                    let res = roomSpawn.createCreep([CARRY, CARRY, MOVE], null, { job: "broker" });
-                }
+                //if ((!roomPop.settlers ? 0 : roomPop.settlers.length) < room.memory.jobs.settlers) {
+                //    let body = creepFactory.buildBody("LLMM");
+                //    let res = roomSpawn.createCreep(body, null, { job: "settler", rooms: { home: homeRoom, work: workRoom } });
+                //}
                 
                 if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 3) {
-                    let res = roomSpawn.createCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "hauler" });
+                    let body = creepFactory.buildBody("CCCCCCCCCCCCCCCCMMMMMMMM");
+                    let res = roomSpawn.createCreep(body, null, { job: "hauler", rooms: { home: homeRoom, work: workRoom } });
                 }
                 
                 if ((!roomPop.miners ? 0 : roomPop.miners.length) < room.memory.jobs.miners) {
-                    let res = roomSpawn.createCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE], null, { job: "miner" });
+                    let body = creepFactory.buildBody("WWWWWCMMMMM");
+                    let res = roomSpawn.createCreep(body, null, { job: "miner", rooms: { home: homeRoom, work: workRoom } });
                 }
-                
+            }
+        }
+
+        if (room.name === "E77N85") {
+            let homeRoom = room.name;
+            let workRoom = room.name;
+            let roomSpawn = Game.rooms[homeRoom].find(FIND_MY_SPAWNS)[0];
+            
+            if (roomSpawn && !roomSpawn.spawning) {
+                let roomPop = pop[workRoom];
+
+                if ((!roomPop.builders ? 0 : roomPop.builders.length) < 1) {
+                    let body = [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "builder", rooms: { home: homeRoom, work: workRoom } });
+                }
+
+                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 1) {
+                    let body = [WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "upgrader", rooms: { home: homeRoom, work: workRoom } });
+                }
+
+                if ((!roomPop.healers ? 0 : roomPop.healers.length) < 0) {
+                    let body = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, HEAL, MOVE, HEAL, MOVE, HEAL, MOVE, HEAL, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "healer", rooms: { home: homeRoom, work: workRoom } });
+                }
+
+                if ((!roomPop.defenders ? 0 : roomPop.defenders.length) < 0) {
+                    let body = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "defender", rooms: { home: homeRoom, work: workRoom } });
+                }
+
+                if ((!roomPop.attackers ? 0 : roomPop.attackers.length) < 0) {
+                    let body = [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "attacker", rooms: { home: homeRoom, work: workRoom } });
+                }
+
+                if ((!roomPop.brokers ? 0 : roomPop.brokers.length) < 1) {
+                    let body = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "broker", rooms: { home: homeRoom, work: workRoom } });
+                }
+
+                if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 2) {
+                    let body = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "hauler", rooms: { home: homeRoom, work: workRoom } });
+                }
+
+                if ((!roomPop.miners ? 0 : roomPop.miners.length) < room.memory.jobs.miners) {
+                    let body = [WORK, WORK, WORK, WORK, WORK, CARRY, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "miner", rooms: { home: homeRoom, work: workRoom } });
+                }
+
                 if ((!roomPop.refuelers ? 0 : roomPop.refuelers.length) < room.memory.jobs.refuelers) {
-                    let res = roomSpawn.createCreep([CARRY, CARRY, CARRY, CARRY, MOVE, MOVE], null, { job: "refueler" });
+                    let body = [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "refueler", rooms: { home: homeRoom, work: workRoom } });
                 }
             }
         }
 
         if (room.name === "E78N85") {
-            let roomSpawn = room.find(FIND_MY_SPAWNS)[0];
+            let homeRoom = room.name;
+            let workRoom = room.name;
+            let roomSpawn = Game.rooms[homeRoom].find(FIND_MY_SPAWNS)[0];
             
             if (roomSpawn && !roomSpawn.spawning) {
-                let roomPop = pop[room.name];
-                
-                if ((!roomPop.balancers ? 0 : roomPop.balancers.length) < 1) {
-                    // Balancers MUST be produced in the workroom.
-                    let res = roomSpawn.createCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "balancer", homeroom: "E77N85", workroom: "E78N85" });
+                let roomPop = pop[workRoom];
+
+                if ((!roomPop.balancers ? 0 : roomPop.balancers.length) < 0) {
+                    let body = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "balancer", rooms: { home: "E77N85", work: workRoom } });
                 }
 
                 if ((!roomPop.builders ? 0 : roomPop.builders.length) < 1) {
-                    let res = roomSpawn.createCreep([WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], null, { job: "builder" });
+                    let body = [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "builder", rooms: { home: homeRoom, work: workRoom } });
                 }
-                
-                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 1) {
-                    let res = roomSpawn.createCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "upgrader" });
+
+                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 2) {
+                    let body = [WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "upgrader", rooms: { home: homeRoom, work: workRoom } });
                 }
-                
+
                 if ((!roomPop.healers ? 0 : roomPop.healers.length) < 0) {
-                    let res = roomSpawn.createCreep([TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, HEAL, MOVE, HEAL, MOVE, HEAL, MOVE, HEAL, MOVE], null, { job: "healer" });
+                    let body = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, HEAL, MOVE, HEAL, MOVE, HEAL, MOVE, HEAL, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "healer", rooms: { home: homeRoom, work: workRoom } });
                 }
-                
+
                 if ((!roomPop.defenders ? 0 : roomPop.defenders.length) < 0) {
-                    let res = roomSpawn.createCreep([TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE], null, { job: "defender" });
+                    let body = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "defender", rooms: { home: homeRoom, work: workRoom } });
                 }
-                
+
                 if ((!roomPop.attackers ? 0 : roomPop.attackers.length) < 1) {
-                    let res = roomSpawn.createCreep([TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE], null, { job: "attacker" });
+                    let body = [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "attacker", rooms: { home: homeRoom, work: workRoom } });
                 }
 
                 if ((!roomPop.brokers ? 0 : roomPop.brokers.length) < 1) {
-                    let res = roomSpawn.createCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE], null, { job: "broker" });
+                    let body = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "broker", rooms: { home: homeRoom, work: workRoom } });
                 }
-                
+
                 if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 1) {
-                    let res = roomSpawn.createCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "hauler" });
+                    let body = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "hauler", rooms: { home: homeRoom, work: workRoom } });
                 }
-                
+
                 if ((!roomPop.miners ? 0 : roomPop.miners.length) < room.memory.jobs.miners) {
-                    let res = roomSpawn.createCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE], null, { job: "miner" });
+                    let body = [WORK, WORK, WORK, WORK, WORK, CARRY, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "miner", rooms: { home: homeRoom, work: workRoom } });
                 }
-                
+
                 if ((!roomPop.refuelers ? 0 : roomPop.refuelers.length) < room.memory.jobs.refuelers) {
-                    let res = roomSpawn.createCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "refueler" });
+                    let body = [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "refueler", rooms: { home: homeRoom, work: workRoom } });
                 }
             }
         }
         
-        if (room.name === "E79N84") {
+        if (room.name === "E79N86") {
             let homeRoom = "E79N85";
-            
+            let workRoom = room.name;
             let roomSpawn = Game.rooms[homeRoom].find(FIND_MY_SPAWNS)[0];
             
             if (roomSpawn && !roomSpawn.spawning) {
-                
-                let roomPop = pop[room.name];
+                let roomPop = pop[workRoom];
+
+                if ((!roomPop.builders ? 0 : roomPop.builders.length) < 0) {
+                    let body = [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "builder", rooms: { home: homeRoom, work: workRoom } });
+                }
 
                 if ((!roomPop.settlers ? 0 : roomPop.settlers.length) < room.memory.jobs.settlers) {
-                    let res = roomSpawn.createCreep([CLAIM, CLAIM, MOVE, MOVE], null, { job: "settler", homeroom: homeRoom, workroom: room.name });
+                    let body = [CLAIM, CLAIM, MOVE, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "settler", rooms: { home: homeRoom, work: workRoom } });
                 }
                 
-                if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 3) {
-                    let res = roomSpawn.createCreep([CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE], null, { job: "hauler", homeroom: homeRoom, workroom: room.name });
+                if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 4) {
+                    let body = creepFactory.buildBody("CCCCCCCCCCCCCCCCMMMMMMMM");
+                    let res = roomSpawn.createCreep(body, null, { job: "hauler", rooms: { home: homeRoom, work: workRoom } });
                 }
                 
                 if ((!roomPop.miners ? 0 : roomPop.miners.length) < room.memory.jobs.miners) {
-                    let res = roomSpawn.createCreep([WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "miner", homeroom: homeRoom, workroom: room.name });
+                    let body = [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "miner", rooms: { home: homeRoom, work: workRoom } });
                 }
             }
         }
         
         if (room.name === "E79N85") {
-            let roomSpawn = room.find(FIND_MY_SPAWNS)[0];
+            let homeRoom = room.name;
+            let workRoom = room.name;
+            let roomSpawn = Game.rooms[homeRoom].find(FIND_MY_SPAWNS)[0];
             
             if (roomSpawn && !roomSpawn.spawning) {
-                let roomPop = pop[room.name];
+                let roomPop = pop[workRoom];
 
-                if ((!roomPop.balancers ? 0 : roomPop.balancers.length) < 1) {
-                    // Balancers MUST be produced in the workroom.
-                    let res = roomSpawn.createCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "balancer", homeroom: "E78N85", workroom: "E79N85" });
+                if ((!roomPop.balancers ? 0 : roomPop.balancers.length) < 0) {
+                    let body = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "balancer", rooms: { home: "E78N85", work: workRoom } });
                 }
 
                 if ((!roomPop.builders ? 0 : roomPop.builders.length) < 1) {
-                    let res = roomSpawn.createCreep([WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], null, { job: "builder" });
-                }
-                
-                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 2) {
-                    let res = roomSpawn.createCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE], null, { job: "upgrader" });
-                }
-                
-                if ((!roomPop.healers ? 0 : roomPop.healers.length) < 0) {
-                    let res = roomSpawn.createCreep([HEAL, MOVE, HEAL, MOVE, HEAL, MOVE, HEAL, MOVE], null, { job: "healer" });
-                }
-                
-                if ((!roomPop.defenders ? 0 : roomPop.defenders.length) < 0) {
-                    let res = roomSpawn.createCreep([TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE], null, { job: "defender" });
-                }
-                
-                if ((!roomPop.attackers ? 0 : roomPop.attackers.length) < 1) {
-                    let res = roomSpawn.createCreep([TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE], null, { job: "attacker" });
+                    let body = [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "builder", rooms: { home: homeRoom, work: workRoom } });
                 }
 
-                if ((!roomPop.brokers ? 0 : roomPop.brokers.length) < 0) {
-                    let res = roomSpawn.createCreep([CARRY, CARRY, CARRY, CARRY, MOVE], null, { job: "broker" });
+                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 2) {
+                    let body = [WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "upgrader", rooms: { home: homeRoom, work: workRoom } });
                 }
-                
+
+                if ((!roomPop.healers ? 0 : roomPop.healers.length) < 0) {
+                    let body = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, HEAL, MOVE, HEAL, MOVE, HEAL, MOVE, HEAL, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "healer", rooms: { home: homeRoom, work: workRoom } });
+                }
+
+                if ((!roomPop.defenders ? 0 : roomPop.defenders.length) < 0) {
+                    let body = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "defender", rooms: { home: homeRoom, work: workRoom } });
+                }
+
+                if ((!roomPop.attackers ? 0 : roomPop.attackers.length) < 1) {
+                    let body = [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE,ATTACK,MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "attacker", rooms: { home: homeRoom, work: workRoom } });
+                }
+
+                if ((!roomPop.brokers ? 0 : roomPop.brokers.length) < 1) {
+                    let body = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "broker", rooms: { home: homeRoom, work: workRoom } });
+                }
+
                 if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 1) {
-                    let res = roomSpawn.createCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], null, { job: "hauler" });
+                    let body = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "hauler", rooms: { home: homeRoom, work: workRoom } });
                 }
-                
+
                 if ((!roomPop.miners ? 0 : roomPop.miners.length) < room.memory.jobs.miners) {
-                    let res = roomSpawn.createCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE], null, { job: "miner" });
+                    let body = [WORK, WORK, WORK, WORK, WORK, CARRY, MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "miner", rooms: { home: homeRoom, work: workRoom } });
                 }
-                
+
                 if ((!roomPop.refuelers ? 0 : roomPop.refuelers.length) < room.memory.jobs.refuelers) {
-                    let res = roomSpawn.createCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], null, { job: "refueler" });
+                    let body = [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE];
+                    let res = roomSpawn.createCreep(body, null, { job: "refueler", rooms: { home: homeRoom, work: workRoom } });
                 }
             }
         }
@@ -305,16 +378,12 @@ module.exports.loop = function () {
         }
     }
     
-    fromLink = Game.getObjectById("5881b20f931682da3fe38ae8");
-    toLink = Game.getObjectById("58815321f42d3c4c5cb3ca63");
+    fromLink = Game.getObjectById("58a82d5c41af22461a2d48f1");
+    toLink = Game.getObjectById("58a60d21b73b6a3dedee4dec");
 
     if (fromLink && !fromLink.cooldown && toLink) {
         if (fromLink.energy > 100 && toLink.energy < toLink.energyCapacity / 2) {
             let result = fromLink.transferEnergy(toLink, Math.min(fromLink.energy, toLink.energyCapacity - toLink.energy));
         }
-    }
-    
-    for (let item of []) {
-        console.log("e")
     }
 }

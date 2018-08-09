@@ -31,6 +31,9 @@ class Population {
 
             // Just in case there is a creep without a work room.
             let workroom = creep.memory.workroom ? creep.memory.workroom : creep.room.name;
+            if (creep.memory.rooms && creep.memory.rooms.work){
+                workroom = creep.memory.rooms.work;
+            }
 
             if (!Memory.population[workroom]) {
                 Memory.population[workroom] = {};

@@ -2,13 +2,10 @@
 
 let C = require('constants');
 
-let RoomBaseV2 = require('Room.BaseV2');
-let RoomBase = require('Room.Base');
-
 /**
  * The CreepBase class is the base class for all creep wrappers. 
  */
-class CreepBase {
+class SmartCreep {
     /**
      * Initializes a new instance of the CreepBase class with the specified creep.
      * 
@@ -17,32 +14,22 @@ class CreepBase {
     constructor(creep) {
         this.creep = creep;
         this.mem = creep.memory;
-
         this.mem.ticksToLive = this.creep.ticksToLive;
         
-        if (!this.mem.rooms) {
-            this.mem.rooms = {};
+        if (!this.mem.homeroom) {
+            this.mem.homeroom = this.creep.room.name;
         }
-
-        this.mem.rooms.current = this.creep.room.name;
-
-        if (!this.mem.rooms.home) {
-            this.mem.rooms.home = this.mem.homeroom ? this.mem.homeroom : this.creep.room.name;
+        if (!this.mem.workroom) {
+            this.mem.workroom = this.mem.homeroom;
         }
-        if (this.mem.homeroom) {
-            delete this.mem.homeroom;
-        }
-
-        if (!this.mem.rooms.work) {
-            this.mem.rooms.work = this.mem.workroom ? this.mem.workroom : this.mem.rooms.home;
-        }
-        if (this.mem.workroom) {
-            delete this.mem.workroom;
-        }
-
         if (!this.mem.task) {
             this.mem.task = "none";
         } 
+
+        this.mem.rooms = {};
+        this.mem.rooms.current = this.creep.room.name;
+        this.mem.rooms.home = this.mem.homeroom;
+        this.mem.rooms.work = this.mem.workroom;
     }
 
     /**
@@ -199,17 +186,6 @@ class CreepBase {
         }
 
         let pos = target.pos ? target.pos : target;
-        
-        let room = new RoomBase(pos.roomName);
-
-        if (room.State !== C.ROOM_STATE_NORMAL) {
-            let flag = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
-            if (flag) {
-                let moveResult = this.creep.moveTo(flag);
-                return moveResult;
-            }
-            return OK;
-        }
 
         let ops = { 
             ignoreCreeps: false,
@@ -220,4 +196,4 @@ class CreepBase {
     }
 }
 
-module.exports = CreepBase;
+module.exports = SmartCreep;
