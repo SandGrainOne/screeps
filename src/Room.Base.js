@@ -13,21 +13,57 @@ class RoomBase {
      * @param {string} name - The name of the room
      */
     constructor(name) {
-        this.name = name;
+        this._name = name;
+        this._visible = false;
+
         if (Memory.rooms[name]) {
             this.mem = Memory.rooms[name];
         }
         else {
             this.mem = {};
         }
-        this.init();
+
+        if (!this.mem.state) {
+            this.mem.state = C.ROOM_STATE_NORMAL;
+        }
+
+        if (!this.mem.update) {
+            this.mem.update = {};
+        }
+
+        if (!this.mem.update.last) {
+            this.mem.update.last = 0;
+        }
+
+        if (!this.mem.update.next) {
+            this.mem.update.next = 0;
+        }
+
+        if (!this.mem.reservations) {
+            this.mem.reservations = {};
+        }
+
+        if (!this.mem.wallcount) {
+            this.mem.wallcount = 0;
+        }
+
+        if (!this.mem.rampcount) {
+            this.mem.rampcount = 0;
+        }
     }
 
     /**
      * Gets the name of the room.
      */
     get Name() {
-        return this.name;
+        return this._name;
+    }
+
+    /**
+     * Gets a value indicating whether the room is visible or not.
+     */
+    get IsVisible() {
+        return this._visible;
     }
 
     /**
@@ -42,37 +78,6 @@ class RoomBase {
      */
     get Type() {
         return this.mem.type;
-    }
-
-    /**
-     * Initializes the room memory with default values.
-     */
-    init() {
-        if (!this.mem.state) {
-            this.mem.state = C.ROOM_STATE_NORMAL;
-        }
-
-        if (!this.mem.update) {
-            this.mem.update = {};
-        }
-        if (!this.mem.update.last) {
-            this.mem.update.last = 0;
-        }
-        if (!this.mem.update.next) {
-            this.mem.update.next = 0;
-        }
-
-        if (!this.mem.targets) {
-            this.mem.targets = {};
-        }
-    }
-
-    /**
-     * Empty method. Can't do anything without access to the actual room.
-     * (Might add some logic later if there are things that can be done based on memory alone.)
-     */
-    update() {
-        // Does nothing without the actual room object from the game.
     }
 }
 

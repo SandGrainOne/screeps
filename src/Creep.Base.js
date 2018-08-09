@@ -18,24 +18,18 @@ class CreepBase {
         this.mem = creep.memory;
 
         this.mem.ticksToLive = this.creep.ticksToLive;
-        
+
+        // Make sure the creep has been given rooms to work in.
         if (!this.mem.rooms) {
             this.mem.rooms = {};
         }
-
         this.mem.rooms.current = this.creep.room.name;
-
         if (!this.mem.rooms.home) {
             this.mem.rooms.home = this.creep.room.name;
         }
-
         if (!this.mem.rooms.work) {
             this.mem.rooms.work = this.creep.room.name;
         }
-
-        if (!this.mem.task) {
-            this.mem.task = "none";
-        } 
     }
 
     /**
@@ -46,45 +40,17 @@ class CreepBase {
     }
 
     /**
-     * Gets the stored number of remaining ticks to live.
-     */
-    get TicksToLive() {
-        return this.creep.ticksToLive;
-    }
-
-    /**
-     * Gets the creeps job name.
-     */
-    get Job() {
-        return this.men.job;
-    }
-
-    /**
-     * Gets the current task.
-     */
-    get Task() {
-        return this.mem.task;
-    }
-
-    /**
-     * Sets the current task.
-     */
-    set Task(value) {
-        this.mem.task = value;
-    }
-
-    /**
      * Gets a value indicating whether the creep is in the work room.
      */
     get AtWork() {
-        return this.Room.Name === this.WorkRoom.Name;
+        return this.Room.Name === this.mem.rooms.work;
     }
 
     /**
      * Gets a value indicating whether the creep is in the home room.
      */
     get AtHome() {
-        return this.Room.Name === this.HomeRoom.Name;
+        return this.Room.Name === this.mem.rooms.home;
     }
 
     /**
@@ -144,20 +110,30 @@ class CreepBase {
     /**
      * The creep will move to the given room. Use this if the creep don't have a full RoomPosition.
      * 
-     * @param {RoomBase} room - The room that the creep want to move to.
+     * @param {string} roomName - The name of the room to move to.
+     * @param {boolean} move - Set to false to have the method return a position instead of moving.
      * 
-     * @returns {object} true if the creep is in the given room already.
+     * @returns {int} The result of the moveTo call.
      */
-    moveToRoom(room) {
+    moveToRoom(roomName, move = true) {
+        let moveTarget = null;
+
         // Micro manage where creeps go to exit a room while looking for a specific room.
-        if (C.EXIT[this.Room.Name] && C.EXIT[this.Room.Name][room.Name]) {
-            let coords = C.EXIT[this.Room.Name][room.Name];
-            return this.moveTo(new RoomPosition(coords.x, coords.y, this.Room.Name));
+        if (C.EXIT[this.Room.Name] && C.EXIT[this.Room.Name][roomName]) {
+            let coords = C.EXIT[this.Room.Name][roomName];
+            moveTarget = new RoomPosition(coords.x, coords.y, this.Room.Name);
+        }
+        else {
+            let exitDir = this.creep.room.findExitTo(roomName);
+            moveTarget = this.creep.pos.findClosestByRange(exitDir);
         }
 
-        let exitDir = this.creep.room.findExitTo(room.Name);
-        let exit = this.creep.pos.findClosestByRange(exitDir);
-        return this.moveTo(exit);
+        if (move) {
+            return this.moveTo(moveTarget);
+        }
+        else {
+            return moveTarget;
+        }
     }
 
     /**
@@ -168,18 +144,18 @@ class CreepBase {
             return ERR_TIRED;
         }
 
-        let pos = target.pos ? target.pos : target;
+        let pos = target && target.pos ? target.pos : target;
         
-        let room = new RoomBase(pos.roomName);
+        //let room = new RoomBase(pos.roomName);
 
-        if (room.State !== C.ROOM_STATE_NORMAL) {
-            let flag = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
-            if (flag) {
-                let moveResult = this.creep.moveTo(flag);
-                return moveResult;
-            }
-            return OK;
-        }
+        //if (false && room.State !== C.ROOM_STATE_NORMAL) {
+        //    let flag = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
+        //    if (flag) {
+        //        let moveResult = this.creep.moveTo(flag);
+        //        return moveResult;
+        //    }
+        //    return OK;
+        //}
 
         let ops = { 
             ignoreCreeps: false,
@@ -187,7 +163,6 @@ class CreepBase {
         }
 
         let res = this.creep.moveTo(pos, ops);
-        //if (pos.roomName === "E80N85") console.log("moveTo(" +JSON.stringify(pos) + ") = " + res);
         return res;
     }
 }

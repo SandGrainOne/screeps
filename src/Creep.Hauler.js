@@ -25,7 +25,7 @@ class CreepHauler extends CreepWorker {
      */
     work() {
         // If possible, perform road repairs on the move.
-        if (this.Strength > 0 && this.CargoAmount > Math.min(this.Strength, this.Capacity)) {
+        if (this.Strength > 0 && this.NextCarry > Math.min(this.Strength, this.Capacity)) {
             let foundStructures = this.creep.pos.lookFor(LOOK_STRUCTURES);
             if (foundStructures.length > 0) {
                 for (let structure of foundStructures) {
@@ -40,7 +40,7 @@ class CreepHauler extends CreepWorker {
             }
         }
 
-        if (this.CargoAmount < this.Capacity) {
+        if (this.NextCarry < this.Capacity) {
             // Using FIND_DROPPED_RESOURCES instead of Room.Resources.Drops. 
             // The later does not include drops at containers, but those must still be picked up.
             let drops = this.creep.pos.findInRange(FIND_DROPPED_RESOURCES, 1);
@@ -54,7 +54,7 @@ class CreepHauler extends CreepWorker {
         }
 
         // Withdraw any resource from a container.
-        if (this.AtWork && this.CargoAmount < this.Capacity) {
+        if (this.AtWork && this.NextCarry < this.Capacity) {
             if (this.Room.Containers.length > 0) {
                 let containers = this.creep.pos.findInRange(this.Room.Containers, 1);
                 // The containers are sorted. The one with the most in storage is first.
@@ -69,7 +69,7 @@ class CreepHauler extends CreepWorker {
             }
         }
 
-        if (this.AtHome && this.CargoAmount > 0) {
+        if (this.AtHome && this.NextCarry > 0) {
             if (this.Room.Links.Inputs.length > 0) {
                 let links = this.creep.pos.findInRange(this.Room.Links.Inputs, 1);
                 if (links.length > 0) {
@@ -91,28 +91,24 @@ class CreepHauler extends CreepWorker {
             }
         }
 
-        if (this.Name === "Penelope") {
-            console.log("Carry: " + this.StartCarry);
-            console.log("Next: " + this.CargoAmount);
+        if (this.Name === " ") {
+            console.log("_startCarry: " + this._startCarry);
+            console.log("_nextCarry : " + this.NextCarry);
         }
 
-        if (this.CargoAmount <= 0) {
+        if (this.NextCarry <= 0) {
             this.IsWorking = true;
         }
 
-        if (this.CargoAmount >= this.Capacity) {
+        if (this.NextCarry >= this.Capacity) {
             this.IsWorking = false;
         }
 
         let moveTarget = null;
 
-        if (this.Name === "Penelope") {
-            console.log("IsWorking: " + this.IsWorking);
-        }
-
         if (this.IsWorking) {
             if (!this.AtWork) {
-                this.moveToRoom(this.WorkRoom);
+                this.moveToRoom(this.WorkRoom.Name);
             }
             else {
                 if (!moveTarget) {
@@ -143,12 +139,8 @@ class CreepHauler extends CreepWorker {
             }
         }
         else {
-
-            if (this.Name === "Penelope") {
-                console.log("AtHome: " + this.AtHome);
-            }
             if (!this.AtHome) {
-                this.moveToRoom(this.HomeRoom);
+                this.moveToRoom(this.HomeRoom.Name);
             }
             else {
                 if (!moveTarget) {

@@ -25,8 +25,8 @@ class CreepSettler extends CreepWorker {
         if (this.AtWork) {
             if (this.Room.Controller && this.creep.pos.isNearTo(this.Room.Controller)) {
                 if (this.Name === " ") {
-                    console.log("Hi, I am  .");
-                    //this.creep.claimController(this.Room.Controller);
+                    this.creep.signController(this.Room.Controller, "For the Sand empire!");
+                    this.creep.claimController(this.Room.Controller);
                 }
                 else {
                     this.creep.reserveController(this.Room.Controller);
@@ -35,7 +35,7 @@ class CreepSettler extends CreepWorker {
         }
 
         if (!this.AtWork) {
-            this.moveToRoom(this.WorkRoom);
+            this.moveToRoom(this.WorkRoom.Name);
         }
         else {
             if (this.Room.Controller && !this.creep.pos.isNearTo(this.Room.Controller)) {

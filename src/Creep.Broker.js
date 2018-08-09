@@ -25,7 +25,7 @@ class CreepBroker extends CreepWorker {
      */
     work() {
         if (!this.AtWork) {
-            this.moveToRoom(this.WorkRoom);
+            this.moveTo(this.moveToRoom(this.WorkRoom.Name, false));
             return true;
         }
 
@@ -37,16 +37,34 @@ class CreepBroker extends CreepWorker {
             this.creep.say("todo?");
         }
 
-        if (storageLink && this.creep.pos.isNearTo(storageLink)) {
-            this.creep.withdraw(storageLink, RESOURCE_ENERGY);
+        if (this.NextCarry < this.Capacity) {
+            if (storageLink && storageLink.energy > 0 && this.creep.pos.isNearTo(storageLink)) {
+                this.withdraw(storageLink, RESOURCE_ENERGY);
+            }
         }
 
-        if (terminal && this.creep.pos.isNearTo(storage) && (!storage || storage.store.energy > 400000)) {
-            this.creep.transfer(storage, RESOURCE_ENERGY);
+        if (this.NextCarry < this.Capacity) {
+            if (storage && storage.store.energy > 500000 && this.creep.pos.isNearTo(storage)) {
+                this.withdraw(storage, RESOURCE_ENERGY);
+            }
         }
 
-        if (storage && this.creep.pos.isNearTo(storage)) {
-            this.creep.transfer(storage, RESOURCE_ENERGY);
+        if (this.NextCarry < this.Capacity) {
+            if (terminal && terminal.store.energy > 0 && this.creep.pos.isNearTo(terminal)) {
+                this.withdraw(terminal, RESOURCE_ENERGY);
+            }
+        }
+
+        if (this.NextCarry > 0) {
+            if (storage && storage.store.energy < 400000 && this.creep.pos.isNearTo(storage)) {
+                this.transfer(storage, RESOURCE_ENERGY);
+            }
+        }
+
+        if (this.NextCarry > 0) {
+            if (terminal && this.creep.pos.isNearTo(terminal)) {
+                this.transfer(terminal, RESOURCE_ENERGY);
+            }
         }
 
         if (storage && !this.creep.pos.isNearTo(storage)) {

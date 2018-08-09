@@ -25,7 +25,7 @@ class CreepRefueler extends CreepWorker {
      */
     work() {
         if (!this.AtWork) {
-            this.moveToRoom(this.WorkRoom);
+            this.moveToRoom(this.WorkRoom.Name);
             return true;
         }
 

@@ -31,7 +31,7 @@ class CreepBalancer extends CreepWorker {
         }
         
         // If possible, perform road repairs on the move.
-        if (this.Strength > 0 && this.CargoAmount > Math.min(this.Strength, this.Capacity)) {
+        if (this.Strength > 0 && this.StartEnergy >= Math.min(this.Strength, this.Capacity)) {
             let foundStructures = this.creep.pos.lookFor(LOOK_STRUCTURES);
             if (foundStructures.length > 0) {
                 for (let structure of foundStructures) {
@@ -46,7 +46,7 @@ class CreepBalancer extends CreepWorker {
             }
         }
 
-        if (this.AtWork && this.EndCarry <= 0) {
+        if (this.AtWork && this.NextCarry <= 0) {
             let storage = this.Room.Storage;
             if (storage) {
                 if (this.creep.pos.isNearTo(storage)) {
@@ -55,7 +55,7 @@ class CreepBalancer extends CreepWorker {
             }
         }
 
-        if (this.AtHome && this.EndCarry > 0) {
+        if (this.AtHome && this.NextCarry > 0) {
             if (this.Room.Links.Inputs.length > 0) {
                 let links = this.creep.pos.findInRange(this.Room.Links.Inputs, 1);
                 if (links.length > 0) {
@@ -78,15 +78,15 @@ class CreepBalancer extends CreepWorker {
         }
 
         if (this.Name === " ") {
-            console.log("Carry: " + this.StartCarry);
-            console.log("Next: " + this.EndCarry);
+            console.log("_startCarry: " + this._startCarry);
+            console.log("_nextCarry: " + this.NextCarry);
         }
 
-        if (this.EndCarry <= 0) {
+        if (this.NextCarry <= 0) {
             this.IsWorking = true;
         }
 
-        if (this.EndCarry >= this.Capacity) {
+        if (this.NextCarry >= this.Capacity) {
             this.IsWorking = false;
         }
 
@@ -94,7 +94,7 @@ class CreepBalancer extends CreepWorker {
 
         if (this.IsWorking) {
             if (!this.AtWork) {
-                this.moveToRoom(this.WorkRoom);
+                this.moveToRoom(this.WorkRoom.Name);
             }
             else {
                 let storage = this.Room.Storage;
@@ -107,7 +107,7 @@ class CreepBalancer extends CreepWorker {
         }
         else {
             if (!this.AtHome) {
-                this.moveToRoom(this.HomeRoom);
+                this.moveToRoom(this.HomeRoom.Name);
             }
             else {
                 if (!moveTarget) {

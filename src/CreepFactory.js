@@ -21,8 +21,7 @@ class CreepFactory {
     /**
      * Initializes a new instance of the CreepBase class with the specified creep.
      */
-    constructor(knownRooms) {
-        this.KnownRooms = knownRooms;
+    constructor() {
     }
 
     /**
@@ -33,7 +32,12 @@ class CreepFactory {
     wrap(creep) {
         let smartCreep = null;
 
-        switch (creep.memory.job) {
+        let job = creep.memory.job;
+        if (job.name) {
+            job = job.name;
+        }
+
+        switch (job) {
             case 'miner':
                 smartCreep = new CreepMiner(creep);
                 break;
@@ -78,10 +82,6 @@ class CreepFactory {
         if (!smartCreep) {
             smartCreep = new CreepBase(creep);
         }
-
-        smartCreep.Room = this.KnownRooms[smartCreep.creep.memory.rooms.current];
-        smartCreep.HomeRoom = this.KnownRooms[smartCreep.creep.memory.rooms.home];
-        smartCreep.WorkRoom = this.KnownRooms[smartCreep.creep.memory.rooms.work];
 
         return smartCreep;
     }

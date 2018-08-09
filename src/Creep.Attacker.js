@@ -22,23 +22,19 @@ class CreepAttacker extends CreepSoldier {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
-        if (this.Name === "Mila") {
-            let flagAttack = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_RED });
-
-            if (flagAttack) {
-                this.creep.moveTo(flagAttack);
-            }
+        if(!this.AtWork) {
+            this.moveToRoom(this.WorkRoom.Name);
             return true;
         }
 
         // Retreat ?
-        if (this.creep.hits < this.creep.hitsMax / 2) {
-            let flagRetreat = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
-            if (flagRetreat) {
-                this.creep.moveTo(flagRetreat);
-            }
-            return true;
-        }
+        //if (this.creep.hits < this.creep.hitsMax / 2) {
+        //    let flagRetreat = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
+        //    if (flagRetreat) {
+        //        this.creep.moveTo(flagRetreat);
+        //    }
+        //    return true;
+        //}
         
         let hostileCreep = this.creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
         if (hostileCreep) {

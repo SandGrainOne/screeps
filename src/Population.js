@@ -19,33 +19,28 @@ class Population {
                 Memory.population[roomName] = {};
             }
         }
-        
-        // Loop through all creeps in memory and sort them to quick access buckets.
-        for (let creepName in Memory.creeps) {
-            let creep = Game.creeps[creepName];
-            if (!creep) {
-                // The creep must have died
-                delete Memory.creeps[creepName];
-                continue;
-            }
 
-            // Just in case there is a creep without a work room.
-            let workroom = creep.memory.workroom ? creep.memory.workroom : creep.room.name;
-            if (creep.memory.rooms && creep.memory.rooms.work){
-                workroom = creep.memory.rooms.work;
-            }
+        for (let creepName in Game.creeps) {
+
+            let creep = Game.creeps[creepName];
+            let workroom = creep.memory.rooms.work;
 
             if (!Memory.population[workroom]) {
                 Memory.population[workroom] = {};
             }
 
-            if (!Memory.population[workroom][creep.memory.job + 's']) {
-                Memory.population[workroom][creep.memory.job + 's'] = [];
-            }            
+            let job = creep.memory.job;
+            if (job.name) {
+                job = job.name;
+            }
 
-            Memory.population[workroom][creep.memory.job + 's'].push(creepName);
+            if (!Memory.population[workroom][job + 's']) {
+                Memory.population[workroom][job + 's'] = [];
+            }
+
+            Memory.population[workroom][job + 's'].push(creepName);
         }
-        
+
         // Create easy access creep lists for rooms.
         for (let room in Memory.population) {
             this[room] = Memory.population[room];

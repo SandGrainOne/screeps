@@ -21,6 +21,10 @@ class CreepHealer extends CreepSoldier {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
+        if(!this.AtWork) {
+            this.moveToRoom(this.WorkRoom.Name);
+            return true;
+        }
         
         let flagAttack = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_RED });
 

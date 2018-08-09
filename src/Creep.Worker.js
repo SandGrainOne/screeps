@@ -25,6 +25,8 @@ class CreepWorker extends CreepBase {
 
         this._carry = this._startCarry - this._startEnergy;
         this._energy = this._startEnergy;
+
+        this._performedWork = {};
     }
 
     /**
@@ -49,13 +51,6 @@ class CreepWorker extends CreepBase {
     }
 
     /**
-     * Gets the amount of resources carried by the creep at the start of its work cycle.
-     */
-    get StartCarry() {
-        return this._startCarry;
-    }
-
-    /**
      * Gets the amount of energy callculated to be held by the creep at the end of the work cycle.
      */
     get EndEnergy() {
@@ -65,14 +60,7 @@ class CreepWorker extends CreepBase {
     /**
      * Gets the amount of resources callculated to be carried by the creep at the end of the work cycle.
      */
-    get EndCarry() {
-        return this._carry + this._energy;
-    }
-
-    /**
-     * Gets the amount of resources callculated to be carried by the creep at the end of the work cycle.
-     */
-    get CargoAmount() {
+    get NextCarry() {
         return this._carry + this._energy;
     }
 
@@ -90,18 +78,23 @@ class CreepWorker extends CreepBase {
         this.mem.isworking = !!value;
     }
 
+    work() {
+        return false;
+    }
+
     /**
      * Perform a retreat if there is an enemy creep in the room or if it is hurt.
      * 
      * @returns {Boolean} true if the retreat was required and the creep is on the move
      */
     retreat() {
-        if (!this.AtHome) {
-            if (this.Room.State !== C.ROOM_STATE_NORMAL || this.creep.hits < this.creep.hitsMax) {
-                this.moveToRoom(this.HomeRoom);
-                return true;
-            }
-        }
+        // TODO: Add more advanced logic to handle type of hostile creeps and type of room.
+        //if (!this.AtHome) {
+        //    if (this.Room.State !== C.ROOM_STATE_NORMAL || this.creep.hits < this.creep.hitsMax) {
+        //        this.moveToRoom(this.HomeRoom.Name);
+        //        return true;
+        //    }
+        //}
         return false;
     }
 
@@ -112,9 +105,14 @@ class CreepWorker extends CreepBase {
      * @param {ConstructionSite} target - The target construction site.
      */
     build(target) {
+        if (this._performedWork.build) {
+            return ERR_BUSY;
+        }
+
         let res = this.creep.build(target);
         if (res === OK) {
             this._energy = this._energy - (this._strength * 5);
+            this._performedWork.build = true;
         }
         return res;
     }
@@ -126,9 +124,14 @@ class CreepWorker extends CreepBase {
      * @param {Structure} target - The target structure to repair.
      */
     repair(target) {
+        if (this._performedWork.repair) {
+            return ERR_BUSY;
+        }
+
         let res = this.creep.repair(target);
         if (res === OK) {
             this._energy = this._energy - this._strength;
+            this._performedWork.repair = true;
         }
         return res;
     }
@@ -140,9 +143,14 @@ class CreepWorker extends CreepBase {
      * @param {StructureController} target - The controller to upgrade.
      */
     upgrade(target) {
+        if (this._performedWork.upgrade) {
+            return ERR_BUSY;
+        }
+
         let res = this.creep.upgradeController(target);
         if (res === OK) {
             this._energy = this._energy - this._strength;
+            this._performedWork.upgrade = true;
         }
         return res;
     }
@@ -154,6 +162,10 @@ class CreepWorker extends CreepBase {
      * @param {Source|Mineral} target - The mineral node to harvest from.
      */
     harvest(target) {
+        if (this._performedWork.harvest) {
+            return ERR_BUSY;
+        }
+
         let res = this.creep.harvest(target);
         if (res === OK) {
             if (target instanceof Source) {
@@ -162,6 +174,7 @@ class CreepWorker extends CreepBase {
             if (target instanceof Mineral) {
                 this._carry = this._carry + (this._strength);
             }
+            this._performedWork.harvest = true;
         }
         return res;
     }
@@ -173,6 +186,10 @@ class CreepWorker extends CreepBase {
      * @param {string} resourceType - One of the RESOURCE_* constants indicating what resource to drop.
      */
     drop(resourceType) {
+        if (this._performedWork.drop) {
+            return ERR_BUSY;
+        }
+
         let res = this.creep.drop(resourceType);
         if (res === OK) {
             let carriedAmount = this.creep.carry[resourceType];
@@ -182,6 +199,7 @@ class CreepWorker extends CreepBase {
             else {
                 this._carry = this._carry - carriedAmount;
             }
+            this._performedWork.drop = true;
         }
         return res;
     }
@@ -193,15 +211,20 @@ class CreepWorker extends CreepBase {
      * @param {Resource} target - The resource drop to pick up from the ground.
      */
     pickup(target) {
+        if (this._performedWork.pickup) {
+            return ERR_BUSY;
+        }
+
         let res = this.creep.pickup(target);
         if (res === OK) {
-            let creepSpace = this.Capacity - this.EndCarry;
+            let creepSpace = this._capacity - this._startCarry;
             if (target.resourceType === RESOURCE_ENERGY) {
                 this._energy = this._energy + Math.min(target.amount, creepSpace);
             }
             else {
                 this._carry = this._carry + Math.min(target.amount, creepSpace);
             }
+            this._performedWork.pickup = true;
         }
         return res;
     }
@@ -214,6 +237,10 @@ class CreepWorker extends CreepBase {
      * @param {string} resourceType - One of the RESOURCE_* constants indicating what resource to drop.
      */
     transfer(target, resourceType) {
+        if (this._performedWork.transfer) {
+            return ERR_BUSY;
+        }
+
         let targetSpace = 0;
         if (target.storeCapacity) {
             // Containers, Storage, Terminal, etc
@@ -239,6 +266,7 @@ class CreepWorker extends CreepBase {
             else {
                 this._carry = this._carry - amountTransfered;
             }
+            this._performedWork.transfer = true;
         }
         return res;
     }
@@ -251,6 +279,10 @@ class CreepWorker extends CreepBase {
      * @param {string} resourceType - One of the RESOURCE_* constants indicating what resource to drop.
      */
     withdraw(target, resourceType) {
+        if (this._performedWork.withdraw) {
+            return ERR_BUSY;
+        }
+
         let amountStored = 0;
         if (target.store) {
             // Containers, Storage, Terminal, etc
@@ -261,7 +293,7 @@ class CreepWorker extends CreepBase {
             amountStored = target.energy;
         }
 
-        let restCapacity = this.Capacity - this.CargoAmount;
+        let restCapacity = this._capacity - this._carry - this._energy;
         let amountTransfered = Math.min(amountStored, restCapacity);
 
         if (amountTransfered <= 0) {
@@ -269,6 +301,7 @@ class CreepWorker extends CreepBase {
         }
 
         let res = this.creep.withdraw(target, resourceType, amountTransfered);
+
         if (res === OK) {
             if (resourceType === RESOURCE_ENERGY) {
                 this._energy = this._energy + amountTransfered;
@@ -276,6 +309,7 @@ class CreepWorker extends CreepBase {
             else {
                 this._carry = this._carry + amountTransfered;
             }
+            this._performedWork.withdraw = true;
         }
         return res;
     }
