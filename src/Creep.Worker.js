@@ -90,8 +90,8 @@ class CreepWorker extends CreepBase {
     retreat() {
         // TODO: Add more advanced logic to handle type of hostile creeps and type of room.
         //if (!this.AtHome) {
-        //    if (this.Room.State !== C.ROOM_STATE_NORMAL || this.creep.hits < this.creep.hitsMax) {
-        //        this.moveToRoom(this.HomeRoom.Name);
+        //    if (this.Room.state !== C.ROOM_STATE_NORMAL || this.creep.hits < this.creep.hitsMax) {
+        //        this.moveToRoom(this.HomeRoom.name);
         //        return true;
         //    }
         //}
@@ -271,14 +271,6 @@ class CreepWorker extends CreepBase {
 
         let carriedAmount = this.creep.carry[resourceType];
         let amountTransfered = Math.min(targetSpace, carriedAmount);
-
-        if (this.Name === " ") {
-            console.log("target.structureType: " + target.structureType);
-            console.log("resourceType: " + resourceType);
-            console.log("targetSpace: " + targetSpace);
-            console.log("carriedAmount: " + carriedAmount);
-            console.log("amountTransfered: " + amountTransfered);
-        }
 
         if (amountTransfered <= 0) {
             return ERR_NOT_ENOUGH_RESOURCES;

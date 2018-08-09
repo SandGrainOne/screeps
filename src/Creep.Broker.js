@@ -25,7 +25,7 @@ class CreepBroker extends CreepWorker {
      */
     work() {
         if (!this.AtWork) {
-            this.moveTo(this.moveToRoom(this.WorkRoom.Name, false));
+            this.moveTo(this.moveToRoom(this.WorkRoom.name, false));
             return true;
         }
 
@@ -33,37 +33,75 @@ class CreepBroker extends CreepWorker {
         let storageLink = this.Room.Links.Storage;
         let terminal = this.Room.Terminal;
 
-        if (!storage || !storageLink) {
+        if (!storage || (!storageLink && !terminal)) {
             this.creep.say("todo?");
+            return false;
         }
 
-        if (this.NextCarry < this.Capacity) {
-            if (storageLink && storageLink.energy > 0 && this.creep.pos.isNearTo(storageLink)) {
-                this.withdraw(storageLink, RESOURCE_ENERGY);
+        let performedWithdraw = false;
+
+        if (this.NextCarry < this.Capacity && !performedWithdraw) {
+            if (storageLink && storageLink.energy > 300 && this.creep.pos.isNearTo(storageLink)) {
+                if (this.withdraw(storageLink, RESOURCE_ENERGY) === OK ) {
+                    performedWithdraw = true;
+                }
             }
         }
 
-        if (this.NextCarry < this.Capacity) {
-            if (storage && storage.store.energy > 500000 && this.creep.pos.isNearTo(storage)) {
-                this.withdraw(storage, RESOURCE_ENERGY);
+        if (this.NextCarry < this.Capacity && !performedWithdraw && this.creep.pos.isNearTo(storage)) {
+            // Do not move stuff out of the storage if the terminal is full.
+            if (terminal && _.sum(terminal.store) < terminal.storeCapacity * 0.9) {
+                for (let resourceType in storage.store) {
+                    let storeLimit = C.STORAGE_THRESHOLD_MINERAL * 1.1;
+                    if (resourceType === RESOURCE_ENERGY) {
+                        storeLimit = C.STORAGE_THRESHOLD_ENERGY * 1.1;
+                    }
+
+                    if (storage.store[resourceType] > storeLimit) {
+                        if (this.withdraw(storage, resourceType) === OK) {
+                            performedWithdraw = true;
+                            break;
+                        }
+                    }
+                }
             }
         }
 
-        if (this.NextCarry < this.Capacity) {
-            if (terminal && terminal.store.energy > 0 && this.creep.pos.isNearTo(terminal)) {
-                this.withdraw(terminal, RESOURCE_ENERGY);
+        if (terminal && this.NextCarry < this.Capacity && !performedWithdraw && this.creep.pos.isNearTo(terminal)) {
+            for (let resourceType in terminal.store) {
+                let storeLimit = C.STORAGE_THRESHOLD_MINERAL * 0.9;
+                if (resourceType === RESOURCE_ENERGY) {
+                    storeLimit = C.STORAGE_THRESHOLD_ENERGY * 0.9;
+                }
+
+                // Only reason to withdraw from the terminal would be if the storage is below its threshold.
+                if ((storage.store[resourceType] || 0 ) < storeLimit) {
+                    if (this.withdraw(terminal, resourceType) === OK) {
+                        performedWithdraw = true;
+                        break;
+                    }
+                }
             }
         }
 
-        if (this.NextCarry > 0) {
-            if (storage && storage.store.energy < 500000 && this.creep.pos.isNearTo(storage)) {
-                this.transfer(storage, RESOURCE_ENERGY);
-            }
-        }
+        if (this.NextCarry > 0 && this.creep.pos.isNearTo(storage)) {
+            for (let resourceType in this.creep.carry) {
+                let storeLimit = C.STORAGE_THRESHOLD_MINERAL * 0.9;
+                if (resourceType === RESOURCE_ENERGY) {
+                    storeLimit = C.STORAGE_THRESHOLD_ENERGY * 0.9;
+                }
 
-        if (this.NextCarry > 0) {
-            if (terminal && this.creep.pos.isNearTo(terminal)) {
-                this.transfer(terminal, RESOURCE_ENERGY);
+                if ((storage.store[resourceType] || 0) < storeLimit) {
+                    if (this.transfer(storage, resourceType) === OK) {
+                        break;
+                    }
+                }
+
+                if (terminal && this.creep.pos.isNearTo(terminal)) {
+                    if (this.transfer(terminal, resourceType) === OK) {
+                        break;
+                    }
+                }
             }
         }
 

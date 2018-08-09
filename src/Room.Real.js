@@ -15,8 +15,8 @@ class RoomReal extends RoomBase {
      */
     constructor(room) {
         super(room.name);
-        this._visible = true;
         this.room = room;
+        this._visible = true;
     }
 
     get Controller() {
@@ -34,12 +34,12 @@ class RoomReal extends RoomBase {
     }
 
     reserveTarget(targetId, creepName) {
-        if (!this.mem.reservations[targetId]) {
-            this.mem.reservations[targetId] = { creepName: creepName, ttl: 2 };
+        if (!this._mem.reservations[targetId]) {
+            this._mem.reservations[targetId] = { creepName: creepName, ttl: 2 };
             return true;
         }
-        if (this.mem.reservations[targetId].creepName === creepName) {
-            this.mem.reservations[targetId].ttl = 2;
+        if (this._mem.reservations[targetId].creepName === creepName) {
+            this._mem.reservations[targetId].ttl = 2;
             return true;
         }
         return false;
@@ -51,49 +51,60 @@ class RoomReal extends RoomBase {
      * @param {Boolean} force - Perform an analysis of the room right away. Ignore the update schedule.
      */
     analyze(force) {
-        if (!force && this.mem.update.next >= Game.time) {
+        if (!force && this._mem.update.next >= Game.time) {
             return;
         }
 
         // Prepare next update.
-        this.mem.update.next = Game.time + 50 + Math.floor(Math.random() * 10);
-        this.mem.update.last = Game.time;
+        this._mem.update.next = Game.time + 50 + Math.floor(Math.random() * 10);
+        this._mem.update.last = Game.time;
 
         // Storing resource information to memory.
-        this.mem.resources = {};
-        this.mem.resources.sources = [];
+        this._mem.resources = {};
+        this._mem.resources.sources = [];
         for (let source of this.room.find(FIND_SOURCES)) {
-            this.mem.resources.sources.push(source.id);
+            this._mem.resources.sources.push(source.id);
         }
-        this.mem.resources.minerals = null;
-        this.mem.resources.extractor = null;
+        this._mem.resources.minerals = null;
+        this._mem.resources.extractor = null;
         let mineralNodes = this.room.find(FIND_MINERALS);
         if (mineralNodes.length > 0) {
-            this.mem.resources.minerals = mineralNodes[0].id;
+            this._mem.resources.minerals = mineralNodes[0].id;
         }
 
-        this.mem.structures = {};
-        this.mem.structures.spawns = [];
-        this.mem.structures.extensions = [];
-        this.mem.structures.towers = [];
-        this.mem.structures.containers = [];
-        this.mem.structures.tempstorage = null;
-        this.mem.structures.links = {};
-        this.mem.structures.links.storage = null;
-        this.mem.structures.links.controller = null;
-        this.mem.structures.links.inputs = [];
-        this.mem.structures.labs = {};
-        this.mem.structures.labs.all = [];
+        this._mem.structures = {};
+        this._mem.structures.spawns = [];
+        this._mem.structures.extensions = [];
+        this._mem.structures.towers = [];
+        this._mem.structures.containers = [];
+        this._mem.structures.tempstorage = null;
+        this._mem.structures.links = {};
+        this._mem.structures.links.storage = null;
+        this._mem.structures.links.controller = null;
+        this._mem.structures.links.inputs = [];
+        this._mem.structures.labs = {};
+        this._mem.structures.labs.all = [];
+        this._mem.structures.labs.rOne = null;
+        this._mem.structures.labs.rTwo = null;
+        this._mem.structures.labs.producers = [];
+
+        // Need to handle Labs multiple times in order to identify the roles.
+        let labs = [];
 
         for (let structure of this.room.find(FIND_STRUCTURES)) {
 
             if (structure.structureType === STRUCTURE_CONTAINER) {
                 if (!this.room.storage && structure.pos.findInRange(FIND_MY_SPAWNS, 1).length > 0) {
-                    this.mem.structures.tempstorage = structure.id;
+                    this._mem.structures.tempstorage = structure.id;
                 }
                 else {
-                    this.mem.structures.containers.push(structure.id);
+                    this._mem.structures.containers.push(structure.id);
                 }
+            }
+
+            // Some rooms have public extractors
+            if (structure.structureType === STRUCTURE_EXTRACTOR) {
+                this._mem.resources.extractor = structure.id;
             }
 
             if (!this.room.controller || !this.room.controller.my) {
@@ -101,16 +112,16 @@ class RoomReal extends RoomBase {
             }
 
             if (structure.structureType === STRUCTURE_SPAWN) {
-                this.mem.structures.spawns.push(structure.id);
-                this.mem.structures.extensions.push(structure.id);
+                this._mem.structures.spawns.push(structure.id);
+                this._mem.structures.extensions.push(structure.id);
             }
 
             if (structure.structureType === STRUCTURE_EXTENSION) {
-                this.mem.structures.extensions.push(structure.id);
+                this._mem.structures.extensions.push(structure.id);
             }
 
             if (structure.structureType === STRUCTURE_TOWER) {
-                this.mem.structures.towers.push(structure.id);
+                this._mem.structures.towers.push(structure.id);
             }
 
             if (structure.structureType === STRUCTURE_LINK) {
@@ -118,31 +129,58 @@ class RoomReal extends RoomBase {
                 let rangeToController = structure.pos.getRangeTo(this.room.controller);
 
                 if (Math.min(rangeToStorage, rangeToController) > 5) {
-                    this.mem.structures.links.inputs.push(structure.id);
+                    this._mem.structures.links.inputs.push(structure.id);
                 }
                 else if (rangeToController < rangeToStorage) {
-                    this.mem.structures.links.controller = structure.id;
+                    this._mem.structures.links.controller = structure.id;
                 }
                 else {
-                    this.mem.structures.links.storage = structure.id;
+                    this._mem.structures.links.storage = structure.id;
                 }
-            }
-
-            if (structure.structureType === STRUCTURE_EXTRACTOR) {
-                this.mem.resources.extractor = structure.id;
             }
 
             if (structure.structureType === STRUCTURE_LAB) {
-                this.mem.structures.labs.all.push(structure.id);
+                this._mem.structures.labs.all.push(structure.id);
+                labs.push(structure);
+            }
+        }
+
+        if (this.name === "E77N85" && this.room.controller && this.room.controller.my) {
+            if (labs.length === 3) {
+                this._mem.structures.labs.rOne = labs[0].id;
+                this._mem.structures.labs.rTwo = labs[1].id;
+                this._mem.structures.labs.producers.push(labs[2].id);
+            }
+            else if (labs.length === 6) {
+                labs.sort(function(a, b) { return _.sum(a.pos.x + a.pos.y * 10) - _.sum(b.pos.x + b.pos.y * 10) });
+                this._mem.structures.labs.producers.push(labs[0].id);
+                this._mem.structures.labs.producers.push(labs[1].id);
+                this._mem.structures.labs.rOne = labs[2].id;
+                this._mem.structures.labs.rTwo = labs[3].id;
+                this._mem.structures.labs.producers.push(labs[4].id);
+                this._mem.structures.labs.producers.push(labs[5].id);
+            }
+            else if (labs.length === 10) {
+                labs.sort(function(a, b) { return _.sum(a.pos.x + a.pos.y * 10) - _.sum(b.pos.x + b.pos.y * 10) });
+                this._mem.structures.labs.producers.push(labs[0].id);
+                this._mem.structures.labs.producers.push(labs[1].id);
+                this._mem.structures.labs.producers.push(labs[2].id);
+                this._mem.structures.labs.producers.push(labs[3].id);
+                this._mem.structures.labs.rOne = labs[4].id;
+                this._mem.structures.labs.rTwo = labs[5].id;
+                this._mem.structures.labs.producers.push(labs[6].id);
+                this._mem.structures.labs.producers.push(labs[7].id);
+                this._mem.structures.labs.producers.push(labs[8].id);
+                this._mem.structures.labs.producers.push(labs[9].id);
             }
         }
     }
 
     tickReservations() {
-        for (let targetId in this.mem.reservations) {
-            this.mem.reservations[targetId].ttl = this.mem.reservations[targetId].ttl - 1;
-            if (this.mem.reservations[targetId].ttl === 0) {
-                delete this.mem.reservations[targetId];
+        for (let targetId in this._mem.reservations) {
+            this._mem.reservations[targetId].ttl = this._mem.reservations[targetId].ttl - 1;
+            if (this._mem.reservations[targetId].ttl === 0) {
+                delete this._mem.reservations[targetId];
             }
         }
     }
@@ -150,18 +188,18 @@ class RoomReal extends RoomBase {
     prepare() {
         this.Resources = {};
         this.Resources.Sources = [];
-        if (this.mem.resources) {
-            if (this.mem.resources.sources) {
-                for (let sourceId of this.mem.resources.sources) {
+        if (this._mem.resources) {
+            if (this._mem.resources.sources) {
+                for (let sourceId of this._mem.resources.sources) {
                     let source = Game.getObjectById(sourceId);
                     if (source) {
                         this.Resources.Sources.push(source);
                     }
                 }
             }
-            if (this.mem.resources.minerals && this.mem.resources.extractor) {
-                let mineralNode = Game.getObjectById(this.mem.resources.minerals);
-                let extractor = Game.getObjectById(this.mem.resources.extractor);
+            if (this._mem.resources.minerals && this._mem.resources.extractor) {
+                let mineralNode = Game.getObjectById(this._mem.resources.minerals);
+                let extractor = Game.getObjectById(this._mem.resources.extractor);
                 if (mineralNode && mineralNode.mineralAmount > 0 && extractor) {
                     this.Resources.Minerals = mineralNode;
                     this.Resources.Extractor = extractor;
@@ -186,8 +224,8 @@ class RoomReal extends RoomBase {
 
         // Create a quick access array for all containers.
         this.Containers = [];
-        if (this.mem.structures && this.mem.structures.containers) {
-            for (let containerId of this.mem.structures.containers) {
+        if (this._mem.structures && this._mem.structures.containers) {
+            for (let containerId of this._mem.structures.containers) {
                 let container = Game.getObjectById(containerId);
                 if (container) {
                     this.Containers.push(container);
@@ -200,8 +238,8 @@ class RoomReal extends RoomBase {
 
         // Create a quick access array for all spawns.
         this.Spawns = [];
-        if (this.mem.structures && this.mem.structures.spawns) {
-            for (let spawnId of this.mem.structures.spawns) {
+        if (this._mem.structures && this._mem.structures.spawns) {
+            for (let spawnId of this._mem.structures.spawns) {
                 let spawn = Game.getObjectById(spawnId);
                 if (spawn) {
                     this.Spawns.push(spawn);
@@ -211,8 +249,8 @@ class RoomReal extends RoomBase {
 
         // Create a quick access array for extensions (and spawns).
         this.Extensions = [];
-        if (this.mem.structures && this.mem.structures.extensions) {
-            for (let extensionId of this.mem.structures.extensions) {
+        if (this._mem.structures && this._mem.structures.extensions) {
+            for (let extensionId of this._mem.structures.extensions) {
                 let extension = Game.getObjectById(extensionId);
                 if (extension && extension.energy < extension.energyCapacity) {
                     this.Extensions.push(extension);
@@ -225,14 +263,14 @@ class RoomReal extends RoomBase {
         if (this.room.storage) {
             this.Storage = this.room.storage;
         }
-        else if (this.mem.structures.tempstorage) {
-            let tempStorage = Game.getObjectById(this.mem.structures.tempstorage);
+        else if (this._mem.structures.tempstorage) {
+            let tempStorage = Game.getObjectById(this._mem.structures.tempstorage);
             if (tempStorage) {
                 this.Storage =  tempStorage;
             }
         }
-        else if (this.mem.tempstorage) {
-            let tempStorage = Game.getObjectById(this.mem.tempstorage);
+        else if (this._mem.tempstorage) {
+            let tempStorage = Game.getObjectById(this._mem.tempstorage);
             if (tempStorage) {
                 this.Storage =  tempStorage;
             }
@@ -240,8 +278,8 @@ class RoomReal extends RoomBase {
 
         // Create a quick access array for towers.
         this.Towers = [];
-        if (this.mem.structures && this.mem.structures.towers) {
-            for (let towerId of this.mem.structures.towers) {
+        if (this._mem.structures && this._mem.structures.towers) {
+            for (let towerId of this._mem.structures.towers) {
                 let tower = Game.getObjectById(towerId);
                 if (tower) {
                     this.Towers.push(tower);
@@ -257,21 +295,21 @@ class RoomReal extends RoomBase {
         this.Links.Controller = null;
         this.Links.Storage = null;
         this.Links.Inputs = [];
-        if (this.mem.structures && this.mem.structures.links) {
-            if (this.mem.structures.links.controller) {
-                let controllerLink = Game.getObjectById(this.mem.structures.links.controller);
+        if (this._mem.structures && this._mem.structures.links) {
+            if (this._mem.structures.links.controller) {
+                let controllerLink = Game.getObjectById(this._mem.structures.links.controller);
                 if (controllerLink) {
                     this.Links.Controller = controllerLink;
                 }
             }
-            if (this.mem.structures.links.storage) {
-                let storageLink = Game.getObjectById(this.mem.structures.links.storage);
+            if (this._mem.structures.links.storage) {
+                let storageLink = Game.getObjectById(this._mem.structures.links.storage);
                 if (storageLink) {
                     this.Links.Storage = storageLink;
                 }
             }
-            if (this.mem.structures.links.inputs) {
-                for (let linkId of this.mem.structures.links.inputs) {
+            if (this._mem.structures.links.inputs) {
+                for (let linkId of this._mem.structures.links.inputs) {
                     let inputLink = Game.getObjectById(linkId);
                     if (inputLink) {
                         this.Links.Inputs.push(inputLink);
@@ -283,8 +321,8 @@ class RoomReal extends RoomBase {
         this.Labs = {};
         this.Labs.All = [];
         this.Labs.Refuel = [];
-        if (this.mem.structures.labs.all.length > 0) {
-            for (let labId of this.mem.structures.labs.all) {
+        if (this._mem.structures.labs.all.length > 0) {
+            for (let labId of this._mem.structures.labs.all) {
                 let lab = Game.getObjectById(labId);
                 if (lab) {
                     this.Labs.All.push(lab);
@@ -328,13 +366,13 @@ class RoomReal extends RoomBase {
 
         let hostileCreeps = this.room.find(FIND_HOSTILE_CREEPS);
         if (hostileCreeps.length > 0) {
-            this.mem.state = C.ROOM_STATE_INVADED;
+            this._mem.state = C.ROOM_STATE_INVADED;
         }
         else {
-            this.mem.state = C.ROOM_STATE_NORMAL;
+            this._mem.state = C.ROOM_STATE_NORMAL;
         }
 
-        this.room.memory.jobs = { 
+        this._mem.jobs = { 
             settlers: 0,
             builders: 0,
             upgraders: 0,
@@ -344,26 +382,26 @@ class RoomReal extends RoomBase {
             refuelers: 0
         };
 
-        this.room.memory.jobs.miners = this.mem.resources.sources.length;
+        this._mem.jobs.miners = this._mem.resources.sources.length;
 
         if (this.Resources.Minerals) {
-            this.room.memory.jobs.mineralminers = 1;
-            this.room.memory.jobs.haulers = 1;
+            this._mem.jobs.mineralminers = 1;
+            this._mem.jobs.haulers = 1;
         }
 
         if (this.room.controller && this.room.controller.reservation) {
             if (this.room.controller.reservation.username === C.USERNAME && this.room.controller.reservation.ticksToEnd < 4000){
-                this.room.memory.jobs.settlers = 1;
+                this._mem.jobs.settlers = 1;
             }
         }
 
         if (this.Storage) {
-            this.room.memory.jobs.refuelers = 2;
+            this._mem.jobs.refuelers = 2;
         }
 
         let wallCount = this.room.find(FIND_STRUCTURES, { filter: (s) => s.structureType === STRUCTURE_WALL }).length;
         if (wallCount > 0) {
-            if (this.mem.wallcount > wallCount) {
+            if (this._mem.wallcount > wallCount) {
                 if (this.room.controller && this.room.controller.my && !this.room.controller.safeMode) {
                     let hostiles = this.room.find(FIND_HOSTILE_CREEPS).length;
                     if (hostiles > 1) {
@@ -372,14 +410,14 @@ class RoomReal extends RoomBase {
                 }
             }
             
-            if (this.mem.wallcount < wallCount) {
-                this.mem.wallcount = wallCount;
+            if (this._mem.wallcount < wallCount) {
+                this._mem.wallcount = wallCount;
             }
         }
 
         let rampCount = this.room.find(FIND_STRUCTURES, { filter: (s) => s.structureType === STRUCTURE_RAMPART }).length;
         if (rampCount > 0) {
-            if (this.mem.rampcount > rampCount) {
+            if (this._mem.rampcount > rampCount) {
                 if (this.room.controller && this.room.controller.my && !this.room.controller.safeMode) {
                     let hostiles = this.room.find(FIND_HOSTILE_CREEPS).length;
                     if (hostiles > 1) {
@@ -388,8 +426,8 @@ class RoomReal extends RoomBase {
                 }
             }
 
-            if (this.mem.rampcount < rampCount) {
-                this.mem.rampcount = rampCount;
+            if (this._mem.rampcount < rampCount) {
+                this._mem.rampcount = rampCount;
             }
         }
     }
@@ -426,7 +464,7 @@ class RoomReal extends RoomBase {
 
             let rampartToRepair = tower.pos.findClosestByRange(FIND_STRUCTURES, { 
                 filter: (s) => { 
-                    return s.structureType === STRUCTURE_RAMPART && (s.hits < 300000);
+                    return s.structureType === STRUCTURE_RAMPART && (s.hits < 400000);
                 } 
             });
 
@@ -437,7 +475,7 @@ class RoomReal extends RoomBase {
 
             let wallToRepair = tower.pos.findClosestByRange(FIND_STRUCTURES, { 
                 filter: (wall) => { 
-                    return wall.structureType === STRUCTURE_WALL && (wall.hits < 300000);
+                    return wall.structureType === STRUCTURE_WALL && (wall.hits < 400000);
                 } 
             });
 
@@ -493,6 +531,17 @@ class RoomReal extends RoomBase {
                     let amount = Math.min(inputLink.energy, roomLink.energyCapacity - roomLink.energy)
                     let res = inputLink.transferEnergy(roomLink, amount);
                     break;
+                }
+            }
+        }
+
+        if (this.Links.Controller && this.Links.Storage) {
+            let storageLink = this.Links.Storage;
+            if (storageLink.cooldown === 0 && storageLink.energy > 0) {
+                let controllerLink = this.Links.Controller;
+                if (controllerLink.energy < controllerLink.energyCapacity / 2) {
+                    let amount = Math.min(storageLink.energy, controllerLink.energyCapacity - controllerLink.energy)
+                    let res = storageLink.transferEnergy(controllerLink, amount);
                 }
             }
         }

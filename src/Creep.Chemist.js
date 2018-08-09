@@ -25,7 +25,7 @@ class CreepChemist extends CreepWorker {
      */
     work() {
         if (!this.AtWork) {
-            this.moveTo(this.moveToRoom(this.WorkRoom.Name, false));
+            this.moveTo(this.moveToRoom(this.WorkRoom.name, false));
             return true;
         }
 

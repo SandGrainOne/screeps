@@ -62,21 +62,21 @@ class CreepBase {
      * Gets a value indicating whether the creep is retired.
      */
     get IsRetired() {
-        return this.mem.ticksToLive < (this.mem.spawnTime + this.mem.timeToWork + C.RETIREMENT);
+        return this.mem.ticksToLive < (this.mem.spawnTime + C.RETIREMENT);
     }
 
     /**
      * Gets a value indicating whether the creep is in the work room.
      */
     get AtWork() {
-        return this.Room.Name === this.mem.rooms.work;
+        return this.Room.name === this.mem.rooms.work;
     }
 
     /**
      * Gets a value indicating whether the creep is in the home room.
      */
     get AtHome() {
-        return this.Room.Name === this.mem.rooms.home;
+        return this.Room.name === this.mem.rooms.home;
     }
 
     /**
@@ -88,10 +88,6 @@ class CreepBase {
     act() {
         if (this.creep.spawning) {
             return true;
-        }
-
-        if(!this.mem.timeToWork && this.AtWork) {
-            this.mem.timeToWork = CREEP_LIFE_TIME - this.mem.ticksToLive;
         }
 
         if (this.renew()) {
@@ -149,9 +145,9 @@ class CreepBase {
         let moveTarget = null;
 
         // Micro manage where creeps go to exit a room while looking for a specific room.
-        if (C.EXIT[this.Room.Name] && C.EXIT[this.Room.Name][roomName]) {
-            let coords = C.EXIT[this.Room.Name][roomName];
-            moveTarget = new RoomPosition(coords.x, coords.y, this.Room.Name);
+        if (C.EXIT[this.Room.name] && C.EXIT[this.Room.name][roomName]) {
+            let coords = C.EXIT[this.Room.name][roomName];
+            moveTarget = new RoomPosition(coords.x, coords.y, this.Room.name);
         }
         else {
             let exitDir = this.creep.room.findExitTo(roomName);
@@ -178,7 +174,7 @@ class CreepBase {
         
         //let room = new RoomBase(pos.roomName);
 
-        //if (false && room.State !== C.ROOM_STATE_NORMAL) {
+        //if (false && room.state !== C.ROOM_STATE_NORMAL) {
         //    let flag = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
         //    if (flag) {
         //        let moveResult = this.creep.moveTo(flag);

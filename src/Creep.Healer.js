@@ -22,7 +22,7 @@ class CreepHealer extends CreepSoldier {
      */
     work() {
         if(!this.AtWork) {
-            this.moveToRoom(this.WorkRoom.Name);
+            this.moveToRoom(this.WorkRoom.name);
             return true;
         }
         

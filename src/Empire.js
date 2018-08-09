@@ -102,7 +102,7 @@ class Empire {
             }
 
             let job = smartCreep.Job;
-            let workroom = smartCreep.WorkRoom.Name;
+            let workroom = smartCreep.WorkRoom.name;
 
             if (!this._mem.creeps[workroom]) {
                 this._mem.creeps[workroom] = {};

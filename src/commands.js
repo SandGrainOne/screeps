@@ -17,3 +17,8 @@ Game.spawns.Askim.createCreep([WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, M
 
 let body = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, HEAL, MOVE, HEAL, MOVE, HEAL, MOVE, HEAL, MOVE];
 Game.spawns.Askim.createCreep([TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, HEAL, MOVE, HEAL, MOVE, HEAL, MOVE, HEAL, MOVE], null, { job: "healer", rooms: { home: "E76N89", work: "E76N89" } });
+
+
+
+JSON.stringify(Game.market.getOrderById("58dd3d1e7431e2a026e96bd8"))
+Game.market.deal("58dd3d1e7431e2a026e96bd8", 20000, "E78N85")

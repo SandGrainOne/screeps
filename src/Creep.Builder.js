@@ -69,11 +69,6 @@ class CreepBuilder extends CreepWorker {
             }
         }
 
-        if (this.Name === " ") {
-            console.log("_startCarry: " + this._startCarry);
-            console.log("_nextCarry : " + this.NextCarry);
-        }
-
         if (this.NextCarry >= this.Capacity) {
             this.IsWorking = true;
         }
@@ -88,7 +83,7 @@ class CreepBuilder extends CreepWorker {
         if (this.IsWorking) {
 
             if (!moveTarget && !this.AtWork) {
-                moveTarget = this.moveToRoom(this.WorkRoom.Name, false);
+                moveTarget = this.moveToRoom(this.WorkRoom.name, false);
                 moveRequired = true;
             }
 
@@ -139,7 +134,7 @@ class CreepBuilder extends CreepWorker {
             }
 
             if (!moveTarget && !this.AtHome) {
-                moveTarget = this.moveToRoom(this.HomeRoom.Name, false);
+                moveTarget = this.moveToRoom(this.HomeRoom.name, false);
                 moveRequired = true;
             }
 

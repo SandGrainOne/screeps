@@ -6,6 +6,10 @@
 let constants = {
     "USERNAME": "SandGrainOne",
 
+    "JOB_REFUELER": "refueler",
+    "JOB_MINER": "miner",
+    "JOB_HAULER": "hauler",
+
     "ROOM_TYPE_OWNED": "owned",
     "ROOM_TYPE_RESERVED": "reserved",
     "ROOM_TYPE_OTHER": "other",
@@ -13,6 +17,12 @@ let constants = {
     "ROOM_STATE_NORMAL": "normal",
     "ROOM_STATE_INVADED": "invaded",
     "ROOM_STATE_ATTACKED": "attacked",
+
+    "STORAGE_THRESHOLD_ENERGY": 500000,
+    "STORAGE_THRESHOLD_MINERAL": 10000,
+
+    "TERMINAL_THRESHOLD_ENERGY": 50000,
+    "TERMINAL_THRESHOLD_MINERAL": 1000,
 
     "RETIREMENT": 10,
 
@@ -51,6 +61,12 @@ let constants = {
         },
         "E77N88": {
             "E78N89": { x: 39, y: 0 }
+        },
+        "E77N89": {
+            "E77N88": { x: 31, y: 49 }
+        },
+        "E76N85": {
+            "E77N85": { x: 49, y: 31 }
         }
     }
 }

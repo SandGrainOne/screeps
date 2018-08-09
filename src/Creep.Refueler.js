@@ -25,7 +25,7 @@ class CreepRefueler extends CreepWorker {
      */
     work() {
         if (!this.AtWork) {
-            this.moveToRoom(this.WorkRoom.Name);
+            this.moveToRoom(this.WorkRoom.name);
             return true;
         }
 
@@ -42,7 +42,7 @@ class CreepRefueler extends CreepWorker {
         }
 
         if (this.Room.Extensions.length > 0) {
-            // The extensions array hold only extensions and spawns with space for energy.
+            // The extensions array only contains extensions and spawns with space for energy.
             let extensions = this.creep.pos.findInRange(this.Room.Extensions, 1);
             if (extensions.length > 0) {
                 let result = this.creep.transfer(extensions[0], RESOURCE_ENERGY);
@@ -50,7 +50,7 @@ class CreepRefueler extends CreepWorker {
         }
 
         if (this.Room.Labs.Refuel.length > 0) {
-            // The extensions array hold only extensions and spawns with space for energy.
+            // The refuel array only contains labs with space for energy.
             let labs = this.creep.pos.findInRange(this.Room.Labs.Refuel, 1);
             if (labs.length > 0) {
                 let result = this.creep.transfer(labs[0], RESOURCE_ENERGY);
@@ -58,7 +58,7 @@ class CreepRefueler extends CreepWorker {
         }
 
         if (this.creep.carry.energy > 0) { 
-            if (this.Room.State !== C.ROOM_STATE_NORMAL) {
+            if (this.Room.state !== C.ROOM_STATE_NORMAL) {
                 let tower = this.creep.pos.findClosestByPath(FIND_MY_STRUCTURES, { 
                     filter: function (s) { 
                         return s.structureType === STRUCTURE_TOWER && (s.energy < s.energyCapacity - 200); 

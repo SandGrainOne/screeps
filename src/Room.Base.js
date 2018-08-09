@@ -17,67 +17,97 @@ class RoomBase {
         this._visible = false;
 
         if (Memory.rooms[name]) {
-            this.mem = Memory.rooms[name];
+            this._mem = Memory.rooms[name];
         }
         else {
-            this.mem = {};
+            this._mem = {};
         }
 
-        if (!this.mem.state) {
-            this.mem.state = C.ROOM_STATE_NORMAL;
+        if (!this._mem.state) {
+            this._mem.state = C.ROOM_STATE_NORMAL;
         }
 
-        if (!this.mem.update) {
-            this.mem.update = {};
+        if (!this._mem.update) {
+            this._mem.update = {};
         }
 
-        if (!this.mem.update.last) {
-            this.mem.update.last = 0;
+        if (!this._mem.update.last) {
+            this._mem.update.last = 0;
         }
 
-        if (!this.mem.update.next) {
-            this.mem.update.next = 0;
+        if (!this._mem.update.next) {
+            this._mem.update.next = 0;
         }
 
-        if (!this.mem.reservations) {
-            this.mem.reservations = {};
+        if (!this._mem.reservations) {
+            this._mem.reservations = {};
         }
 
-        if (!this.mem.wallcount) {
-            this.mem.wallcount = 0;
+        if (!this._mem.jobs) {
+            this._mem.jobs = { 
+                settlers: 0,
+                builders: 0,
+                upgraders: 0,
+                haulers: 0,
+                miners: 0,
+                mineralminers: 0,
+                refuelers: 0
+            };
         }
 
-        if (!this.mem.rampcount) {
-            this.mem.rampcount = 0;
+        if (!this._mem.wallcount) {
+            this._mem.wallcount = 0;
+        }
+
+        if (!this._mem.rampcount) {
+            this._mem.rampcount = 0;
         }
     }
 
     /**
      * Gets the name of the room.
      */
-    get Name() {
+    get name() {
         return this._name;
     }
 
     /**
      * Gets a value indicating whether the room is visible or not.
      */
-    get IsVisible() {
+    get isVisible() {
         return this._visible;
     }
 
     /**
      * Gets the state of the room.
      */
-    get State() {
-        return this.mem.state;
+    get state() {
+        return this._mem.state;
     }
 
     /**
      * Gets the room type.
      */
-    get Type() {
-        return this.mem.type;
+    get type() {
+        return this._mem.type;
+    }
+
+    /**
+     * Gets an object with all jobs in the room.
+     */
+    get jobs() {
+        return this._mem.jobs;
+    }
+
+    getJobsFor(jobName) {
+        if (!this._mem.jobs || !this._mem.jobs[jobName + "s"]) {
+            return 0;
+        }
+        return this._mem.jobs[jobName + "s"];
+    }
+
+    populate() {
+
     }
 }
 
