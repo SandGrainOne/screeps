@@ -1,8 +1,6 @@
 'use strict';
 
-let C = require('constants');
-
-let CreepWorker = require('Creep.Worker');
+let CreepWorker = require('./Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for a refueler.
@@ -55,8 +53,8 @@ class CreepBalancer extends CreepWorker {
         }
 
         if (this.isHome && this.load > 0) {
-            if (this.room.Links.Inputs.length > 0) {
-                let links = this.pos.findInRange(this.room.Links.Inputs, 1);
+            if (this.room.links.inputs.length > 0) {
+                let links = this.pos.findInRange(this.room.links.inputs, 1);
                 if (links.length > 0) {
                     for (let link of links) {
                         if (this.transfer(link, RESOURCE_ENERGY) === OK ) {
@@ -105,8 +103,8 @@ class CreepBalancer extends CreepWorker {
             }
             else {
                 if (!moveTarget) {
-                    if (this.room.Links.Inputs.length > 0) {
-                        let links = this.pos.findInRange(this.room.Links.Inputs, 1);
+                    if (this.room.links.inputs.length > 0) {
+                        let links = this.pos.findInRange(this.room.links.inputs, 1);
                         if (links.length > 0) {
                             for (let link of links) {
                                 if (link.energy < link.energyCapacity) {

@@ -1,8 +1,6 @@
 'use strict';
 
-let C = require('constants');
-
-let CreepWorker = require('Creep.Worker');
+let CreepWorker = require('./Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for a chemist.
@@ -29,14 +27,14 @@ class CreepChemist extends CreepWorker {
             return true;
         }
 
-        if (!this.room.terminal || !this.room.Labs.compoundOne || !this.room.Labs.compoundTwo || this.room.Labs.producers.length <= 0) {
+        if (!this.room.terminal || !this.room.labs.compoundOne || !this.room.labs.compoundTwo || this.room.labs.producers.length <= 0) {
             return false;
         }
 
         let reaction = {};
 
         if (this.room.name === "E73N87") {
-            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_GHODIUM_ALKALIDE };
+            reaction = { compoundOne: RESOURCE_HYDROGEN, compoundTwo: RESOURCE_OXYGEN };
         }
 
         if (this.room.name === "E75N87") {
@@ -52,10 +50,14 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.room.name === "E77N85") {
-            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_GHODIUM_ACID };
+            reaction = { compoundOne: RESOURCE_KEANIUM, compoundTwo: RESOURCE_ZYNTHIUM };
         }
 
         if (this.room.name === "E78N85") {
+            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_LEMERGIUM_ALKALIDE };
+        }
+
+        if (this.room.name === "E78N88") {
             reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_LEMERGIUM_ALKALIDE };
         }
 
@@ -81,13 +83,9 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.load >= this.capacity) {
-            if (this.room.Labs.compoundOne.mineralAmount > 0 && this.room.Labs.compoundTwo.mineralAmount > 0) {
+            if (this.room.labs.compoundOne.mineralAmount > 0 && this.room.labs.compoundTwo.mineralAmount > 0) {
                 emptyCreep = true;
             }
-        }
-
-        if (Object.keys(this.carry).length > 1) {
-            emptyCreep = true;
         }
 
         if (emptyCreep) {
@@ -105,12 +103,12 @@ class CreepChemist extends CreepWorker {
         }
 
         for (let compound in reaction) {
-            if (this.room.Labs[compound].mineralType && this.room.Labs[compound].mineralType !== reaction[compound]) {
-                if (this.pos.isNearTo(this.room.Labs[compound])) {
-                    this.withdraw(this.room.Labs[compound], this.room.Labs[compound].mineralType);
+            if (this.room.labs[compound].mineralType && this.room.labs[compound].mineralType !== reaction[compound]) {
+                if (this.pos.isNearTo(this.room.labs[compound])) {
+                    this.withdraw(this.room.labs[compound], this.room.labs[compound].mineralType);
                 }
                 else {
-                    this.moveTo(this.room.Labs[compound]);
+                    this.moveTo(this.room.labs[compound]);
                 }
                 return true;
             }
@@ -118,12 +116,12 @@ class CreepChemist extends CreepWorker {
 
         for (let compound in reaction) {
             if (this.carry[reaction[compound]] && this.carry[reaction[compound]] >= this.capacity) {
-                if (this.room.Labs[compound].mineralAmount <= 0) {
-                    if (this.pos.isNearTo(this.room.Labs[compound])) {
-                        this.transfer(this.room.Labs[compound], reaction[compound]);
+                if (this.room.labs[compound].mineralAmount <= 0) {
+                    if (this.pos.isNearTo(this.room.labs[compound])) {
+                        this.transfer(this.room.labs[compound], reaction[compound]);
                     }
                     else {
-                        this.moveTo(this.room.Labs[compound]);
+                        this.moveTo(this.room.labs[compound]);
                     }
                     return true;
                 }
@@ -133,7 +131,7 @@ class CreepChemist extends CreepWorker {
         if (this.load <= 0) {
             if (this.room.terminal.store[reaction.compoundOne] && this.room.terminal.store[reaction.compoundTwo]) {
                 for (let compound in reaction) {
-                    if (this.room.Labs[compound].mineralAmount <= 0) {
+                    if (this.room.labs[compound].mineralAmount <= 0) {
                         if (this.pos.isNearTo(this.room.terminal)) {
                             this.withdraw(this.room.terminal, reaction[compound]);
                         }
@@ -147,7 +145,7 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.load < this.capacity) {
-            for (let producer of this.room.Labs.producers) {
+            for (let producer of this.room.labs.producers) {
                 if (producer.mineralType && producer.mineralType !== REACTIONS[reaction.compoundOne][reaction.compoundTwo]){                    
                     if (this.pos.isNearTo(producer)) {
                         this.withdraw(producer, producer.mineralType);
@@ -161,13 +159,13 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.load < this.capacity) {
-            this.room.Labs.producers.sort(function(a, b) { return b.mineralAmount - a.mineralAmount });
-            if (this.room.Labs.producers[0].mineralAmount > 0) {
-                if (this.pos.isNearTo(this.room.Labs.producers[0])) {
-                    this.withdraw(this.room.Labs.producers[0], this.room.Labs.producers[0].mineralType);
+            this.room.labs.producers.sort(function(a, b) { return b.mineralAmount - a.mineralAmount });
+            if (this.room.labs.producers[0].mineralAmount > 0) {
+                if (this.pos.isNearTo(this.room.labs.producers[0])) {
+                    this.withdraw(this.room.labs.producers[0], this.room.labs.producers[0].mineralType);
                 }
                 else {
-                    this.moveTo(this.room.Labs.producers[0]);
+                    this.moveTo(this.room.labs.producers[0]);
                 }
             }
             if (Object.keys(this.room.storage.store).length > 1) {
@@ -178,7 +176,7 @@ class CreepChemist extends CreepWorker {
                             if (resourceType === RESOURCE_ENERGY) {
                                 continue;
                             }
-        
+
                             // Moving all resources except energy to the terminal.
                             if (this.room.storage.store[resourceType] > 0) {
                                 if (this.withdraw(this.room.storage, resourceType) === OK) {
@@ -200,7 +198,7 @@ class CreepChemist extends CreepWorker {
                 if (this.carry[resourceType] > 0) {
                     // Creep holds wrong type of resource. Get rid of it.
                     this.moveTo(this.room.terminal);
-                    
+
                     if (this.pos.isNearTo(this.room.terminal)) {
                         this.transfer(this.room.terminal, resourceType);
                         break;

@@ -1,8 +1,8 @@
 'use strict';
 
-let C = require('constants');
+let C = require('./constants');
 
-let CreepBase = require('Creep.Base');
+let CreepBase = require('./Creep.Base');
 
 /**
  * Wrapper class for creeps with worker related logic.

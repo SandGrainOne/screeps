@@ -1,8 +1,6 @@
 'use strict';
 
-let C = require('constants');
-
-let CreepWorker = require('Creep.Worker');
+let CreepWorker = require('./Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for a miner.
@@ -104,20 +102,6 @@ class CreepMineralMiner extends CreepWorker {
         else {
             if (!moveTarget) {
                 let range = 50;
-                // Ensure the creep only carry energy. No need to seek out a link otherwise.
-                if (this.energy > 0 && this.energy === this.load && this.room.Links.Inputs.length > 0) {
-                    for (let link of this.room.Links.Inputs) {
-                        if (link.energy >= link.energyCapacity) {
-                            continue;
-                        }
-                        let rangeToLink = this.pos.getRangeTo(link);
-                        if (range > rangeToLink) {
-                            range = rangeToLink;
-                            moveTarget = link;
-                        }
-                    }
-                }
-
                 if (this.room.containers.length > 0) {
                     for (let container of this.room.containers) {
                         if (_.sum(container.store) >= container.storeCapacity) {

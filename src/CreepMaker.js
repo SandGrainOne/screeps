@@ -1,24 +1,24 @@
 'use strict';
 
-let C = require('constants');
+let C = require('./constants');
 
-let CreepBase = require('Creep.Base');
+let CreepBase = require('./Creep.Base');
 
 let wrappers = {
-    "miner": require('Creep.Miner'),
-    "hauler": require('Creep.Hauler'),
-    "linker": require('Creep.Linker'),
-    "healer": require('Creep.Healer'),
-    "chemist": require('Creep.Chemist'),
-    "builder": require('Creep.Builder'),
-    "settler": require('Creep.Settler'),
-    "upgrader": require('Creep.Upgrader'),
-    "refueler": require('Creep.Refueler'),
-    "defender": require('Creep.Defender'),
-    "attacker": require('Creep.Attacker'),
-    "patroler": require('Creep.Patroler'),
-    "dismantler": require('Creep.Dismantler'),
-    "mineralminer": require('Creep.MineralMiner'),
+    "miner": require('./Creep.Miner'),
+    "hauler": require('./Creep.Hauler'),
+    "linker": require('./Creep.Linker'),
+    "healer": require('./Creep.Healer'),
+    "chemist": require('./Creep.Chemist'),
+    "builder": require('./Creep.Builder'),
+    "settler": require('./Creep.Settler'),
+    "upgrader": require('./Creep.Upgrader'),
+    "refueler": require('./Creep.Refueler'),
+    "defender": require('./Creep.Defender'),
+    "attacker": require('./Creep.Attacker'),
+    "patroler": require('./Creep.Patroler'),
+    "dismantler": require('./Creep.Dismantler'),
+    "mineralminer": require('./Creep.MineralMiner'),
 };
 
 class CreepMaker {
@@ -36,6 +36,7 @@ class CreepMaker {
         }
 
         if (!smartCreep) {
+            console.log("Creep " + creep.name + " has an invalid job: " + job);
             smartCreep = new CreepBase(creep);
         }
 

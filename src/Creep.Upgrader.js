@@ -1,6 +1,6 @@
 'use strict';
 
-let CreepWorker = require('Creep.Worker');
+let CreepWorker = require('./Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for an upgrader.
@@ -39,7 +39,7 @@ class CreepUpgrader extends CreepWorker {
         }
 
         if (this.atWork && this.energy < this.capacity) {
-            let link = this.room.Links.Controller;
+            let link = this.room.links.controller;
             if (link && link.energy > 0 && this.pos.isNearTo(link)) {
                 let res = this.withdraw(link, RESOURCE_ENERGY);
             }
@@ -94,15 +94,15 @@ class CreepUpgrader extends CreepWorker {
                 this.moveToRoom(this.HomeRoom.name);
             }
             else {
-                if (this.atWork && this.room.Links.Controller && this.pos.isNearTo(this.room.Links.Controller)) {
-                    moveTarget = this.room.Links.Controller;
+                if (this.atWork && this.room.links.controller && this.pos.isNearTo(this.room.links.controller)) {
+                    moveTarget = this.room.links.controller;
                 }
                 else if (this.room.storage && this.pos.isNearTo(this.room.storage)) {
                     moveTarget = this.room.storage;
                 }
 
                 if (!moveTarget && this.atWork) {
-                    let link = this.room.Links.Controller;
+                    let link = this.room.links.controller;
                     if (link && link.energy > 0 && !this.pos.isNearTo(link)) {
                         moveTarget = link;
                     }

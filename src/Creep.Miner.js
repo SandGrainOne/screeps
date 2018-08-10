@@ -1,8 +1,6 @@
 'use strict';
 
-let C = require('constants');
-
-let CreepWorker = require('Creep.Worker');
+let CreepWorker = require('./Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for a miner.
@@ -115,8 +113,8 @@ class CreepMiner extends CreepWorker {
                 }
             }
 
-            if (this.room.Links.Inputs.length > 0) {
-                let link = this.getFirstInRange(this.room.Links.Inputs, 1);
+            if (this.room.links && this.room.links.inputs.length > 0) {
+                let link = this.getFirstInRange(this.room.links.inputs, 1);
                 if (link) {
                     this.transfer(link, RESOURCE_ENERGY);
                 }
@@ -172,8 +170,8 @@ class CreepMiner extends CreepWorker {
             if (!moveTarget) {
                 let range = 50;
                 // Ensure the creep only carry energy. No need to seek out a link otherwise.
-                if (this.energy > 0 && this.energy === this.load && this.room.Links.Inputs.length > 0) {
-                    for (let link of this.room.Links.Inputs) {
+                if (this.energy > 0 && this.energy === this.load && this.room.links.inputs.length > 0) {
+                    for (let link of this.room.links.inputs) {
                         if (link.energy >= link.energyCapacity) {
                             continue;
                         }
@@ -250,7 +248,7 @@ class CreepMiner extends CreepWorker {
             workParts = Math.min(Math.floor(room.energyCapacityAvailable / 250), workParts);
         }
         else {
-            // Rooms not owned might not have a builder. Miners are given an extra part to perform repairs.
+            // Rooms not owned does not have builders. Miners are given an extra part to perform repairs.
             workParts = workParts + (Math.ceil(sourceCapacity / 600) === (sourceCapacity / 600) ? 1 : 0);
         }
 
@@ -263,7 +261,7 @@ class CreepMiner extends CreepWorker {
 
         let job = {};
         job.number = room.sources.length;
-        job.body = Array(workParts).fill(WORK).concat(Array(carryParts).fill(CARRY)).concat(Array(moveParts).fill(MOVE));
+        job.body = "" + workParts + ",W," + carryParts + ",C," + moveParts + ",M";
 
         return job;
     }

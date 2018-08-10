@@ -19,6 +19,7 @@ const constants = {
     "ROOM_STATE_ATTACKED": "attacked",
 
     "TERMINAL_THRESHOLD_ENERGY": 50000,
+    "LINK_MINIMUM_TRANSFER": 200,
 
     "RETIREMENT": 10,
 

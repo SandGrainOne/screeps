@@ -1,6 +1,6 @@
 'use strict';
 
-let CreepBase = require('Creep.Base');
+let CreepBase = require('./Creep.Base');
 
 /**
  * Wrapper class for creeps with logic for war.

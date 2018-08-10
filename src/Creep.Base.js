@@ -1,8 +1,8 @@
 'use strict';
 
-let C = require('constants');
+let C = require('./constants');
 
-let RoomBase = require('Room.Base');
+let RoomBase = require('./Room.Base');
 
 /**
  * The CreepBase class is the base class for all creep wrappers. 

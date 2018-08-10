@@ -1,6 +1,6 @@
 'use strict';
 
-let CreepSoldier = require('Creep.Soldier');
+let CreepSoldier = require('./Creep.Soldier');
 
 /**
  * Wrapper class for creeps with logic for a healer.

@@ -1,10 +1,10 @@
 'use strict';
 
-let C = require('constants');
-let CreepMaker = require('CreepMaker');
+let C = require('./constants');
+let CreepMaker = require('./CreepMaker');
 
-let RoomBase = require('Room.Base');
-let RoomReal = require('Room.Real');
+let RoomBase = require('./Room.Base');
+let RoomReal = require('./Room.Real');
 
 /**
  * The Empire class primary purpose is to provide easy access to game objects like creeps and rooms.
@@ -207,7 +207,5 @@ class Empire {
         return;
     }
 }
-
-global.test = new Empire();
 
 module.exports = Empire;

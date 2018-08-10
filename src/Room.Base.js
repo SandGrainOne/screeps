@@ -1,6 +1,6 @@
 'use strict';
 
-let C = require('constants');
+let C = require('./constants');
 
 /**
  * This class is a wrapper for the room memory. It can not be used to wrap an actual room object, 
@@ -16,7 +16,7 @@ class RoomBase {
         this._name = name;
         this._visible = false;
 
-        if (Memory.rooms[name]) {
+        if (Memory.rooms && Memory.rooms[name]) {
             this._mem = Memory.rooms[name];
         }
         else {

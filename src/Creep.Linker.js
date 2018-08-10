@@ -1,8 +1,8 @@
 'use strict';
 
-let C = require('constants');
+let C = require('./constants');
 
-let CreepWorker = require('Creep.Worker');
+let CreepWorker = require('./Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for a linker.
@@ -30,7 +30,7 @@ class CreepLinker extends CreepWorker {
         }
 
         let storage = this.room.storage;
-        let storageLink = this.room.Links.Storage;
+        let storageLink = this.room.links.storage;
 
         if (!storage || !storageLink) {
             return false;
@@ -38,8 +38,8 @@ class CreepLinker extends CreepWorker {
 
         let worked = false;
 
-        if (storageLink.cooldown > 1 || !this.room.Links.Controller) {
-            // Move stuff away from storage link. It can't send off the energy on its own.
+        if (storageLink.cooldown > 1 || !this.room.links.controller || this.room.links.controller.energyCapacity - this.room.links.controller.energy < C.LINK_MINIMUM_TRANSFER) {
+            // Storage link can't send the energy. Remove it with the creep.
             if (this.load === 0) {
                 if (storageLink.energy > 0 && this.pos.isNearTo(storageLink)) {
                     if (this.withdraw(storageLink, RESOURCE_ENERGY) === OK ) {

@@ -1,8 +1,8 @@
 'use strict';
 
-let C = require('constants');
+let C = require('./constants');
 
-let CreepWorker = require('Creep.Worker');
+let CreepWorker = require('./Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for a hauler.
@@ -80,9 +80,9 @@ class CreepHauler extends CreepWorker {
                     }
                 }
             }
-            if (this.energy > 0 && this.room.Links.Inputs.length > 0) {
+            if (this.energy > 0 && this.room.links.inputs.length > 0) {
                 // There might be more than one link in range. 
-                let links = this.pos.findInRange(this.room.Links.Inputs, 1);
+                let links = this.pos.findInRange(this.room.links.inputs, 1);
                 if (links.length > 0) {
                     for (let link of links) {
                         if (link.energy < link.energyCapacity) {
@@ -177,9 +177,9 @@ class CreepHauler extends CreepWorker {
                 let range = 50;
 
                 // Ensure the creep only carry energy. No need to seek out a link otherwise.
-                if (this.isRemoting && this.energy > 0 && this.energy === this.load && this.room.Links.Inputs.length > 0) {
+                if (this.isRemoting && this.energy > 0 && this.energy === this.load && this.room.links.inputs.length > 0) {
 
-                    for (let link of this.room.Links.Inputs) {
+                    for (let link of this.room.links.inputs) {
                         if (link.energy >= link.energyCapacity) {
                             continue;
                         }

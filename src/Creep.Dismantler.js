@@ -1,8 +1,6 @@
 'use strict';
 
-let C = require('constants');
-
-let CreepWorker = require('Creep.Worker');
+let CreepWorker = require('./Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for a dismantler.
