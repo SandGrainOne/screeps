@@ -6,6 +6,7 @@ let CreepBase = require('Creep.Base');
 let CreepMiner = require('Creep.Miner');
 let CreepHauler = require('Creep.Hauler');
 let CreepBroker = require('Creep.Broker');
+let CreepLinker = require('Creep.Linker');
 let CreepHealer = require('Creep.Healer');
 let CreepChemist = require('Creep.Chemist');
 let CreepBuilder = require('Creep.Builder');
@@ -44,10 +45,18 @@ class CreepFactory {
                 smartCreep = new CreepMiner(creep);
                 break;
             case 'hauler':
-                smartCreep =  new CreepHauler(creep);
+                if (creep.name === "Scarlett") {
+                    smartCreep = new CreepHauler(creep);
+                }
+                else {
+                    smartCreep =  new CreepHauler(creep);
+                }
                 break;
             case 'broker':
                 smartCreep =  new CreepBroker(creep);
+                break;
+            case 'linker':
+                smartCreep =  new CreepLinker(creep);
                 break;
             case 'refueler':
                 smartCreep =  new CreepRefueler(creep);

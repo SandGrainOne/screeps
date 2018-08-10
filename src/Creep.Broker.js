@@ -30,22 +30,13 @@ class CreepBroker extends CreepWorker {
         }
 
         let storage = this.Room.storage;
-        let storageLink = this.Room.Links.Storage;
         let terminal = this.Room.terminal;
 
-        if (!storage || (!storageLink && !terminal)) {
+        if (!storage || !terminal) {
             return false;
         }
 
         let performedWithdraw = false;
-
-        if (this.load < this.capacity && !performedWithdraw) {
-            if (storageLink && storageLink.energy > 200 && this.creep.pos.isNearTo(storageLink)) {
-                if (this.withdraw(storageLink, RESOURCE_ENERGY) === OK ) {
-                    performedWithdraw = true;
-                }
-            }
-        }
 
         if (this.load < this.capacity && !performedWithdraw && this.creep.pos.isNearTo(storage)) {
             // Do not move stuff out of the storage if the terminal is full.
@@ -68,15 +59,7 @@ class CreepBroker extends CreepWorker {
         }
 
         if (this.load > 0 && this.creep.pos.isNearTo(storage)) {
-            for (let resourceType in this.creep.carry) { /*
-                if (resourceType === RESOURCE_ENERGY) {
-                    if (storageLink && storageLink.energy < 400 && this.creep.pos.isNearTo(storageLink)) {
-                        if (this.transfer(storageLink, RESOURCE_ENERGY) === OK) {
-                            break;
-                        }
-                    }
-                }*/
-
+            for (let resourceType in this.creep.carry) {
                 if (resourceType === RESOURCE_ENERGY) {
                     if (this.transfer(storage, resourceType) === OK) {
                         break;
@@ -96,10 +79,6 @@ class CreepBroker extends CreepWorker {
 
         if (storage && !this.creep.pos.isNearTo(storage)) {
             this.moveTo(storage);
-        }
-
-        if (storageLink && !this.creep.pos.isNearTo(storageLink)) {
-            this.moveTo(storageLink);
         }
 
         if (terminal && !this.creep.pos.isNearTo(terminal)) {

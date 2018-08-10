@@ -36,27 +36,31 @@ class CreepChemist extends CreepWorker {
         let reaction = {};
 
         if (this.Room.name === "E75N87") {
-            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_UTRIUM_ACID };
+            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_GHODIUM_ALKALIDE };
+        }
+
+        if (this.Room.name === "E75N89") {
+            reaction = { compoundOne: RESOURCE_UTRIUM, compoundTwo: RESOURCE_HYDROGEN };
         }
 
         if (this.Room.name === "E77N88") {
-            reaction = { compoundOne: RESOURCE_OXYGEN, compoundTwo: RESOURCE_HYDROGEN };
+            reaction = { compoundOne: RESOURCE_GHODIUM_OXIDE, compoundTwo: RESOURCE_HYDROXIDE };
         }
 
         if (this.Room.name === "E77N85") {
-            reaction = { compoundOne: RESOURCE_ZYNTHIUM_KEANITE, compoundTwo: RESOURCE_UTRIUM_LEMERGITE };
+            reaction = { compoundOne: RESOURCE_KEANIUM, compoundTwo: RESOURCE_KEANIUM };
         }
 
         if (this.Room.name === "E78N85") {
-            reaction = { compoundOne: RESOURCE_GHODIUM_ACID, compoundTwo: RESOURCE_CATALYST };
+            reaction = { compoundOne: RESOURCE_OXYGEN, compoundTwo: RESOURCE_HYDROGEN };
         }
 
         if (this.Room.name === "E79N85") {
-            reaction = { compoundOne: RESOURCE_UTRIUM_LEMERGITE, compoundTwo: RESOURCE_ZYNTHIUM_KEANITE };
+            reaction = { compoundOne: RESOURCE_GHODIUM, compoundTwo: RESOURCE_GHODIUM };
         }
 
         if (this.Room.name === "E79N86") {
-            reaction = { compoundOne: RESOURCE_UTRIUM_LEMERGITE, compoundTwo: RESOURCE_ZYNTHIUM_KEANITE };
+            reaction = { compoundOne: RESOURCE_ZYNTHIUM_KEANITE, compoundTwo: RESOURCE_UTRIUM_LEMERGITE };
         }
 
         let emptyCreep = false;

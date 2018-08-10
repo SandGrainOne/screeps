@@ -44,7 +44,7 @@ class RoomReal extends RoomBase {
             return this._room.storage;
         }
 
-        if (this._mem.structures.miniStorage) {
+        if (this._mem.structures && this._mem.structures.miniStorage) {
             return Game.getObjectById(this._mem.structures.miniStorage);
         }
 
@@ -600,78 +600,45 @@ class RoomReal extends RoomBase {
     }
 
     linking() {
-        if (this.name === "") { //E78N85
-            if (this.Links.All.length <= 0) {
-                return;
-            }
-
-            let total = _.sum(this.Links.All, (l) => l.energy);
-            let average = total / this.Links.All.length;
-
-            let linkBelow = null;
-            let linkAbove = null;
-
-            for (let link of this.Links.All) {
-                if (link.energy < average) {
-                    if (linkBelow === null || linkBelow.energy > link.energy) {
-                        linkBelow = link;
-                    }
-                }
-                if (link.energy > average) {
-                    if (linkAbove === null || linkAbove.energy < link.energy) {
-                        if (link.cooldown === 0) {
-                            linkAbove = link;
-                        }
-                    }
-                }
-            }
-
-            if (linkAbove && linkBelow) {
-                let amount = Math.min(400, linkBelow.energy)
-                linkAbove.transferEnergy(linkBelow, amount);
-            }
+        if (this.Links.Inputs.length === 0) {
+            return;
         }
-        else {
-            if (this.Links.Inputs.length === 0) {
-                return;
+
+        let roomLinks = [];
+        if (this.Links.Controller) {
+            roomLinks.push(this.Links.Controller);
+        }
+        if (this.Links.Storage) {
+            roomLinks.push(this.Links.Storage);
+        }
+
+        for (let inputLink of this.Links.Inputs) {
+            if (inputLink.cooldown > 0 || inputLink.energy < 100) {
+                continue;
             }
 
-            let roomLinks = [];
-            if (this.Links.Controller) {
-                roomLinks.push(this.Links.Controller);
-            }
-            if (this.Links.Storage) {
-                roomLinks.push(this.Links.Storage);
-            }
-
-            for (let inputLink of this.Links.Inputs) {
-                if (inputLink.cooldown > 0 || inputLink.energy < 100) {
-                    continue;
-                }
-                
-                let performedTransfer = false;
-                for (let roomLink of roomLinks) {
-                    if (roomLink.energy < roomLink.energyCapacity - 200) {
-                        let amount = Math.min(inputLink.energy, roomLink.energyCapacity - roomLink.energy)
-                        let res = inputLink.transferEnergy(roomLink, amount);
-                        performedTransfer = true;
-                        break;
-                    }
-                }
-                
-                if (performedTransfer) {
+            let performedTransfer = false;
+            for (let roomLink of roomLinks) {
+                if (roomLink.energy < roomLink.energyCapacity - 200) {
+                    let amount = Math.min(inputLink.energy, roomLink.energyCapacity - roomLink.energy)
+                    let res = inputLink.transferEnergy(roomLink, amount);
+                    performedTransfer = true;
                     break;
                 }
             }
 
-            if (this.Links.Controller && this.Links.Storage) {
-                let storageLink = this.Links.Storage;
-                if (storageLink.cooldown === 0 && storageLink.energy > 0) {
-                    let controllerLink = this.Links.Controller;
-                    if (controllerLink.energy < controllerLink.energyCapacity) {
-                        let amount = Math.min(storageLink.energy, controllerLink.energyCapacity - controllerLink.energy)
-                        let res = storageLink.transferEnergy(controllerLink, amount);
-                    }
+            if (performedTransfer) {
+                break;
+            }
+        }
+
+        if (this.Links.Controller && this.Links.Storage) {
+            let storageLink = this.Links.Storage;
+            if (storageLink.cooldown === 0 && storageLink.energy > 0) {
+                let controllerLink = this.Links.Controller;
+                if (controllerLink.energy < controllerLink.energyCapacity) {
+                    let amount = Math.min(storageLink.energy, controllerLink.energyCapacity - controllerLink.energy)
+                    let res = storageLink.transferEnergy(controllerLink, amount);
                 }
             }
         }
