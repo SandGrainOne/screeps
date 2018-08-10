@@ -78,14 +78,6 @@ class RoomReal extends RoomBase {
     }
 
     /**
-     * Gets a value indicating whether the room has a minable mineral node. This takes into consideration
-     * that the mineral node has minerals and that the extractor is usable by current user.
-     */
-    get hasMinerals() {
-        return this._mem.hasHarvestableMinerals || false;
-    }
-
-    /**
      * Gets the room mineral node if it exists. Otherwise null.
      */
     get minerals() {
@@ -248,7 +240,7 @@ class RoomReal extends RoomBase {
      * Gets the total energy capacity of all spawns and extensions in the room.
      */
     get energyCapacityAvailable() {
-        this._room.energyCapacityAvailable;
+        return this._room.energyCapacityAvailable;
     }
 
     /**
@@ -367,6 +359,7 @@ class RoomReal extends RoomBase {
         this._mem.resources = {};
         this._mem.resources.sources = [];
         this._cache.sources = [];
+
         this._mem.resources.minerals = null;
         this._cache.minerals = null;
 
@@ -383,7 +376,10 @@ class RoomReal extends RoomBase {
         this._mem.structures = {};
         this._mem.structures.spawns = [];
         this._mem.structures.extensions = [];
+
         this._mem.structures.containers = [];
+        this._cache.containers = [];
+
         this._mem.structures.extractor = null;
         this._mem.structures.towers = [];
         this._mem.structures.ramparts = [];
@@ -410,6 +406,7 @@ class RoomReal extends RoomBase {
 
             if (structure.structureType === STRUCTURE_CONTAINER) {
                 this._mem.structures.containers.push(structure.id);
+                this._cache.containers.push(structure);
                 if (structure.hits < structure.hitsMax) {
                     this._mem.structures.repairs.push(structure.id);
                 }
@@ -515,7 +512,7 @@ class RoomReal extends RoomBase {
             }
         }
 
-        // this.makeJobs();
+        this.makeJobs();
     }
 
     createJobs() {
@@ -523,7 +520,7 @@ class RoomReal extends RoomBase {
 
         this._mem.jobs.haulers = this.containers.length + this._room.terminal ? 1 : 0;
 
-        if (this.hasMinerals) {
+        if (this.minerals && this.minerals.mineralAmount > 0 && this.extractor) {
             this._mem.jobs.mineralminers = 1;
         }
 
@@ -539,10 +536,7 @@ class RoomReal extends RoomBase {
     }
 
     makeJobs() {
-        if (this.name === "E73N87") {
-            let jobs = CreepMaker.makeBody(this);
-            console.log(JSON.stringify(jobs));
-        }
+        let jobs = CreepMaker.defineJobs(this);
     }
 
     prepare() {

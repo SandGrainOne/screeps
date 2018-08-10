@@ -25,15 +25,15 @@ class CreepSettler extends CreepWorker {
      */
     work() {
         if (this.atWork) {
-            if (this.Room.controller && this.creep.pos.isNearTo(this.Room.controller)) {
-                if (!this.Room.controller.sign || this.Room.controller.sign.username !== C.USERNAME) {
-                    this.creep.signController(this.Room.controller, "For the Sand empire!");
+            if (this.room.controller && this.pos.isNearTo(this.room.controller)) {
+                if (!this.room.controller.sign || this.room.controller.sign.username !== C.USERNAME) {
+                    this._creep.signController(this.room.controller, "For the Sand empire!");
                 }
-                if (this.Room.name === "E78N88") {
-                    this.creep.claimController(this.Room.controller);
+                if (this.room.name === "EEE") {
+                    this._creep.claimController(this.room.controller);
                 }
                 else {
-                    this.creep.reserveController(this.Room.controller);
+                    this._creep.reserveController(this.room.controller);
                 }
             }
         }
@@ -42,8 +42,8 @@ class CreepSettler extends CreepWorker {
             this.moveToRoom(this.WorkRoom.name);
         }
         else {
-            if (this.Room.controller && !this.creep.pos.isNearTo(this.Room.controller)) {
-                this.moveTo(this.Room.controller);
+            if (this.room.controller && !this.pos.isNearTo(this.room.controller)) {
+                this.moveTo(this.room.controller);
             }
         }
 

@@ -29,8 +29,8 @@ class CreepBroker extends CreepWorker {
             return true;
         }
 
-        let storage = this.Room.storage;
-        let terminal = this.Room.terminal;
+        let storage = this.room.storage;
+        let terminal = this.room.terminal;
 
         if (!storage || !terminal) {
             return false;
@@ -38,7 +38,7 @@ class CreepBroker extends CreepWorker {
 
         let performedWithdraw = false;
 
-        if (this.load < this.capacity && !performedWithdraw && this.creep.pos.isNearTo(storage)) {
+        if (this.load < this.capacity && !performedWithdraw && this.pos.isNearTo(storage)) {
             // Do not move stuff out of the storage if the terminal is full.
             if (terminal && _.sum(terminal.store) < terminal.storeCapacity * 0.9) {
                 for (let resourceType in storage.store) {
@@ -58,8 +58,8 @@ class CreepBroker extends CreepWorker {
             }
         }
 
-        if (this.load > 0 && this.creep.pos.isNearTo(storage)) {
-            for (let resourceType in this.creep.carry) {
+        if (this.load > 0 && this.pos.isNearTo(storage)) {
+            for (let resourceType in this.carry) {
                 if (resourceType === RESOURCE_ENERGY) {
                     if (this.transfer(storage, resourceType) === OK) {
                         break;
@@ -68,7 +68,7 @@ class CreepBroker extends CreepWorker {
 
                 // Moving energy to the terminal is handled by the refuelers.
                 if (resourceType !== RESOURCE_ENERGY) {
-                    if (terminal && this.creep.pos.isNearTo(terminal)) {
+                    if (terminal && this.pos.isNearTo(terminal)) {
                         if (this.transfer(terminal, resourceType) === OK) {
                             break;
                         }
@@ -77,11 +77,11 @@ class CreepBroker extends CreepWorker {
             }
         }
 
-        if (storage && !this.creep.pos.isNearTo(storage)) {
+        if (storage && !this.pos.isNearTo(storage)) {
             this.moveTo(storage);
         }
 
-        if (terminal && !this.creep.pos.isNearTo(terminal)) {
+        if (terminal && !this.pos.isNearTo(terminal)) {
             this.moveTo(terminal);
         }
 

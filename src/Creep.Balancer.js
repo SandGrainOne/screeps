@@ -31,7 +31,7 @@ class CreepBalancer extends CreepWorker {
         
         // If possible, perform road repairs on the move.
         if (this.strength > 0 && this.energy > 0) {
-            let foundStructures = this.creep.pos.lookFor(LOOK_STRUCTURES);
+            let foundStructures = this.pos.lookFor(LOOK_STRUCTURES);
             if (foundStructures.length > 0) {
                 for (let structure of foundStructures) {
                     if (structure.structureType === STRUCTURE_ROAD) {
@@ -46,17 +46,17 @@ class CreepBalancer extends CreepWorker {
         }
 
         if (this.atWork && this.load <= 0) {
-            let storage = this.Room.storage;
+            let storage = this.room.storage;
             if (storage) {
-                if (this.creep.pos.isNearTo(storage)) {
+                if (this.pos.isNearTo(storage)) {
                     this.withdraw(storage, RESOURCE_ENERGY);
                 }
             }
         }
 
         if (this.isHome && this.load > 0) {
-            if (this.Room.Links.Inputs.length > 0) {
-                let links = this.creep.pos.findInRange(this.Room.Links.Inputs, 1);
+            if (this.room.Links.Inputs.length > 0) {
+                let links = this.pos.findInRange(this.room.Links.Inputs, 1);
                 if (links.length > 0) {
                     for (let link of links) {
                         if (this.transfer(link, RESOURCE_ENERGY) === OK ) {
@@ -66,9 +66,9 @@ class CreepBalancer extends CreepWorker {
                 }
             }
 
-            let storage = this.Room.storage;
-            if (storage && this.creep.pos.isNearTo(storage)) {
-                for (let resourceType in this.creep.carry) {
+            let storage = this.room.storage;
+            if (storage && this.pos.isNearTo(storage)) {
+                for (let resourceType in this.carry) {
                     if (this.transfer(storage, resourceType) === OK) {
                         break;
                     }
@@ -91,9 +91,9 @@ class CreepBalancer extends CreepWorker {
                 this.moveToRoom(this.WorkRoom.name);
             }
             else {
-                let storage = this.Room.storage;
+                let storage = this.room.storage;
                 if (storage) {
-                    if (!this.creep.pos.isNearTo(storage)) {
+                    if (!this.pos.isNearTo(storage)) {
                         moveTarget = storage;
                     }
                 }
@@ -105,8 +105,8 @@ class CreepBalancer extends CreepWorker {
             }
             else {
                 if (!moveTarget) {
-                    if (this.Room.Links.Inputs.length > 0) {
-                        let links = this.creep.pos.findInRange(this.Room.Links.Inputs, 1);
+                    if (this.room.Links.Inputs.length > 0) {
+                        let links = this.pos.findInRange(this.room.Links.Inputs, 1);
                         if (links.length > 0) {
                             for (let link of links) {
                                 if (link.energy < link.energyCapacity) {
@@ -119,8 +119,8 @@ class CreepBalancer extends CreepWorker {
                 }
 
                 if (!moveTarget) {
-                    if (this.Room.storage && !this.creep.pos.isNearTo(this.Room.storage)) {
-                        moveTarget = this.Room.storage;
+                    if (this.room.storage && !this.pos.isNearTo(this.room.storage)) {
+                        moveTarget = this.room.storage;
                     }
                 }
             }

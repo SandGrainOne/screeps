@@ -91,7 +91,6 @@ class Empire {
             let smartCreep = CreepMaker.wrap(creep);
             this._allCreeps.push(smartCreep);
 
-            smartCreep.Room = this.getRoom(creep.room.name);
             smartCreep.HomeRoom = this.getRoom(creep.memory.rooms.home);
             smartCreep.WorkRoom = this.getRoom(creep.memory.rooms.work);
 
@@ -155,7 +154,7 @@ class Empire {
         if (richestAmount - poorestAmount > 100000) {
             //this.print(richest.name + ".terminal.store.energy: " + richest.terminal.store.energy);
             //this.print(poorest.name + ".terminal.storeCapacity - _.sum(" + poorest.name + ".terminal.store): " + (poorest.terminal.storeCapacity - _.sum(poorest.terminal.store)));
-            if (richest.terminal.store.energy > 30000 && poorest.terminal.storeCapacity - _.sum(poorest.terminal.store) > 20000) {
+            if (richest.terminal.store.energy > 30000 && poorest.terminal.store.energy < 100000 && poorest.terminal.storeCapacity - _.sum(poorest.terminal.store) > 20000) {
                 this.print("Transfering 10000 energy from " + richest.name + "(" + richestAmount + ") to " + poorest.name + "(" + poorestAmount + ")");
                 richest.terminal.send(RESOURCE_ENERGY, 10000, poorest.name);
             }
@@ -170,8 +169,8 @@ class Empire {
 
         let body = CreepMaker.buildBody(bodyCode);
         let memory = {
-            "job": {
-                "name": job,
+            "job": job,
+            "work": {
                 "task": task
             },
             "rooms": {

@@ -26,50 +26,41 @@ class CreepAttacker extends CreepSoldier {
             this.moveToRoom(this.WorkRoom.name);
             return true;
         }
-
-        // Retreat ?
-        //if (this.creep.hits < this.creep.hitsMax / 2) {
-        //    let flagRetreat = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
-        //    if (flagRetreat) {
-        //        this.creep.moveTo(flagRetreat);
-        //    }
-        //    return true;
-        //}
         
-        let hostileCreep = this.creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+        let hostileCreep = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
         if (hostileCreep) {
-            if (this.Room.isMine && this.Room.ramparts > 0) {
-                this.creep.moveTo(hostileCreep);
+            if (this.room.isMine && this.room.ramparts > 0) {
+                this.moveTo(hostileCreep);
                 let ramps = hostileCreep.pos.findInRange(FIND_MY_STRUCTURES, 1, { filter: (s) => s.structureType === STRUCTURE_RAMPART })
                 if (ramps.length > 0) {
-                    if (!this.creep.pos.isEqualTo(ramps[0])) {
-                       this.creep.moveTo(ramps[0]);
+                    if (!this.pos.isEqualTo(ramps[0])) {
+                       this.moveTo(ramps[0]);
                     }
                 }
-                this.creep.attack(hostileCreep);
+                this.attack(hostileCreep);
             } 
             else {
-                this.creep.attack(hostileCreep);
-                this.creep.moveTo(hostileCreep);
+                this.attack(hostileCreep);
+                this.moveTo(hostileCreep);
             }
             return true;
         }
 
-        let enemyStructure = this.creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, { 
+        let enemyStructure = this.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, { 
             filter: (it) => it.structureType != STRUCTURE_CONTROLLER && it.structureType != STRUCTURE_POWER_BANK
         });
         if (enemyStructure !== null) {
-            if (this.creep.attack(enemyStructure) === ERR_NOT_IN_RANGE) {
-                let moveResult = this.creep.moveTo(enemyStructure);
+            if (this.attack(enemyStructure) === ERR_NOT_IN_RANGE) {
+                let moveResult = this.moveTo(enemyStructure);
             }
             return true;
         }
 
         // Attack ?
-        let flagAttack = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_RED });
+        let flagAttack = this.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_RED });
 
         if (flagAttack) {
-            this.creep.moveTo(flagAttack);
+            this.moveTo(flagAttack);
         }
 
         return true;

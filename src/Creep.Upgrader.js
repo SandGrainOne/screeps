@@ -23,31 +23,31 @@ class CreepUpgrader extends CreepWorker {
      */
     work() {
         if (this.atWork && this.energy > 0) {
-            if (this.Room.isMine) {
-                let rangeToController = this.creep.pos.getRangeTo(this.Room.controller);
+            if (this.room.isMine) {
+                let rangeToController = this.pos.getRangeTo(this.room.controller);
                 if (rangeToController <= 3) {
-                    this.upgrade(this.Room.controller);
+                    this.upgrade(this.room.controller);
                 }
             }
         }
 
         if (this.isHome && this.energy < this.capacity) {
-            let storage = this.Room.storage;
-            if (storage && storage.store.energy > 0 && this.creep.pos.isNearTo(storage)) {
+            let storage = this.room.storage;
+            if (storage && storage.store.energy > 0 && this.pos.isNearTo(storage)) {
                 this.withdraw(storage, RESOURCE_ENERGY);
             }
         }
 
         if (this.atWork && this.energy < this.capacity) {
-            let link = this.Room.Links.Controller;
-            if (link && link.energy > 0 && this.creep.pos.isNearTo(link)) {
+            let link = this.room.Links.Controller;
+            if (link && link.energy > 0 && this.pos.isNearTo(link)) {
                 let res = this.withdraw(link, RESOURCE_ENERGY);
             }
         }
         
         if (this.atWork && this.energy < this.capacity) {
-            if (this.Room.containers.length > 0) {
-                let containers = this.creep.pos.findInRange(this.Room.containers, 1);
+            if (this.room.containers.length > 0) {
+                let containers = this.pos.findInRange(this.room.containers, 1);
                 if (containers.length > 0) {
                     this.withdraw(containers[0], RESOURCE_ENERGY);
                 }
@@ -55,9 +55,9 @@ class CreepUpgrader extends CreepWorker {
         }
         
         if (this.atWork && this.energy < this.capacity) {
-            if (this.Room.sources.length > 0) {
-                let sources = this.creep.pos.findInRange(this.Room.sources, 1);
-                if (sources[0] && this.creep.pos.isNearTo(sources[0])) {
+            if (this.room.sources.length > 0) {
+                let sources = this.pos.findInRange(this.room.sources, 1);
+                if (sources[0] && this.pos.isNearTo(sources[0])) {
                     this.harvest(sources[0]);
                 }
             }
@@ -78,10 +78,10 @@ class CreepUpgrader extends CreepWorker {
                 this.moveToRoom(this.WorkRoom.name);
             }
             else {
-                if (this.Room.isMine) {
-                    let rangeToController = this.creep.pos.getRangeTo(this.Room.controller);
+                if (this.room.isMine) {
+                    let rangeToController = this.pos.getRangeTo(this.room.controller);
                     if (rangeToController > 3) {
-                        moveTarget = this.Room.controller;
+                        moveTarget = this.room.controller;
                     }
                 }
                 else {
@@ -94,29 +94,29 @@ class CreepUpgrader extends CreepWorker {
                 this.moveToRoom(this.HomeRoom.name);
             }
             else {
-                if (this.atWork && this.Room.Links.Controller && this.creep.pos.isNearTo(this.Room.Links.Controller)) {
-                    moveTarget = this.Room.Links.Controller;
+                if (this.atWork && this.room.Links.Controller && this.pos.isNearTo(this.room.Links.Controller)) {
+                    moveTarget = this.room.Links.Controller;
                 }
-                else if (this.Room.storage && this.creep.pos.isNearTo(this.Room.storage)) {
-                    moveTarget = this.Room.storage;
+                else if (this.room.storage && this.pos.isNearTo(this.room.storage)) {
+                    moveTarget = this.room.storage;
                 }
 
                 if (!moveTarget && this.atWork) {
-                    let link = this.Room.Links.Controller;
-                    if (link && link.energy > 0 && !this.creep.pos.isNearTo(link)) {
+                    let link = this.room.Links.Controller;
+                    if (link && link.energy > 0 && !this.pos.isNearTo(link)) {
                         moveTarget = link;
                     }
                 }
                 if (!moveTarget) {
-                    let storage = this.Room.storage;
-                    if (storage && storage.store.energy > 0 && !this.creep.pos.isNearTo(storage)) {
+                    let storage = this.room.storage;
+                    if (storage && storage.store.energy > 0 && !this.pos.isNearTo(storage)) {
                         moveTarget = storage;
                     }
                 }
                 if (!moveTarget && this.atWork) {
-                    let source = this.creep.pos.findClosestByPath(this.Room.sources);
+                    let source = this.pos.findClosestByPath(this.room.sources);
                     
-                    if (source && !this.creep.pos.isNearTo(source)) {
+                    if (source && !this.pos.isNearTo(source)) {
                         moveTarget = source;
                     }
                 }

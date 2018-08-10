@@ -32,6 +32,30 @@ class CreepSoldier extends CreepBase {
     work() {
         return false;
     }
+
+    /**
+     * This function is a wrapper for creep.attack().
+     * Currently has no logic of its own.
+     * 
+     * @param {Creep, Structure} target - The target object to be attacked.
+     * 
+     * @returns {int} A code indicating the result of the function call.
+     */
+    attack(target) {
+        return this._creep.attack(target);
+    }
+
+    /**
+     * This function is a wrapper for creep.rangedAttack().
+     * Currently has no logic of its own.
+     * 
+     * @param {Creep, Structure} target - The target object to be attacked.
+     * 
+     * @returns {int} A code indicating the result of the function call.
+     */
+    rangedAttack(target) {
+        return this._creep.rangedAttack(target);
+    }
 }
 
 module.exports = CreepSoldier;

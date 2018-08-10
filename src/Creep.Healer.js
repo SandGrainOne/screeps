@@ -26,33 +26,33 @@ class CreepHealer extends CreepSoldier {
             return true;
         }
         
-        let flagAttack = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_RED });
+        let flagAttack = this.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_RED });
 
         if (flagAttack) {
-            this.creep.moveTo(flagAttack);
+            this.moveTo(flagAttack);
         }
         
-        let target = this.creep.pos.findClosestByRange(FIND_MY_CREEPS, { filter: (c) => c.hits < c.hitsMax });
+        let target = this.pos.findClosestByRange(FIND_MY_CREEPS, { filter: (c) => c.hits < c.hitsMax });
         if (target) {
-            this.creep.moveTo(target);
-            if (this.creep.pos.isNearTo(target)) {
-                this.creep.heal(target);
+            this.moveTo(target);
+            if (this.pos.isNearTo(target)) {
+                this._creep.heal(target);
             }
             else {
-                this.creep.rangedHeal(target);
+                this._creep.rangedHeal(target);
             }
         }
 
-        if (this.creep.hits < this.creep.hitsMax) {
-            this.creep.heal(this.creep);
+        if (this._creep.hits < this._creep.hitsMax) {
+            this._creep.heal(this._creep);
         }
         
-        let hostileCreep = this.creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+        let hostileCreep = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
         
         if (hostileCreep) {            
-            if (this.creep.pos.getRangeTo(hostileCreep) < 3){
-                let flagRetreat = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
-                this.creep.moveTo(flagRetreat);
+            if (this.pos.getRangeTo(hostileCreep) < 3){
+                let flagRetreat = this.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
+                this.moveTo(flagRetreat);
             }
         }
 

@@ -17,17 +17,24 @@ class CreepWorker extends CreepBase {
     constructor(creep) {
         super(creep);
 
-        this._baseStrength = this.creep.getActiveBodyparts(WORK);
+        this._baseStrength = this._creep.getActiveBodyparts(WORK);
 
-        this._capacity = this.creep.getActiveBodyparts(CARRY) * 50;
+        this._capacity = this._creep.getActiveBodyparts(CARRY) * 50;
 
-        this._startEnergy = this.creep.carry.energy;
-        this._startLoad =_.sum(this.creep.carry);
+        this._startEnergy = this._creep.carry.energy;
+        this._startLoad =_.sum(this._creep.carry);
 
         this._energy = this._startEnergy;
         this._minerals = this._startLoad - this._startEnergy;
 
         this._performedWork = {};
+    }
+
+    /**
+     * Gets an object with the creep's cargo contents.
+     */
+    get carry() {
+        return this._creep.carry;
     }
 
     /**
@@ -62,14 +69,14 @@ class CreepWorker extends CreepBase {
      * Gets a value indicating whether the creep is working.
      */
     get isWorking() {
-        return !!this.mem.isworking;
+        return !!this._mem.isworking;
     }
 
     /**
      * Sets a value indicating whether the creep is working.
      */
     set isWorking(value) {
-        this.mem.isworking = !!value;
+        this._mem.isworking = !!value;
     }
 
     /**
@@ -78,13 +85,13 @@ class CreepWorker extends CreepBase {
      * @returns {Boolean} true if the creep is retreating
      */
     retreat() {
-        if (this.creep.hits < this.creep.hitsMax) {
+        if (this._creep.hits < this._creep.hitsMax) {
             if (!this.isHome) {
                 this.moveTo(this.moveToRoom(this.HomeRoom.name, false));
                 return true;
             }
             else {
-                let flag = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
+                let flag = this.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
                 if (flag) {
                     this.moveTo(flag);
                 }
@@ -105,7 +112,7 @@ class CreepWorker extends CreepBase {
             return ERR_BUSY;
         }
 
-        let res = this.creep.build(target);
+        let res = this._creep.build(target);
         if (res === OK) {
             this._energy = Math.max(0, this._energy - (this._baseStrength * C.BUILD_COST));
             this._performedWork.build = true;
@@ -124,7 +131,7 @@ class CreepWorker extends CreepBase {
             return ERR_BUSY;
         }
 
-        let res = this.creep.repair(target);
+        let res = this._creep.repair(target);
         if (res === OK) {
             this._energy = Math.max(0, this._energy - (this._baseStrength * C.REPAIR_COST));
             this._performedWork.repair = true;
@@ -143,7 +150,7 @@ class CreepWorker extends CreepBase {
             return ERR_BUSY;
         }
 
-        let res = this.creep.upgradeController(target);
+        let res = this._creep.upgradeController(target);
         if (res === OK) {
             this._energy = Math.max(0, this._energy - (this._baseStrength * C.UPGRADE_COST));
             this._performedWork.upgrade = true;
@@ -162,7 +169,7 @@ class CreepWorker extends CreepBase {
             return ERR_BUSY;
         }
 
-        let res = this.creep.harvest(target);
+        let res = this._creep.harvest(target);
         if (res === OK) {
             if (target instanceof Source) {
                 this._energy = Math.min(this._capacity, this._energy + (this._baseStrength * C.HARVEST_ENERGY_GAIN));
@@ -186,12 +193,12 @@ class CreepWorker extends CreepBase {
             return ERR_BUSY;
         }
 
-        let carriedAmount = this.creep.carry[resourceType];
+        let carriedAmount = this.carry[resourceType];
         if (carriedAmount <= 0) {
             return ERR_NOT_ENOUGH_RESOURCES;
         }
 
-        let res = this.creep.drop(resourceType);
+        let res = this._creep.drop(resourceType);
         if (res === OK) {
             if (resourceType === RESOURCE_ENERGY) {
                 this._energy = this._energy - carriedAmount;
@@ -215,7 +222,7 @@ class CreepWorker extends CreepBase {
             return ERR_BUSY;
         }
 
-        let res = this.creep.pickup(target);
+        let res = this._creep.pickup(target);
         if (res === OK) {
             let creepSpace = this._capacity - this._minerals - this._energy;
             if (target.resourceType === RESOURCE_ENERGY) {
@@ -269,14 +276,14 @@ class CreepWorker extends CreepBase {
             }
         }
 
-        let carriedAmount = this.creep.carry[resourceType];
+        let carriedAmount = this.carry[resourceType];
         let amountTransfered = Math.min(targetSpace, carriedAmount);
 
         if (amountTransfered <= 0) {
             return ERR_NOT_ENOUGH_RESOURCES;
         }
 
-        let res = this.creep.transfer(target, resourceType, amountTransfered);
+        let res = this._creep.transfer(target, resourceType, amountTransfered);
         if (res === OK) {
             if (resourceType === RESOURCE_ENERGY) {
                 this._energy = this._energy - amountTransfered;
@@ -334,7 +341,7 @@ class CreepWorker extends CreepBase {
             return ERR_NOT_ENOUGH_RESOURCES;
         }
 
-        let res = this.creep.withdraw(target, resourceType, amountTransfered);
+        let res = this._creep.withdraw(target, resourceType, amountTransfered);
 
         if (res === OK) {
             if (resourceType === RESOURCE_ENERGY) {

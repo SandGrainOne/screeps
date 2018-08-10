@@ -30,7 +30,7 @@ class CreepBuilder extends CreepWorker {
      */
     get target() {
         if (this._cache.target === undefined) {
-            return this._cache.target = Game.getObjectById(this.mem.job.target); // job.target might be undefined.
+            return this._cache.target = Game.getObjectById(this._mem.work.target); // TODO: work.target might be undefined.
         }
         return this._cache.target;
     }
@@ -41,11 +41,11 @@ class CreepBuilder extends CreepWorker {
     set target(obj) {
         if (obj !== null) {
             this._cache.target = obj;
-            this.mem.job.target = obj.id;
+            this._mem.work.target = obj.id;
         }
         else {
             this._cache.target = null;
-            delete this.mem.job.target;
+            delete this._mem.work.target;
         }
     }
 
@@ -61,7 +61,7 @@ class CreepBuilder extends CreepWorker {
         if (this.atWork) {
             if (this.target !== null) {
                 if (this.target instanceof ConstructionSite || this.target.hits < this.target.hitsMax) {
-                    if (!this.Room.reserve(this.target.id, this.job, this.name)) {
+                    if (!this.room.reserve(this.target.id, this.job, this.name)) {
                         this.target = null;
                     }
                 }
@@ -75,7 +75,7 @@ class CreepBuilder extends CreepWorker {
             }
 
             if (this.target !== null && this.energy > 0) {
-                if (this.creep.pos.getRangeTo(this.target) <= 3) {
+                if (this.pos.getRangeTo(this.target) <= 3) {
                     if (this.target instanceof ConstructionSite) {
                         this.build(this.target);
                     }
@@ -88,22 +88,22 @@ class CreepBuilder extends CreepWorker {
 
         if (this.energy < this.capacity) {
             if (this.isHome) {
-                let storage = this.Room.storage;
-                if (storage && storage.store.energy > 0 && this.creep.pos.isNearTo(storage)) {
+                let storage = this.room.storage;
+                if (storage && storage.store.energy > 0 && this.pos.isNearTo(storage)) {
                     this.withdraw(storage, RESOURCE_ENERGY);
                 }
             }
 
-            if (this.Room.containers.length > 0) {
-                let container = this.getFirstInRange(this.Room.containers, 1);
+            if (this.room.containers.length > 0) {
+                let container = this.getFirstInRange(this.room.containers, 1);
                 if (container !== null && container.store.energy > 0) {
                     this.withdraw(container, RESOURCE_ENERGY);
                 }
             }
 
-            if (this.Room.sources.length > 0) {
-                let sources = this.creep.pos.findInRange(this.Room.sources, 1);
-                if (sources[0] && this.creep.pos.isNearTo(sources[0])) {
+            if (this.room.sources.length > 0) {
+                let sources = this.pos.findInRange(this.room.sources, 1);
+                if (sources[0] && this.pos.isNearTo(sources[0])) {
                     this.harvest(sources[0]);
                 }
             }
@@ -131,7 +131,7 @@ class CreepBuilder extends CreepWorker {
             }
             else {
                 if (this.target !== null) {
-                    if (this.creep.pos.getRangeTo(this.target) > 3) {
+                    if (this.pos.getRangeTo(this.target) > 3) {
                         moveTarget = this.target;
                     }
                 }
@@ -139,16 +139,16 @@ class CreepBuilder extends CreepWorker {
         }
 
         if (this.task === "charge") {
-            if (!moveTarget && (this.isHome || this.atWork) && !this.Room.storage) {
-                if (!moveTarget && this.Room.containers.length > 0) {
-                    let container = this.creep.pos.findClosestByRange(this.Room.containers);
+            if (!moveTarget && (this.isHome || this.atWork) && !this.room.storage) {
+                if (!moveTarget && this.room.containers.length > 0) {
+                    let container = this.pos.findClosestByRange(this.room.containers);
                     if (container && container.store.energy > 0) {
                         moveTarget = container;
                     }
                 }
 
-                if (!moveTarget && this.Room.sources.length > 0) {
-                    let source = this.creep.pos.findClosestByRange(this.Room.sources);
+                if (!moveTarget && this.room.sources.length > 0) {
+                    let source = this.pos.findClosestByRange(this.room.sources);
                     if (source) {
                         moveTarget = source;
                     }
@@ -159,8 +159,8 @@ class CreepBuilder extends CreepWorker {
                 moveTarget = this.moveToRoom(this.HomeRoom.name, false);
             }
 
-            if (!moveTarget && this.Room.storage) {
-                let storage = this.Room.storage;
+            if (!moveTarget && this.room.storage) {
+                let storage = this.room.storage;
                 if (storage && storage.store.energy > 0) {
                     moveTarget = storage;
                 }
@@ -176,18 +176,18 @@ class CreepBuilder extends CreepWorker {
 
     findTarget() {
         if (Game.time % 3 === 0) {
-            if (this.Room.constructionSites.length > 0) {
-                for (let site of this.Room.constructionSites) {
-                    if (this.Room.reserve(site.id, this.job, this.name)) {
+            if (this.room.constructionSites.length > 0) {
+                for (let site of this.room.constructionSites) {
+                    if (this.room.reserve(site.id, this.job, this.name)) {
                         return site;
                     }
                 }
             }
         }
 
-        if (this.Room.repairs.length > 0) {
-            for (let repairs of this.Room.repairs) {
-                if (this.Room.reserve(repairs.id, this.job, this.name)) {
+        if (this.room.repairs.length > 0) {
+            for (let repairs of this.room.repairs) {
+                if (this.room.reserve(repairs.id, this.job, this.name)) {
                     return repairs;
                 }
             }

@@ -14,66 +14,100 @@ class CreepBase {
      * @param {Creep} creep - The creep to be wrapped.
      */
     constructor(creep) {
-        this.creep = creep;
-        this.mem = creep.memory;
+        this._creep = creep;
+        this._mem = creep.memory;
 
-        this.mem.ticksToLive = this.creep.ticksToLive;
+        if (!this._mem.targets) {
+            this._mem.targets = {};
+        }
+
+        // Tick cache
+        this._cache = {};
+        this._cache.targets = {};
     }
 
     /**
      * Gets the name of the creep.
      */
     get name() {
-        return this.creep.name;
+        return this._creep.name;
     }
 
     /**
      * Gets the name of the job assigned to the creep.
      */
     get job() {
-        return this.mem.job.name;
+        return this._mem.job;
+    }
+
+    /**
+     * Gets the room where there creep currently reside.
+     */
+    get room() {
+        if (this._cache.room !== undefined) {
+            return this._cache.room;
+        }
+
+        return this._cache.room = Empire.getRoom(this._creep.room.name);
+    }
+
+    /**
+     * Gets the current position of the creep.
+     */
+    get pos() {
+        return this._creep.pos;
     }
 
     /**
      * Gets the current task
      */
     get task() {
-        return this.mem.job.task;
+        return this._mem.work.task;
     }
 
     /**
      * Sets the current task
      */
     set task(value) {
-        this.mem.job.task = value;
+        this._mem.work.task = value;
     }
 
     /**
      * Gets a value indicating whether the creep is retired.
      */
     get isRetired() {
-        return this.mem.ticksToLive < (this.mem.spawnTime + C.RETIREMENT);
+        return this._creep.ticksToLive < (this._mem.spawnTime + C.RETIREMENT);
     }
 
     /**
      * Gets a value indicating whether the creep is in the work room.
      */
     get atWork() {
-        return this.Room.name === this.mem.rooms.work;
+        return this.room.name === this._mem.rooms.work;
     }
 
     /**
      * Gets a value indicating whether the creep is in the home room.
      */
     get isHome() {
-        return this.Room.name === this.mem.rooms.home;
+        return this.room.name === this._mem.rooms.home;
     }
 
     /**
      * Gets a value indicating whether the creep is crossing room borders in line of work.
      */
     get isRemoting() {
-        return this.mem.rooms.home !== this.mem.rooms.work;
+        return this._mem.rooms.home !== this._mem.rooms.work;
+    }
+
+    /**
+     * This function is a wrapper for creep.say().
+     * Currently has no logic of its own.
+     * 
+     * @param {string} message - The message to be displayed.
+     */
+    say(message) {
+        this._creep.say(message);
     }
 
     /**
@@ -83,7 +117,7 @@ class CreepBase {
      * @returns {Boolean} true if the creep successfully has performed an action.
      */
     act() {
-        if (this.creep.spawning) {
+        if (this._creep.spawning) {
             return true;
         }
 
@@ -99,7 +133,7 @@ class CreepBase {
             return true;
         }
 
-        this.creep.say("❔");
+        this.say("❔");
 
         return false;
     }
@@ -110,7 +144,7 @@ class CreepBase {
      * @returns {Boolean} true if the creep should be recycled.
      */
     mustRecycle() {
-        if (this.mem.recycle) {
+        if (this._mem.recycle) {
             return true;
         }
         return false;
@@ -121,21 +155,21 @@ class CreepBase {
      */
     _performRecycle() {
         if (!this.isHome) {
-            this.moveTo(this.moveToRoom(this.mem.rooms.home, false));
+            this.moveTo(this.moveToRoom(this._mem.rooms.home, false));
         }
         else {
-            if (this.Room.spawns.length > 0) {
-                let spawns = this.creep.pos.findInRange(this.Room.spawns, 1);
+            if (this.room.spawns.length > 0) {
+                let spawns = this.pos.findInRange(this.room.spawns, 1);
                 if (spawns.length > 0) {
-                    spawns[0].recycleCreep(this.creep);
+                    spawns[0].recycleCreep(this._creep);
                 }
                 else {
-                    let spawn = this.creep.pos.findClosestByRange(this.Room.spawns);
+                    let spawn = this.pos.findClosestByRange(this.room.spawns);
                     if (spawn) {
                         this.moveTo(spawn);
                     }
                     else {
-                        this.creep.say("spawn!?");
+                        this.say("spawn!?");
                     }
                 }
             }
@@ -161,6 +195,39 @@ class CreepBase {
         return false;
     }
 
+    setTarget(type, target) {
+        if (!type || !target || !target.id || !(target instanceof RoomObject)) {
+            console.log("Creep attempted to store an invalid target.")
+            return;
+        }
+
+        this._cache.targets[type] = target;
+        this._mem.targets[type] = { "id": target.id, "x": target.pos.x, "y": target.pos.y, "roomName": target.pos.roomName };
+    }
+
+    getTarget(type) {
+        if (this._cache.targets[type] !== undefined) {
+            return this._cache.targets[type];
+        }
+
+        if (this._mem.targets[type] !== undefined) {
+            let targetData = this._mem.targets[type];
+            let target = Game.getObjectById(targetData.id);
+            if (target) {
+                return this._cache.targets[type] = target;
+            }
+
+            return this._cache.targets[type] = new RoomPosition(targetData.x, targetData.y, targetData.roomName);
+        }
+
+        return this._cache.targets[type] = null;
+    }
+
+    removeTarget(type) {
+        delete this._cache.targets[type];
+        delete this._mem.targets[type];
+    }
+
     /**
      * The creep will move to the given room. Use this if the creep don't have a full RoomPosition.
      * 
@@ -173,13 +240,13 @@ class CreepBase {
         let moveTarget = null;
 
         // Micro manage where creeps go to exit a room while looking for a specific room.
-        if (C.EXIT[this.Room.name] && C.EXIT[this.Room.name][roomName]) {
-            let coords = C.EXIT[this.Room.name][roomName];
-            moveTarget = new RoomPosition(coords.x, coords.y, this.Room.name);
+        if (C.EXIT[this.room.name] && C.EXIT[this.room.name][roomName]) {
+            let coords = C.EXIT[this.room.name][roomName];
+            moveTarget = new RoomPosition(coords.x, coords.y, this.room.name);
         }
         else {
-            let exitDir = this.creep.room.findExitTo(roomName);
-            moveTarget = this.creep.pos.findClosestByRange(exitDir);
+            let exitDir = this._creep.room.findExitTo(roomName);
+            moveTarget = this.pos.findClosestByRange(exitDir);
         }
 
         if (move) {
@@ -194,18 +261,16 @@ class CreepBase {
      * Customized movement method that wraps the default moveTo function.
      */
     moveTo(target) {
-        if (this.creep.fatigue > 0) {
+        if (this._creep.fatigue > 0) {
             return ERR_TIRED;
         }
-
-        let pos = target && target.pos ? target.pos : target;
 
         let ops = { 
             ignoreCreeps: false,
             visualizePathStyle: { fill: 'transparent', stroke: '#fff', lineStyle: 'dashed', strokeWidth: 0.1, opacity: 0.2 } 
         }
 
-        let res = this.creep.moveTo(pos, ops);
+        let res = this._creep.moveTo(target, ops);
         return res;
     }
 
@@ -219,7 +284,7 @@ class CreepBase {
         }
 
         for (let obj of objects) {
-            if (this.creep.pos.getRangeTo(obj) <= range) {
+            if (this.pos.getRangeTo(obj) <= range) {
                 return obj;
             }
         }
@@ -228,12 +293,12 @@ class CreepBase {
     }
 
     /**
-     * Analyze the room and identify the appropriate number of miners as well as their body.
+     * Analyze the given room and identify the appropriate number of miners as well as their body.
      * This base function is empty. Overload in child classes.
      * 
      * @param room - An instance of a visible smart room.
      */
-    static makeBody(room) {
+    static defineJob(room) {
     }
 }
 

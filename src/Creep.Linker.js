@@ -29,8 +29,8 @@ class CreepLinker extends CreepWorker {
             return true;
         }
 
-        let storage = this.Room.storage;
-        let storageLink = this.Room.Links.Storage;
+        let storage = this.room.storage;
+        let storageLink = this.room.Links.Storage;
 
         if (!storage || !storageLink) {
             return false;
@@ -38,10 +38,10 @@ class CreepLinker extends CreepWorker {
 
         let worked = false;
 
-        if (storageLink.cooldown > 1 || !this.Room.Links.Controller) {
+        if (storageLink.cooldown > 1 || !this.room.Links.Controller) {
             // Move stuff away from storage link. It can't send off the energy on its own.
             if (this.load === 0) {
-                if (storageLink.energy > 0 && this.creep.pos.isNearTo(storageLink)) {
+                if (storageLink.energy > 0 && this.pos.isNearTo(storageLink)) {
                     if (this.withdraw(storageLink, RESOURCE_ENERGY) === OK ) {
                         worked = true;
                     }
@@ -49,7 +49,7 @@ class CreepLinker extends CreepWorker {
             }
             else {
                 // Empty creep
-                if (this.creep.pos.isNearTo(storage)) {
+                if (this.pos.isNearTo(storage)) {
                     if (this.transfer(storage, RESOURCE_ENERGY) === OK ) {
                         worked = true;
                     }
@@ -58,14 +58,14 @@ class CreepLinker extends CreepWorker {
         }
         else {
             if (this.load === 0) {
-                if (this.creep.pos.isNearTo(storage)) {
+                if (this.pos.isNearTo(storage)) {
                     if (this.withdraw(storage, RESOURCE_ENERGY) === OK ) {
                         worked = true;
                     }
                 }
             }
             else {
-                if (this.creep.pos.isNearTo(storageLink)) {
+                if (this.pos.isNearTo(storageLink)) {
                     if (this.transfer(storageLink, RESOURCE_ENERGY) === OK ) {
                         worked = true;
                     }
@@ -73,11 +73,11 @@ class CreepLinker extends CreepWorker {
             }
         }
 
-        if (!this.creep.pos.isNearTo(storage)) {
+        if (!this.pos.isNearTo(storage)) {
             this.moveTo(storage);
         }
 
-        if (!this.creep.pos.isNearTo(storageLink)) {
+        if (!this.pos.isNearTo(storageLink)) {
             this.moveTo(storageLink);
         }
 

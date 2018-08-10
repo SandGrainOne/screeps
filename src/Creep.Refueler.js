@@ -29,43 +29,43 @@ class CreepRefueler extends CreepWorker {
             return true;
         }
 
-        if (!this.Room.storage || this.load > this.energy) {
+        if (!this.room.storage || this.load > this.energy) {
             return false;
         }
 
         if (this.energy < this.capacity) {
-            if (this.creep.pos.isNearTo(this.Room.storage)) {
-                this.withdraw(this.Room.storage, RESOURCE_ENERGY);
+            if (this.pos.isNearTo(this.room.storage)) {
+                this.withdraw(this.room.storage, RESOURCE_ENERGY);
             }
         }
 
-        if (this.energy > 0 && this.Room.terminal) {
-            if (this.Room.terminal.store.energy < C.TERMINAL_THRESHOLD_ENERGY - 5000 && this.Room.storage.store.energy > 200000) {
-                if (this.creep.pos.isNearTo(this.Room.terminal)) {
-                    this.transfer(this.Room.terminal, RESOURCE_ENERGY);
-                }
-            }
-        }
-
-        if (this.energy > 0 && this.Room.towers.length > 0) { 
+        if (this.energy > 0 && this.room.towers.length > 0) { 
             // Towers are sorted. The one with less remaining energy first.
-            let tower = this.Room.towers[0];
-            if (this.creep.pos.isNearTo(tower)) {
+            let tower = this.room.towers[0];
+            if (this.pos.isNearTo(tower)) {
                 this.transfer(tower, RESOURCE_ENERGY);
             }
         }
 
-        if (this.energy > 0 && this.Room.extensions.length > 0) {
+        if (this.energy > 0 && this.room.extensions.length > 0) {
             // The extensions array only contains extensions and spawns with space for energy.
-            let extensions = this.creep.pos.findInRange(this.Room.extensions, 1);
+            let extensions = this.pos.findInRange(this.room.extensions, 1);
             if (extensions.length > 0) {
                 this.transfer(extensions[0], RESOURCE_ENERGY);
             }
         }
 
-        if (this.energy > 0 && this.Room.nuker !== null) {
-            if (this.creep.pos.isNearTo(this.Room.nuker)) {
-                this.transfer(this.Room.nuker, RESOURCE_ENERGY);
+        if (this.energy > 0 && this.room.nuker !== null) {
+            if (this.pos.isNearTo(this.room.nuker)) {
+                this.transfer(this.room.nuker, RESOURCE_ENERGY);
+            }
+        }
+
+        if (this.energy > 0 && this.room.terminal) {
+            if (this.room.terminal.store.energy < C.TERMINAL_THRESHOLD_ENERGY - 5000 && this.room.storage.store.energy > 200000) {
+                if (this.pos.isNearTo(this.room.terminal)) {
+                    this.transfer(this.room.terminal, RESOURCE_ENERGY);
+                }
             }
         }
 
@@ -73,9 +73,9 @@ class CreepRefueler extends CreepWorker {
 
         if (this.energy > 0) { 
             // Prioritise towers if the room is invaded.
-            if (this.Room.state !== C.ROOM_STATE_NORMAL) {
-                if (this.Room.towers.length > 0) {
-                    for (let tower of this.Room.towers) {
+            if (this.room.state !== C.ROOM_STATE_NORMAL) {
+                if (this.room.towers.length > 0) {
+                    for (let tower of this.room.towers) {
                         if (tower.energy < tower.energyCapacity - 200) {
                             moveTarget = tower;
                             break;
@@ -84,19 +84,19 @@ class CreepRefueler extends CreepWorker {
                 } 
             }
 
-            if (!moveTarget && this.Room.extensions.length > 0) {
+            if (!moveTarget && this.room.extensions.length > 0) {
                 // All structures in the extensions array have room for energy. Pick the closest.
-                moveTarget = this.creep.pos.findClosestByRange(this.Room.extensions);
+                moveTarget = this.pos.findClosestByRange(this.room.extensions);
             }
 
-            if (!moveTarget && this.Room.terminal) {
-                if (this.Room.terminal.store.energy < 40000 && this.Room.storage.store.energy > 200000) {
-                    moveTarget = this.Room.terminal;
+            if (!moveTarget && this.room.terminal) {
+                if (this.room.terminal.store.energy < 40000 && this.room.storage.store.energy > 200000) {
+                    moveTarget = this.room.terminal;
                 }
             }
 
-            if (!moveTarget && this.Room.towers.length > 0) {
-                for (let tower of this.Room.towers) {
+            if (!moveTarget && this.room.towers.length > 0) {
+                for (let tower of this.room.towers) {
                     if (tower.energy < tower.energyCapacity - 200) {
                         moveTarget = tower;
                         break;
@@ -104,14 +104,14 @@ class CreepRefueler extends CreepWorker {
                 }
             }
 
-            if (!moveTarget && this.Room.nuker !== null) {
-                if (this.Room.nuker.energy < this.Room.nuker.energyCapacity) {
-                    moveTarget = this.Room.nuker;
+            if (!moveTarget && this.room.nuker !== null) {
+                if (this.room.nuker.energy < this.room.nuker.energyCapacity) {
+                    moveTarget = this.room.nuker;
                 }
             }
         }
         else {
-            moveTarget = this.Room.storage;
+            moveTarget = this.room.storage;
         }
 
         if (moveTarget) {

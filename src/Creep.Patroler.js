@@ -22,21 +22,25 @@ class CreepPatroler extends CreepSoldier {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
+        if (this._creep.hits < this._creep.hitsMax) {
+            this._creep.heal(this._creep);
+        }
+
         if (!this.atWork) {
             this.moveTo(this.moveToRoom(this.WorkRoom.name, false));
             return true;
         }
 
-        let hostile = this.creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+        let hostile = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
 
         if (hostile) {
-            if (this.creep.pos.getRangeTo(hostile) > 3) {
-                this.creep.moveTo(hostile);
+            if (this.pos.getRangeTo(hostile) > 3) {
+                this.moveTo(hostile);
             }
             else {
-                this.creep.rangedAttack(hostile);
-                if (this.creep.pos.getRangeTo(hostile) < 3) {
-                    let retreatPosition = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
+                this.rangedAttack(hostile);
+                if (this.pos.getRangeTo(hostile) < 3) {
+                    let retreatPosition = this.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
                     if (retreatPosition) {
                         this.moveTo(retreatPosition);
                     }
@@ -44,19 +48,18 @@ class CreepPatroler extends CreepSoldier {
             }
         }
         else {
-            if (this.Room.keeperLairs.length > 0) {
+            if (this.room.keeperLairs.length > 0) {
                 // The keeper lairs are already sorted by the ticksToSpawn value
-                if (this.creep.pos.getRangeTo(this.Room.keeperLairs[0]) > 3) {
-                    this.creep.moveTo(this.Room.keeperLairs[0]);
+                if (this.pos.getRangeTo(this.room.keeperLairs[0]) > 3) {
+                    this.moveTo(this.room.keeperLairs[0]);
                 }
             }
         }
 
-        if (this.creep.hits < this.creep.hitsMax) {
-            this.creep.heal(this.creep);
-            let health = this.creep.hits / this.creep.hitsMax
+        if (this._creep.hits < this._creep.hitsMax) {
+            let health = this._creep.hits / this._creep.hitsMax
             if (health < 0.4) {
-                let retreatPosition = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
+                let retreatPosition = this.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
                 if (retreatPosition) {
                     this.moveTo(retreatPosition);
                 }

@@ -18,7 +18,6 @@ let wrappers = {
     "defender": require('Creep.Defender'),
     "attacker": require('Creep.Attacker'),
     "patroler": require('Creep.Patroler'),
-    "balancer": require('Creep.Balancer'),
     "dismantler": require('Creep.Dismantler'),
     "mineralminer": require('Creep.MineralMiner'),
 };
@@ -33,10 +32,7 @@ class CreepMaker {
         let smartCreep = null;
 
         let job = creep.memory.job;
-        if (job) {
-            if (job.name) {
-                job = job.name;
-            }
+        if (job && wrappers[job]) {
             smartCreep = new wrappers[job](creep);
         }
 
@@ -47,11 +43,22 @@ class CreepMaker {
         return smartCreep;
     }
 
-    static makeBody(room) {
+    /**
+     * Loop through all wrapper classes for creep jobs and get them to analyze a room to
+     * identify how many creeps the room will need as well as their body composition.
+     * 
+     * @param {RoomReal} room - The room to analyze.
+     * 
+     * @return - Object with all job requirements.
+     */
+    static defineJobs(room) {
         let jobs = {};
 
         for (let jobName in wrappers) {
-            jobs[jobName] = wrappers[jobName].makeBody(room);
+            let job = wrappers[jobName].defineJob(room);
+            if (job) {
+                jobs[jobName] = job;
+            }
         }
 
         return jobs;
