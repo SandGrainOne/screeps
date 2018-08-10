@@ -6,22 +6,13 @@ let CreepWorker = require('./Creep.Worker');
  * Wrapper class for creeps with logic for a chemist.
  * Primary purpose of these creeps are to handle minerals
  */
-class CreepChemist extends CreepWorker {   
-    /**
-     * Initializes a new instance of the CreepChemist class with the specified creep.
-     * 
-     * @param {Creep} creep - The creep to be wrapped
-     */
-    constructor(creep) {
-        super(creep);
-    }
-    
+class CreepChemist extends CreepWorker {
     /**
      * Perform chemist related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
-    work() {
+    work () {
         if (!this.atWork) {
             this.moveToRoom(this.WorkRoom.name);
             return true;
@@ -33,39 +24,39 @@ class CreepChemist extends CreepWorker {
 
         let reaction = {};
 
-        if (this.room.name === "E73N87") {
-            reaction = { compoundOne: RESOURCE_HYDROGEN, compoundTwo: RESOURCE_OXYGEN };
-        }
-
-        if (this.room.name === "E75N87") {
+        if (this.room.name === 'E73N87') {
             reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_GHODIUM_ALKALIDE };
         }
 
-        if (this.room.name === "E75N89") {
+        if (this.room.name === 'E75N87') {
+            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_GHODIUM_ALKALIDE };
+        }
+
+        if (this.room.name === 'E75N89') {
             reaction = { compoundOne: RESOURCE_LEMERGIUM, compoundTwo: RESOURCE_UTRIUM };
         }
 
-        if (this.room.name === "E77N88") {
-            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_GHODIUM_ALKALIDE };
+        if (this.room.name === 'E77N88') {
+            reaction = { compoundOne: RESOURCE_GHODIUM_ALKALIDE, compoundTwo: RESOURCE_CATALYST };
         }
 
-        if (this.room.name === "E77N85") {
+        if (this.room.name === 'E77N85') {
             reaction = { compoundOne: RESOURCE_KEANIUM, compoundTwo: RESOURCE_ZYNTHIUM };
         }
 
-        if (this.room.name === "E78N85") {
+        if (this.room.name === 'E78N85') {
             reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_LEMERGIUM_ALKALIDE };
         }
 
-        if (this.room.name === "E78N88") {
-            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_LEMERGIUM_ALKALIDE };
+        if (this.room.name === 'E78N88') {
+            reaction = { compoundOne: RESOURCE_UTRIUM, compoundTwo: RESOURCE_LEMERGIUM };
         }
 
-        if (this.room.name === "E79N85") {
+        if (this.room.name === 'E79N85') {
             reaction = { compoundOne: RESOURCE_GHODIUM, compoundTwo: RESOURCE_HYDROGEN };
         }
 
-        if (this.room.name === "E79N86") {
+        if (this.room.name === 'E79N86') {
             reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_UTRIUM_ACID };
         }
 
@@ -146,7 +137,7 @@ class CreepChemist extends CreepWorker {
 
         if (this.load < this.capacity) {
             for (let producer of this.room.labs.producers) {
-                if (producer.mineralType && producer.mineralType !== REACTIONS[reaction.compoundOne][reaction.compoundTwo]){                    
+                if (producer.mineralType && producer.mineralType !== REACTIONS[reaction.compoundOne][reaction.compoundTwo]) {
                     if (this.pos.isNearTo(producer)) {
                         this.withdraw(producer, producer.mineralType);
                     }
@@ -159,7 +150,7 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.load < this.capacity) {
-            this.room.labs.producers.sort(function(a, b) { return b.mineralAmount - a.mineralAmount });
+            this.room.labs.producers.sort((a, b) => b.mineralAmount - a.mineralAmount);
             if (this.room.labs.producers[0].mineralAmount > 0) {
                 if (this.pos.isNearTo(this.room.labs.producers[0])) {
                     this.withdraw(this.room.labs.producers[0], this.room.labs.producers[0].mineralType);
@@ -193,7 +184,7 @@ class CreepChemist extends CreepWorker {
             return true;
         }
 
-        if (this.load >= this.capacity) { 
+        if (this.load >= this.capacity) {
             for (let resourceType in this.carry) {
                 if (this.carry[resourceType] > 0) {
                     // Creep holds wrong type of resource. Get rid of it.

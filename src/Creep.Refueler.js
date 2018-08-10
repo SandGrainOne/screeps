@@ -8,22 +8,13 @@ let CreepWorker = require('./Creep.Worker');
  * Wrapper class for creeps with logic for a refueler.
  * Primary purpose of these creeps are to keep the towers, spawn and extensions stocked with energy in that order.
  */
-class CreepRefueler extends CreepWorker {   
-    /**
-     * Initializes a new instance of the CreepRefueler class with the specified creep.
-     * 
-     * @param {Creep} creep - The creep to be wrapped
-     */
-    constructor(creep) {
-        super(creep);
-    }
-    
+class CreepRefueler extends CreepWorker {
     /**
      * Perform refueling related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
-    work() {
+    work () {
         if (!this.atWork) {
             this.moveToRoom(this.WorkRoom.name);
             return true;
@@ -39,7 +30,7 @@ class CreepRefueler extends CreepWorker {
             }
         }
 
-        if (this.energy > 0 && this.room.towers.length > 0) { 
+        if (this.energy > 0 && this.room.towers.length > 0) {
             // Towers are sorted. The one with less remaining energy first.
             let tower = this.room.towers[0];
             if (this.pos.isNearTo(tower)) {
@@ -71,7 +62,7 @@ class CreepRefueler extends CreepWorker {
 
         let moveTarget = null;
 
-        if (this.energy > 0) { 
+        if (this.energy > 0) {
             // Prioritise towers if the room is invaded.
             if (this.room.state !== C.ROOM_STATE_NORMAL) {
                 if (this.room.towers.length > 0) {
@@ -81,7 +72,7 @@ class CreepRefueler extends CreepWorker {
                             break;
                         }
                     }
-                } 
+                }
             }
 
             if (!moveTarget && this.room.extensions.length > 0) {
@@ -126,31 +117,31 @@ class CreepRefueler extends CreepWorker {
      * 
      * @param room - An instance of a visible smart room.
      */
-    static defineJob(room) {
-        // Refuelers operate in owned rooms with a storage.
-        if (!room.isMine || !room.storage) {
-            return;
-        }
+    static defineJob (room) {
+        // // Refuelers operate in owned rooms with a storage.
+        // if (!room.isMine || !room.storage) {
+        //     return;
+        // }
 
-        return;
+        // return;
 
-        // Might add work parts for road repairs?
-        let workParts = 0;
+        // // Might add work parts for road repairs?
+        // let workParts = 0;
 
-        let factor = room.extensions[0].energyCapacity / CARRY_CAPACITY;
-        let carryParts = 1;
+        // let factor = room.extensions[0].energyCapacity / CARRY_CAPACITY;
+        // let carryParts = 1;
 
-        // Make it an even number of parts before adding move.
-        carryParts = carryParts + (workParts + carryParts) % 2;
+        // // Make it an even number of parts before adding move.
+        // carryParts = carryParts + (workParts + carryParts) % 2;
 
-        // Should have 1 move part for every two other parts.
-        let moveParts = Math.max((workParts + carryParts) / 2, 2);
+        // // Should have 1 move part for every two other parts.
+        // let moveParts = Math.max((workParts + carryParts) / 2, 2);
 
-        let job = {};
-        job.number = 2;
-        job.body = Array(workParts).fill(WORK).concat(Array(carryParts).fill(CARRY)).concat(Array(moveParts).fill(MOVE));
+        // let job = {};
+        // job.number = 2;
+        // job.body = Array(workParts).fill(WORK).concat(Array(carryParts).fill(CARRY)).concat(Array(moveParts).fill(MOVE));
 
-        return job;
+        // return job;
     }
 }
 

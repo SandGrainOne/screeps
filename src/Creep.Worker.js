@@ -8,13 +8,12 @@ let CreepBase = require('./Creep.Base');
  * Wrapper class for creeps with worker related logic.
  */
 class CreepWorker extends CreepBase {
-    
     /**
      * Initializes a new instance of the CreepWorker class with the specified creep.
      * 
      * @param {Creep} creep - The creep to be wrapped
      */
-    constructor(creep) {
+    constructor (creep) {
         super(creep);
 
         this._baseStrength = this._creep.getActiveBodyparts(WORK);
@@ -30,72 +29,82 @@ class CreepWorker extends CreepBase {
     /**
      * Gets an object with the creep's cargo contents.
      */
-    get carry() {
+    get carry () {
         return this._creep.carry;
     }
 
     /**
      * Gets the carry capacity of the creep.
      */
-    get capacity() {
+    get capacity () {
         return this._capacity;
     }
 
     /**
      * Gets the work strength of the creep.
      */
-    get strength() {
+    get strength () {
         return this._baseStrength;
     }
 
     /**
      * Gets the amount of energy callculated to be held by the creep at the end of the work cycle.
      */
-    get energy() {
+    get energy () {
         return this._energy;
     }
 
     /**
      * Gets the amount of resources callculated to be carried by the creep at the end of the work cycle.
      */
-    get load() {
+    get load () {
         return this._energy + this._minerals;
     }
 
     /**
      * Gets a value indicating whether the creep is working.
      */
-    get isWorking() {
+    get isWorking () {
         return !!this._mem.isworking;
     }
 
     /**
      * Sets a value indicating whether the creep is working.
      */
-    set isWorking(value) {
+    set isWorking (value) {
         this._mem.isworking = !!value;
     }
 
     /**
-     * Perform a retreat if the creep is hurt.
-     * 
-     * @returns {Boolean} true if the creep is retreating
+     * Determine what task the creep should undertake this tick.
      */
-    retreat() {
-        if (this._creep.hits < this._creep.hitsMax) {
-            if (!this.isHome) {
-                this.moveTo(this.moveToRoom(this.HomeRoom.name, false));
-                return true;
-            }
-            else {
-                let flag = this.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
-                if (flag) {
-                    this.moveTo(flag);
-                }
-            }
+    getTask () {
+        let task = super.getTask();
+        if (!_.isNull(task)) {
+            return task; 
         }
 
-        return false;
+        if (this._creep.hits < this._creep.hitsMax) {
+            return 'retreating';
+        }
+
+        return null;
+    }
+
+    /**
+     * Perform a retreat if the creep is hurt.
+     */
+    retreating () {
+        if (!this.isHome) {
+            this.moveTo(this.moveToRoom(this.HomeRoom.name, false));
+            return true;
+        }
+        else {
+            let flag = this.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
+            if (flag) {
+                this.moveTo(flag);
+            }
+        }
     }
 
     /**
@@ -104,7 +113,7 @@ class CreepWorker extends CreepBase {
      * 
      * @param {ConstructionSite} target - The target construction site.
      */
-    build(target) {
+    build (target) {
         if (this._performedWork.build) {
             return ERR_BUSY;
         }
@@ -123,7 +132,7 @@ class CreepWorker extends CreepBase {
      * 
      * @param {Structure} target - The target structure to repair.
      */
-    repair(target) {
+    repair (target) {
         if (this._performedWork.repair) {
             return ERR_BUSY;
         }
@@ -142,7 +151,7 @@ class CreepWorker extends CreepBase {
      * 
      * @param {StructureController} target - The controller to upgrade.
      */
-    upgrade(target) {
+    upgrade (target) {
         if (this._performedWork.upgrade) {
             return ERR_BUSY;
         }
@@ -161,7 +170,7 @@ class CreepWorker extends CreepBase {
      * 
      * @param {Source|Mineral} target - The mineral node to harvest from.
      */
-    harvest(target) {
+    harvest (target) {
         if (this._performedWork.harvest) {
             return ERR_BUSY;
         }
@@ -170,7 +179,8 @@ class CreepWorker extends CreepBase {
         if (res === OK) {
             if (target instanceof Source) {
                 this._energy = Math.min(this._capacity, this._energy + (this._baseStrength * C.HARVEST_ENERGY_GAIN));
-            }        
+            }
+
             if (target instanceof Mineral) {
                 this._minerals = Math.min(this._capacity, this._minerals + (this._baseStrength * C.HARVEST_MINERAL_GAIN));
             }
@@ -185,7 +195,7 @@ class CreepWorker extends CreepBase {
      * 
      * @param {string} resourceType - One of the RESOURCE_* constants indicating what resource to drop.
      */
-    drop(resourceType) {
+    drop (resourceType) {
         if (this._performedWork.drop) {
             return ERR_BUSY;
         }
@@ -214,7 +224,7 @@ class CreepWorker extends CreepBase {
      * 
      * @param {Resource} target - The resource drop to pick up from the ground.
      */
-    pickup(target) {
+    pickup (target) {
         if (this._performedWork.pickup) {
             return ERR_BUSY;
         }
@@ -240,7 +250,7 @@ class CreepWorker extends CreepBase {
      * @param {Structure} target - The structure to transfer the resource to.
      * @param {string} resourceType - One of the RESOURCE_* constants indicating what resource to drop.
      */
-    transfer(target, resourceType) {
+    transfer (target, resourceType) {
         if (this._performedWork.transfer) {
             return ERR_BUSY;
         }
@@ -300,7 +310,7 @@ class CreepWorker extends CreepBase {
      * @param {Structure} target - The structure to withdraw resources from.
      * @param {string} resourceType - One of the RESOURCE_* constants indicating what resource to drop.
      */
-    withdraw(target, resourceType) {
+    withdraw (target, resourceType) {
         if (this._performedWork.withdraw) {
             return ERR_BUSY;
         }

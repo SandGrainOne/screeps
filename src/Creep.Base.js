@@ -2,8 +2,6 @@
 
 let C = require('./constants');
 
-let RoomBase = require('./Room.Base');
-
 /**
  * The CreepBase class is the base class for all creep wrappers. 
  */
@@ -13,7 +11,7 @@ class CreepBase {
      * 
      * @param {Creep} creep - The creep to be wrapped.
      */
-    constructor(creep) {
+    constructor (creep) {
         this._creep = creep;
         this._mem = creep.memory;
 
@@ -29,74 +27,78 @@ class CreepBase {
     /**
      * Gets the name of the creep.
      */
-    get name() {
+    get name () {
         return this._creep.name;
     }
 
     /**
      * Gets the name of the job assigned to the creep.
      */
-    get job() {
+    get job () {
         return this._mem.job;
     }
 
     /**
      * Gets the room where there creep currently reside.
      */
-    get room() {
-        if (this._cache.room !== undefined) {
-            return this._cache.room;
-        }
+    get room () {
+        // if (this._cache.room !== undefined) {
+        //     return this._cache.room;
+        // }
 
-        return this._cache.room = Empire.getRoom(this._creep.room.name);
+        // this._cache.room = Empire.getRoom(this._creep.room.name);
+        return Empire.rooms[this._creep.room.name]; this._cache.room;
     }
 
     /**
      * Gets the current position of the creep.
      */
-    get pos() {
+    get pos () {
         return this._creep.pos;
     }
 
     /**
      * Gets the current task
      */
-    get task() {
-        return this._mem.work.task;
+    get task () {
+        return _.isUndefined(this._mem.work) ? null : this._mem.work.task;
     }
 
     /**
      * Sets the current task
      */
-    set task(value) {
+    set task (value) {
+        if (_.isUndefined(this._mem.work)) {
+            this._mem.work = {};
+        }
         this._mem.work.task = value;
     }
 
     /**
      * Gets a value indicating whether the creep is retired.
      */
-    get isRetired() {
+    get isRetired () {
         return this._creep.ticksToLive < (this._mem.spawnTime + C.RETIREMENT);
     }
 
     /**
      * Gets a value indicating whether the creep is in the work room.
      */
-    get atWork() {
+    get atWork () {
         return this.room.name === this._mem.rooms.work;
     }
 
     /**
      * Gets a value indicating whether the creep is in the home room.
      */
-    get isHome() {
+    get isHome () {
         return this.room.name === this._mem.rooms.home;
     }
 
     /**
      * Gets a value indicating whether the creep is crossing room borders in line of work.
      */
-    get isRemoting() {
+    get isRemoting () {
         return this._mem.rooms.home !== this._mem.rooms.work;
     }
 
@@ -106,7 +108,7 @@ class CreepBase {
      * 
      * @param {string} message - The message to be displayed.
      */
-    say(message) {
+    say (message) {
         this._creep.say(message);
     }
 
@@ -116,44 +118,52 @@ class CreepBase {
      * 
      * @returns {Boolean} true if the creep successfully has performed an action.
      */
-    act() {
-        if (this._creep.spawning) {
-            return true;
-        }
+    act () {
+        let task = this.getTask();
 
-        if (this.mustRecycle()) {
-            return this._performRecycle();
-        }
+        if (!_.isNull(task)) {
+            if (typeof this[task] !== 'function') {
+                throw new Error('This creep wrapper does not have any task with the name ' + task);
+            }
 
-        if (this.retreat()) {
-            return true;
+            this[task]();
+            return;
         }
 
         if (this.work()) {
             return true;
         }
 
-        this.say("❔");
-        
+        this.say('❔');
+
         return false;
     }
 
     /**
-     * Check if the creep should be recycled. This base method checks the recycle value in the creep memory.
-     * 
-     * @returns {Boolean} true if the creep should be recycled.
+     * Determine what task the creep should undertake this tick.
      */
-    mustRecycle() {
-        if (this._mem.recycle) {
-            return true;
+    getTask () {
+        if (this._creep.spawning) {
+            return "spawning";
         }
-        return false;
+
+        if (this._mem.recycle) {
+            return "recycling";
+        }
+
+        return null;
     }
 
     /**
-     * Perform the actual recycling. This includes moving to the home room, finding a spawn and calling recycle.
+     * Perform any task logic related to spawning.
      */
-    _performRecycle() {
+    spawning () {
+    }
+
+    /**
+     * Perform any task logic related to recycling.
+     */
+    recycling () {
         if (!this.isHome) {
             this.moveTo(this.moveToRoom(this._mem.rooms.home, false));
         }
@@ -169,7 +179,7 @@ class CreepBase {
                         this.moveTo(spawn);
                     }
                     else {
-                        this.say("spawn!?");
+                        this.say('spawn!?');
                     }
                 }
             }
@@ -178,34 +188,25 @@ class CreepBase {
     }
 
     /**
-     * Perform retreat related logic.
-     * 
-     * @returns {Boolean} true if the retreat was required and the creep is on the move
-     */
-    retreat() {
-        return false;
-    }
-
-    /**
      * Perform job related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
-    work() {
+    work () {
         return false;
     }
 
-    setTarget(type, target) {
+    setTarget (type, target) {
         if (!type || !target || !target.id || !(target instanceof RoomObject)) {
-            console.log("Creep attempted to store an invalid target.")
+            console.log('Creep attempted to store an invalid target.');
             return;
         }
 
         this._cache.targets[type] = target;
-        this._mem.targets[type] = { "id": target.id, "x": target.pos.x, "y": target.pos.y, "roomName": target.pos.roomName };
+        this._mem.targets[type] = { 'id': target.id, 'x': target.pos.x, 'y': target.pos.y, 'roomName': target.pos.roomName };
     }
 
-    getTarget(type) {
+    getTarget (type) {
         if (this._cache.targets[type] !== undefined) {
             return this._cache.targets[type];
         }
@@ -214,16 +215,19 @@ class CreepBase {
             let targetData = this._mem.targets[type];
             let target = Game.getObjectById(targetData.id);
             if (target) {
-                return this._cache.targets[type] = target;
+                this._cache.targets[type] = target;
+                return this._cache.targets[type];
             }
 
-            return this._cache.targets[type] = new RoomPosition(targetData.x, targetData.y, targetData.roomName);
+            this._cache.targets[type] = new RoomPosition(targetData.x, targetData.y, targetData.roomName);
+            return this._cache.targets[type];
         }
 
-        return this._cache.targets[type] = null;
+        this._cache.targets[type] = null;
+        return this._cache.targets[type];
     }
 
-    removeTarget(type) {
+    removeTarget (type) {
         delete this._cache.targets[type];
         delete this._mem.targets[type];
     }
@@ -236,7 +240,7 @@ class CreepBase {
      * 
      * @returns {int} The result of the moveTo call.
      */
-    moveToRoom(roomName, move = true) {
+    moveToRoom (roomName, move = true) {
         let moveTarget = null;
 
         // Micro manage where creeps go to exit a room while looking for a specific room.
@@ -248,7 +252,6 @@ class CreepBase {
             moveTarget = new RoomPosition(24, 24, roomName);
         }
 
-
         if (move) {
             return this.moveTo(moveTarget);
         }
@@ -259,24 +262,38 @@ class CreepBase {
 
     /**
      * Customized movement method that wraps the default moveTo function.
+     * 
+     * @param {RoomObject|RoomPosition} target - The location the creep should move to.
+     * @param {object} options - An object containing additional options.
      */
-    moveTo(target) {
+    moveTo (target, options) {
         if (this._creep.fatigue > 0) {
             return ERR_TIRED;
         }
-
-        let ops = { 
-            ignoreCreeps: false,
-            visualizePathStyle: { fill: 'transparent', stroke: '#fff', lineStyle: 'dashed', strokeWidth: 0.1, opacity: 0.2 } 
-        }
-
-        let res = this._creep.moveTo(target, ops);
         
-        if (res === OK) {
-            this._moving = true;
+        // Normalize the input.
+        if (!(target instanceof RoomPosition)) {
+            target = target.pos;
         }
         
-        return res;
+        // Create and set some default move options.
+        options = options || {};
+        _.defaults(options, { 
+            ignoreCreeps: false, 
+            range: 1,
+            visualizePathStyle: { fill: 'transparent', stroke: '#fff', lineStyle: 'dashed', strokeWidth: 0.1, opacity: 0.2 }
+        });
+
+        // If the target is an exit tile. The creep must move on it.
+        if (this.isExit(target)) {
+            options.range = 0;
+        }
+
+        if (this.pos.getRangeTo(target) <= options.range) {
+            return OK;
+        }
+        
+        return this._creep.moveTo(target, options);
     }
 
     /**
@@ -287,7 +304,7 @@ class CreepBase {
      * 
      * @returns {RoomObject} - The first room object without the given range if found. Otherwise null.
      */
-    getFirstInRange(roomObjects, range) {
+    getFirstInRange (roomObjects, range) {
         if (!Array.isArray(roomObjects)) {
             return null;
         }
@@ -313,7 +330,11 @@ class CreepBase {
      * 
      * @param room - An instance of a visible smart room.
      */
-    static defineJob(room) {
+    static defineJob (room) {
+    }
+    
+    isExit(target) {
+        return target.x === 0 || target.y === 0 || target.x === 49 || target.y === 49;
     }
 }
 

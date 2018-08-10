@@ -12,41 +12,27 @@ class RoomBase {
      * 
      * @param {string} name - The name of the room
      */
-    constructor(name) {
+    constructor (name) {
         this._name = name;
         this._visible = false;
 
-        if (Memory.rooms && Memory.rooms[name]) {
+        if (!_.isUndefined(Memory.rooms) && !_.isUndefined(Memory.rooms[name])) {
             this._mem = Memory.rooms[name];
         }
         else {
             this._mem = {};
         }
 
-        if (!this._mem.state) {
-            this._mem.state = C.ROOM_STATE_NORMAL;
-        }
-
-        if (!this._mem.update) {
-            this._mem.update = {};
-            this._mem.update.last = 0;
-            this._mem.update.next = 0;
-        }
-
-        if (!this._mem.resources) {
+        if (_.isUndefined(this._mem.resources)) {
             this._mem.resources = {};
         }
 
-        if (!this._mem.structures) {
+        if (_.isUndefined(this._mem.structures)) {
             this._mem.structures = {};
         }
 
-        if (!this._mem.reservations) {
-            this._mem.reservations = {};
-        }
-
-        if (!this._mem.jobs) {
-            this._mem.jobs = { 
+        if (_.isUndefined(this._mem.jobs)) {
+            this._mem.jobs = {
                 settlers: 0,
                 builders: 0,
                 upgraders: 0,
@@ -61,46 +47,53 @@ class RoomBase {
     /**
      * Gets the name of the room.
      */
-    get name() {
+    get name () {
         return this._name;
     }
 
     /**
      * Gets a value indicating whether the room is visible or not.
      */
-    get isVisible() {
+    get isVisible () {
         return this._visible;
     }
 
     /**
      * Gets the state of the room.
      */
-    get state() {
-        return this._mem.state;
+    get state () {
+        return _.isUndefined(this._mem.state) ? C.ROOM_STATE_NORMAL : this._mem.state;
+    }
+
+    /**
+     * Sets the state of the room.
+     */
+    set state (value) {
+        this._mem.state = value;
     }
 
     /**
      * Gets the room type.
      */
-    get type() {
+    get type () {
         return this._mem.type;
     }
 
     /**
      * Gets an object with all jobs in the room.
      */
-    get jobs() {
+    get jobs () {
         return this._mem.jobs;
     }
 
-    getJobsFor(jobName) {
-        if (!this._mem.jobs || !this._mem.jobs[jobName + "s"]) {
+    getJobsFor (jobName) {
+        if (!this._mem.jobs || !this._mem.jobs[jobName + 's']) {
             return 0;
         }
-        return this._mem.jobs[jobName + "s"];
+        return this._mem.jobs[jobName + 's'];
     }
 
-    createJobs() {
+    createJobs () {
 
     }
 }

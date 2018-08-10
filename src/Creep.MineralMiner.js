@@ -8,20 +8,11 @@ let CreepWorker = require('./Creep.Worker');
  */
 class CreepMineralMiner extends CreepWorker {
     /**
-     * Initializes a new instance of the CreepMiner class with the specified creep.
-     * 
-     * @param {Creep} creep - The creep to be wrapped
-     */
-    constructor(creep) {
-        super(creep);
-    }
-
-    /**
      * Perform mining related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
-    work() {
+    work () {
         let standsOnContainer = false;
 
         if (this.atWork && this.energy >= 0) {
@@ -77,13 +68,13 @@ class CreepMineralMiner extends CreepWorker {
             if (!moveTarget && !this.atWork) {
                 moveTarget = this.moveToRoom(this.WorkRoom.name, false);
             }
-            
+
             if (!moveTarget) {
                 if (this.room.minerals) {
                     if (!this.pos.isNearTo(this.room.minerals)) {
                         moveTarget = this.room.minerals;
                     }
-                    else if (!standsOnContainer && this.room.containers.length > 0){
+                    else if (!standsOnContainer && this.room.containers.length > 0) {
                         // Need to reposition to on top of the container.
                         let containers = this.room.minerals.pos.findInRange(this.room.containers, 1);
                         if (containers.length === 1) {

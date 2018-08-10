@@ -8,22 +8,13 @@ let CreepWorker = require('./Creep.Worker');
  */
 class CreepDismantler extends CreepWorker {
     /**
-     * Initializes a new instance of the CreepDismantler class with the specified creep.
-     * 
-     * @param {Creep} creep - The creep to be wrapped
-     */
-    constructor(creep) {
-        super(creep);
-    }
-    
-    /**
      * Perform dismantler related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
-    work() {
+    work () {
         if (this.atWork && this.isHome) {
-            this.say("Strike");
+            this.say('Strike');
             return true;
         }
 
@@ -31,11 +22,10 @@ class CreepDismantler extends CreepWorker {
 
         if (this.isWorking) {
             if (this.moveToRoom(this.WorkRoom.name)) {
-        
-                let tower = this.pos.findClosestByPath(FIND_STRUCTURES, { 
-                    filter: function (structure) { 
-                        return structure.structureType === STRUCTURE_TOWER; 
-                    } 
+                let tower = this.pos.findClosestByPath(FIND_STRUCTURES, {
+                    filter: function (structure) {
+                        return structure.structureType === STRUCTURE_TOWER;
+                    }
                 });
 
                 if (tower) {
@@ -43,9 +33,9 @@ class CreepDismantler extends CreepWorker {
                         this.moveTo(tower);
                     }
                     return true;
-                } 
+                }
 
-                let spawn = this.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, { 
+                let spawn = this.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {
                     filter: (s) => s.structureType === STRUCTURE_SPAWN
                 });
                 if (spawn) {
@@ -54,18 +44,18 @@ class CreepDismantler extends CreepWorker {
                     }
                     return true;
                 }
-        
-                let building = this.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, { 
-                    filter: function (s) { 
-                        return s.structureType !== STRUCTURE_CONTROLLER; 
-                    } 
+
+                let building = this.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {
+                    filter: function (s) {
+                        return s.structureType !== STRUCTURE_CONTROLLER;
+                    }
                 });
                 if (building) {
                     if (this._creep.dismantle(building) === ERR_NOT_IN_RANGE) {
                         this.moveTo(building);
                     }
                     return true;
-                } 
+                }
             }
         }
         else {
@@ -81,7 +71,7 @@ class CreepDismantler extends CreepWorker {
                         for (let resourceType in this.carry) {
                             if (this.transfer(storage, resourceType) === OK) {
                                 let amount = this.carry[resourceType];
-                                let transfered = Math.min(space, amount);
+                                Math.min(space, amount);
                             }
                         }
                     }

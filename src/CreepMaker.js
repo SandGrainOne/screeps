@@ -5,20 +5,20 @@ let C = require('./constants');
 let CreepBase = require('./Creep.Base');
 
 let wrappers = {
-    "miner": require('./Creep.Miner'),
-    "hauler": require('./Creep.Hauler'),
-    "linker": require('./Creep.Linker'),
-    "healer": require('./Creep.Healer'),
-    "chemist": require('./Creep.Chemist'),
-    "builder": require('./Creep.Builder'),
-    "settler": require('./Creep.Settler'),
-    "upgrader": require('./Creep.Upgrader'),
-    "refueler": require('./Creep.Refueler'),
-    "defender": require('./Creep.Defender'),
-    "attacker": require('./Creep.Attacker'),
-    "patroler": require('./Creep.Patroler'),
-    "dismantler": require('./Creep.Dismantler'),
-    "mineralminer": require('./Creep.MineralMiner'),
+    'miner': require('./Creep.Miner'),
+    'hauler': require('./Creep.Hauler'),
+    'linker': require('./Creep.Linker'),
+    'healer': require('./Creep.Healer'),
+    'chemist': require('./Creep.Chemist'),
+    'builder': require('./Creep.Builder'),
+    'settler': require('./Creep.Settler'),
+    'upgrader': require('./Creep.Upgrader'),
+    'refueler': require('./Creep.Refueler'),
+    'defender': require('./Creep.Defender'),
+    'attacker': require('./Creep.Attacker'),
+    'patroler': require('./Creep.Patroler'),
+    'dismantler': require('./Creep.Dismantler'),
+    'mineralminer': require('./Creep.MineralMiner')
 };
 
 class CreepMaker {
@@ -27,7 +27,7 @@ class CreepMaker {
      * 
      * @param {Creep} creep - The creep to be wrapped.
      */
-    static wrap(creep) {
+    static wrap (creep) {
         let smartCreep = null;
 
         let job = creep.memory.job;
@@ -36,11 +36,29 @@ class CreepMaker {
         }
 
         if (!smartCreep) {
-            console.log("Creep " + creep.name + " has an invalid job: " + job);
+            console.log('Creep ' + creep.name + ' has an invalid job: ' + job);
             smartCreep = new CreepBase(creep);
         }
 
         return smartCreep;
+    }
+
+    /**
+     * Build a body based on a shortened code.
+     * 
+     * Eg: 
+     * WCMM => [WORK, CARRY, MOVE, MOVE]
+     * LLMM => [CLAIM, CLAIM, MOVE, MOVE]
+     */
+    static buildBody (codeChain) {
+        let body = [];
+
+        let codes = Array.from(codeChain);
+        for (let code of codes) {
+            body.push(C.BODY_PART_CODES[code]);
+        }
+
+        return body;
     }
 
     /**
@@ -51,7 +69,7 @@ class CreepMaker {
      * 
      * @return - Object with all job requirements.
      */
-    static defineJobs(room) {
+    static defineJobs (room) {
         let jobs = {};
 
         for (let jobName in wrappers) {
@@ -62,24 +80,6 @@ class CreepMaker {
         }
 
         return jobs;
-    }
-
-    /**
-     * Build a body based on a shortened code.
-     * 
-     * Eg: 
-     * WCMM => [WORK, CARRY, MOVE, MOVE]
-     * LLMM => [CLAIM, CLAIM, MOVE, MOVE]
-     */
-    static buildBody(codeChain) {
-        let body = [];
-
-        let codes = Array.from(codeChain);
-        for (let code of codes) {
-            body.push(C.BODY_PART_CODES[code]);
-        }
-
-        return body;
     }
 }
 

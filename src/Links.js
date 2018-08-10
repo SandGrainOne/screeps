@@ -1,6 +1,6 @@
 'use strict';
 
-let C = require('constants');
+let C = require('./constants');
 
 /**
  * This class is meant to combine all links in a room into a single logical unit
@@ -13,7 +13,7 @@ class Links {
      * 
      * @param {object} memory - The part of room memory assigned to the linking system.
      */
-    constructor(memory) {
+    constructor (memory) {
         this._mem = memory;
 
         // Tick cache
@@ -23,7 +23,7 @@ class Links {
     /**
      * Gets the room link near the room storage if such a link exist. Otherwise null.
      */
-    get storage() {
+    get storage () {
         if (this._cache.storage !== undefined) {
             return this._cache.storage;
         }
@@ -42,7 +42,7 @@ class Links {
     /**
      * Gets the room link near the room controller if such a link exist. Otherwise null.
      */
-    get controller() {
+    get controller () {
         if (this._cache.controller !== undefined) {
             return this._cache.controller;
         }
@@ -61,7 +61,7 @@ class Links {
     /**
      * Gets an array with all input links in the room. Empty if there are no such links.
      */
-    get inputs() {
+    get inputs () {
         if (this._cache.inputs !== undefined) {
             return this._cache.inputs;
         }
@@ -85,7 +85,7 @@ class Links {
      * @param {RoomReal} room - The room where this linking system is located.
      * @param {Link[]} links - All the links in the room.
      */
-    populate(room, links) {
+    populate (room, links) {
         if (links.length < 2) {
             this._mem.canRun = false;
             return;
@@ -123,7 +123,7 @@ class Links {
     /**
      * Run linking logic so that energy is teleported to the storage and controller.
      */
-    run() {
+    run () {
         if (!this._mem.canRun) {
             return;
         }
@@ -162,7 +162,7 @@ class Links {
      * @param {Link} sender - The link that should send some energy.
      * @param {Link} target - The link that should recieve the energy.
      */
-    _transfer(sender, target) {
+    _transfer (sender, target) {
         let amount = Math.min(sender.energy, target.energyCapacity - target.energy);
         if (amount >= C.LINK_MINIMUM_TRANSFER) {
             return sender.transferEnergy(target, amount);

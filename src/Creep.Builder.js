@@ -6,17 +6,17 @@ let CreepWorker = require('./Creep.Worker');
  * Wrapper class for creeps with logic for a builder.
  * Primary porpose of these creeps are to build and repair structures.
  */
-class CreepBuilder extends CreepWorker {   
+class CreepBuilder extends CreepWorker {
     /**
      * Initializes a new instance of the CreepBuilder class with the specified creep.
      * 
      * @param {Creep} creep - The creep to be wrapped
      */
-    constructor(creep) {
+    constructor (creep) {
         super(creep);
-        
+
         if (this.task === null) {
-            this.task = "charge";
+            this.task = 'charge';
         }
 
         // Tick cache
@@ -26,9 +26,9 @@ class CreepBuilder extends CreepWorker {
     /**
      * Gets the creep job target. 
      */
-    get target() {
+    get target () {
         if (this._cache.target === undefined) {
-            return this._cache.target = Game.getObjectById(this._mem.work.target); // TODO: work.target might be undefined.
+            this._cache.target = Game.getObjectById(this._mem.work.target); // TODO: work.target might be undefined.
         }
         return this._cache.target;
     }
@@ -36,7 +36,7 @@ class CreepBuilder extends CreepWorker {
     /**
      * Sets the creep job target. 
      */
-    set target(obj) {
+    set target (obj) {
         if (obj !== null) {
             this._cache.target = obj;
             this._mem.work.target = obj.id;
@@ -52,9 +52,8 @@ class CreepBuilder extends CreepWorker {
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
-    work() {
+    work () {
         let moveTarget = null;
-        let moveRequired = false;
 
         if (this.atWork) {
             if (this.target !== null) {
@@ -108,7 +107,7 @@ class CreepBuilder extends CreepWorker {
         }
 
         if (this.energy <= 0) {
-            this.task = "charge";
+            this.task = 'charge';
 
             if (this.target !== null) {
                 this.target = null;
@@ -116,14 +115,14 @@ class CreepBuilder extends CreepWorker {
         }
 
         if (this.energy >= this.capacity) {
-            this.task = "work";
+            this.task = 'work';
 
             if (this.target === null && this.atWork) {
                 this.target = this.findTarget();
             }
         }
 
-        if (this.task === "work") {
+        if (this.task === 'work') {
             if (!this.atWork) {
                 moveTarget = this.moveToRoom(this.WorkRoom.name, false);
             }
@@ -136,7 +135,7 @@ class CreepBuilder extends CreepWorker {
             }
         }
 
-        if (this.task === "charge") {
+        if (this.task === 'charge') {
             if (!moveTarget && (this.isHome || this.atWork) && !this.room.storage) {
                 if (!moveTarget && this.room.containers.length > 0) {
                     let container = this.pos.findClosestByRange(this.room.containers);
@@ -172,7 +171,7 @@ class CreepBuilder extends CreepWorker {
         return true;
     }
 
-    findTarget() {
+    findTarget () {
         if (Game.time % 3 === 0) {
             if (this.room.constructionSites.length > 0) {
                 for (let site of this.room.constructionSites) {

@@ -21,25 +21,25 @@ let code = {
     /**
      * Update the live hive to the current code version.
      */
-    update: function ()  {
+    update: function () {
         // Ensure that a code object is defined. First update.
-        if (Memory.code === undefined)  {
+        if (Memory.code === undefined) {
             Memory.code = {};
         }
 
         // Ensure that the version is defined. First update.
-        if (Memory.code.version === undefined)  {
-            this._setVersion("1.0");
+        if (Memory.code.version === undefined) {
+            this._setVersion('1.0');
         }
 
         // Adding the empire memory space
-        if (this._getVersion() === "1.0") {
+        if (this._getVersion() === '1.0') {
             if (Memory.empire === undefined) {
                 Memory.empire = {};
             }
-            this._setVersion("1.1");
+            this._setVersion('1.1');
         }
     }
-}
+};
 
 module.exports = code;

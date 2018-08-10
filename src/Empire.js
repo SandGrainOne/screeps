@@ -10,10 +10,10 @@ let RoomReal = require('./Room.Real');
  * The Empire class primary purpose is to provide easy access to game objects like creeps and rooms.
  */
 class Empire {
-     /**
+    /**
      * Initializes a new instance of the Empire class.
      */
-    constructor() {
+    constructor () {
         this._mem = Memory.empire;
 
         // Saving creeps to memory every tick to make the population visible.
@@ -28,47 +28,40 @@ class Empire {
     /**
      * Get an array of all known rooms.
      */
-    get rooms() {
+    get rooms () {
         return this._rooms;
     }
 
     /**
      * Get an array of all living creeps.
      */
-    get creeps() {
+    get creeps () {
         return this._creeps;
-    }
-
-    /**
-     * Get a room by its name.
-     * 
-     * @param {string} roomName - The name of the room to retrieve.
-     */
-    getRoom(roomName) {
-        if (this._rooms[roomName]) {
-            return this._rooms[roomName];
-        }
-        return new RoomBase(roomName);
     }
 
     /**
      * This method is responsible for arranging all important game objects in easy to access collections.
      */
-    prepare() {
+    prepare () {
+        let count = 0;
         for (let roomName in Game.rooms) {
             this._rooms[roomName] = new RoomReal(Game.rooms[roomName]);
+            count++;
         }
 
         for (let roomName in Memory.rooms) {
             if (!this._rooms[roomName]) {
                 this._rooms[roomName] = new RoomBase(roomName);
+                // count++;
             }
         }
+
+        // console.log('Room number: ' + count);
 
         // Loop through all creeps in memory and sort them to quick access buckets.
         for (let creepName in Memory.creeps) {
             let creep = Game.creeps[creepName];
-            
+
             if (!creep) {
                 // The creep must have died.
                 delete Memory.creeps[creepName];
@@ -78,8 +71,8 @@ class Empire {
             let smartCreep = CreepMaker.wrap(creep);
             this._creeps.all[smartCreep.name] = smartCreep;
 
-            smartCreep.HomeRoom = this.getRoom(creep.memory.rooms.home);
-            smartCreep.WorkRoom = this.getRoom(creep.memory.rooms.work);
+            smartCreep.HomeRoom = this._rooms[creep.memory.rooms.home];
+            smartCreep.WorkRoom = this._rooms[creep.memory.rooms.work];
 
             if (smartCreep.isRetired) {
                 // Don't count creeps that are retired.
@@ -108,7 +101,7 @@ class Empire {
         }
     }
 
-    balanceEnergy(){
+    balanceEnergy () {
         // Run this only every 10th tick.
         if (Game.time % 10 !== 0) {
             return;
@@ -121,7 +114,7 @@ class Empire {
 
         for (let roomName in this.rooms) {
             var room = this.rooms[roomName];
-            
+
             if (!room.isVisible || !room.isMine || !room.storage || !room.terminal) {
                 // Room can not take part in the energy balancing game.
                 continue;
@@ -141,41 +134,41 @@ class Empire {
         }
 
         if (richestAmount - poorestAmount > 100000) {
-            //this.print(richest.name + ".terminal.store.energy: " + richest.terminal.store.energy);
-            //this.print(poorest.name + ".terminal.storeCapacity - _.sum(" + poorest.name + ".terminal.store): " + (poorest.terminal.storeCapacity - _.sum(poorest.terminal.store)));
+            // this.print(richest.name + '.terminal.store.energy: ' + richest.terminal.store.energy);
+            // this.print(poorest.name + '.terminal.storeCapacity - _.sum(' + poorest.name + '.terminal.store): ' + (poorest.terminal.storeCapacity - _.sum(poorest.terminal.store)));
             if (richest.terminal.store.energy > 30000 && poorest.terminal.store.energy < 100000 && poorest.terminal.storeCapacity - _.sum(poorest.terminal.store) > 20000) {
-                this.print("Transfering 10000 energy from " + richest.name + "(" + richestAmount + ") to " + poorest.name + "(" + poorestAmount + ")");
+                this.print('Transfering 10000 energy from ' + richest.name + '(' + richestAmount + ') to ' + poorest.name + '(' + poorestAmount + ')');
                 richest.terminal.send(RESOURCE_ENERGY, 10000, poorest.name);
             }
         }
     }
 
-    createCreep(job, task, spawnName, bodyCode, homeRoom, workRoom) {
+    createCreep (job, task, spawnName, bodyCode, homeRoom, workRoom) {
         if (!Game.spawns[spawnName]) {
-            console.log("Error: No spawn with the name '" + spawnName + "'.")
+            console.log('Error: No spawn with the name "' + spawnName + '".');
             return ERR_BUSY;
         }
 
         let body = CreepMaker.buildBody(bodyCode);
         let memory = {
-            "job": job,
-            "work": {
-                "task": task
+            'job': job,
+            'work': {
+                'task': task
             },
-            "rooms": {
-                "home": homeRoom,
-                "work": workRoom
+            'rooms': {
+                'home': homeRoom,
+                'work': workRoom
             },
-            "spawnTime": body.length * 3
-        }
+            'spawnTime': body.length * 3
+        };
 
         return Game.spawns[spawnName].createCreep(body, this.generateName(), memory);
     }
 
-    generateName() {
+    generateName () {
         let isVowel = false;
         let charArray = C.VOWELS;
-        let name = charArray[Math.round(Math.random()*(charArray.length-1))].toUpperCase();
+        let name = charArray[Math.round(Math.random() * (charArray.length - 1))].toUpperCase();
 
         let nameComplete = false;
         while (!nameComplete) {
@@ -187,7 +180,7 @@ class Empire {
             }
             isVowel = !isVowel;
 
-            name += charArray[Math.round(Math.random()*(charArray.length-1))];
+            name += charArray[Math.round(Math.random() * (charArray.length - 1))];
 
             nameComplete = name.length > C.CREEP_NAME_LENGTH && !this.creeps.all[name];
         }
@@ -195,16 +188,40 @@ class Empire {
         return name;
     }
 
-    print(input) {
+    print (input) {
         if (_.isObject(input)) {
             input = JSON.stringify(input);
         }
 
-        input = "<font style='color:#999999'>" + input + "</font>"; // e6de99 - "yellow"
+        input = '<font style="color:#999999">' + input + '</font>'; // e6de99 - "yellow"
 
         console.log(input);
+    }
 
-        return;
+    /**
+     * Analyze the next set of rooms.
+     */
+    analyzeRooms() {
+        let names = Object.keys(this.rooms);
+        // Ensure the ordering of the rooms are the same every time. 
+        // Order might already be consistent, but unsure. This is the safe solution.
+        names.sort();
+
+        let index = this._mem._roomIndex || 0;
+        let counter = 0;
+
+        do {
+            index = index < names.length - 1 ? index + 1 : 0;
+
+            if (this.rooms[names[index]].isVisible) {
+                // Only visible rooms can be analyzed.
+                this.rooms[names[index]].analyze();
+            }
+
+            counter++;
+        } while (counter < 2);
+
+        this._mem._roomIndex = index;
     }
 }
 

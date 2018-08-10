@@ -1,0 +1,17 @@
+{
+    "extends": "standard",
+    "plugins": [
+        "screeps"
+    ],
+    "env": {
+        "screeps/screeps": true
+    },
+    "globals": {
+        "Empire": true
+    },
+    "rules":{
+        "semi": ["error", "always"],
+        "indent": ["error", 4, { "SwitchCase": 1 }],
+        "brace-style": ["error", "stroustrup"]
+    }
+}

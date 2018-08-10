@@ -8,20 +8,11 @@ let CreepSoldier = require('./Creep.Soldier');
  */
 class CreepPatroler extends CreepSoldier {
     /**
-     * Initializes a new instance of the CreepPatroler class with the specified creep.
-     * 
-     * @param {Creep} creep - The creep to be wrapped
-     */
-    constructor(creep) {
-        super(creep);
-    }
-    
-    /**
      * Perform patroler related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
-    work() {
+    work () {
         if (this._creep.hits < this._creep.hitsMax) {
             this._creep.heal(this._creep);
         }
@@ -57,7 +48,7 @@ class CreepPatroler extends CreepSoldier {
         }
 
         if (this._creep.hits < this._creep.hitsMax) {
-            let health = this._creep.hits / this._creep.hitsMax
+            let health = this._creep.hits / this._creep.hitsMax;
             if (health < 0.4) {
                 let retreatPosition = this.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
                 if (retreatPosition) {

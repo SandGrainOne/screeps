@@ -6,22 +6,13 @@ let CreepWorker = require('./Creep.Worker');
  * Wrapper class for creeps with logic for a broker.
  * Primary purpose of these creeps are to move energy between links, storage and terminal.
  */
-class CreepBroker extends CreepWorker {   
-    /**
-     * Initializes a new instance of the CreepBroker class with the specified creep.
-     * 
-     * @param {Creep} creep - The creep to be wrapped
-     */
-    constructor(creep) {
-        super(creep);
-    }
-    
+class CreepBroker extends CreepWorker {
     /**
      * Perform broker related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
-    work() {
+    work () {
         if (!this.atWork) {
             this.moveTo(this.moveToRoom(this.WorkRoom.name, false));
             return true;

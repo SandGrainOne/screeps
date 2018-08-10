@@ -8,22 +8,13 @@ let CreepWorker = require('./Creep.Worker');
  * Wrapper class for creeps with logic for a hauler.
  * Primary purpose of these creeps are to move resources from the perimeter of a room and into the center.
  */
-class CreepHauler extends CreepWorker { 
-    /**
-     * Initializes a new instance of the CreepHauler class with the specified creep.
-     * 
-     * @param {Creep} creep - The creep to be wrapped
-     */
-    constructor(creep) {
-        super(creep);
-    }
-    
+class CreepHauler extends CreepWorker {
     /**
      * Perform hauling related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
-    work() {
+    work () {
         // If possible, perform road repairs on the move.
         if (this.strength > 0 && this.energy > 0) {
             let foundStructures = this.pos.lookFor(LOOK_STRUCTURES);
@@ -122,7 +113,6 @@ class CreepHauler extends CreepWorker {
         let moveTarget = null;
 
         if (this.isWorking) {
-            
             let target = Game.getObjectById(this._mem.work.target);
             if (target === null) {
                 delete this._mem.work.target;
@@ -178,7 +168,6 @@ class CreepHauler extends CreepWorker {
 
                 // Ensure the creep only carry energy. No need to seek out a link otherwise.
                 if (this.isRemoting && this.energy > 0 && this.energy === this.load && this.room.links.inputs.length > 0) {
-
                     for (let link of this.room.links.inputs) {
                         if (link.energy >= link.energyCapacity) {
                             continue;
@@ -212,56 +201,53 @@ class CreepHauler extends CreepWorker {
         }
 
         if (moveTarget) {
-            if (moveTarget && (moveTarget.structureType !== STRUCTURE_CONTAINER || !this.pos.isNearTo(moveTarget))) {
-                this.moveTo(moveTarget);
-            }
+            this.moveTo(moveTarget);
         }
 
         return true;
     }
-    
+
     /**
      * Analyze the room and identify the appropriate number of haulers as well as their body.
      * 
      * @param room - An instance of a visible smart room.
      */
-    static defineJob(room) {
+    static defineJob (room) {
         // Haulers need somewhere to find resources.
-        if (room.containers.length === 0 && !room.terminal) {
-            return;
-        }
+        // if (room.containers.length === 0 && !room.terminal) {
+        //     return;
+        // }
 
-        // Haulers need somewhere to deliver resources
-        if (room.isMine && !room.storage) {
-            return;
-        }
-        return;
+        // // Haulers need somewhere to deliver resources
+        // if (room.isMine && !room.storage) {
+        //     return;
+        // }
+        // return;
 
-        let distance = 0;
-        if (room.isMine) {
-            for (let container of room.containers) {
-                distance += room.storage.pos.getRangeTo(container);
-            }
-            if (room.terminal) {
-                distance += room.storage.pos.getRangeTo(room.terminal);
-            }
-        }
-        else {
-            // Assume that the average distance from a container to the room border is 25 tiles.
-            distance = room.containers.length * 25;
-        }
+        // let distance = 0;
+        // if (room.isMine) {
+        //     for (let container of room.containers) {
+        //         distance += room.storage.pos.getRangeTo(container);
+        //     }
+        //     if (room.terminal) {
+        //         distance += room.storage.pos.getRangeTo(room.terminal);
+        //     }
+        // }
+        // else {
+        //     // Assume that the average distance from a container to the room border is 25 tiles.
+        //     distance = room.containers.length * 25;
+        // }
 
         // TODO: Use the number of containers and the size of sources instead of distance?
         // TODO: One container might not be used all the time (Minerals)
 
-        
-        //console.log(room.name + " distance: " + distance);
+        // console.log(room.name + ' distance: ' + distance);
 
-        let job = {};
-        job.number = 0;
-        job.body = [];
+        // let job = {};
+        // job.number = 0;
+        // job.body = [];
 
-        return job;
+        // return job;
     }
 }
 

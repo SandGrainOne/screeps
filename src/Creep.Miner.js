@@ -7,16 +7,7 @@ let CreepWorker = require('./Creep.Worker');
  * Primary purpose of these creeps are to harvest energy or minerals.
  */
 class CreepMiner extends CreepWorker {
-    /**
-     * Initializes a new instance of the CreepMiner class with the specified creep.
-     * 
-     * @param {Creep} creep - The creep to be wrapped
-     */
-    constructor(creep) {
-        super(creep);
-    }
-
-    get ResourceNode() {
+    get ResourceNode () {
         if (this._mem.resourceid) {
             let source = Game.getObjectById(this._mem.resourceid);
             if (source && (source.energy > 0 || (source.ticksToRegeneration || 300) < 50)) {
@@ -39,13 +30,13 @@ class CreepMiner extends CreepWorker {
 
         return null;
     }
-    
+
     /**
      * Perform mining related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
-    work() {
+    work () {
         let standsOnContainer = false;
         let performedWork = false;
 
@@ -86,7 +77,7 @@ class CreepMiner extends CreepWorker {
                     if (this.room.extractor && this.room.extractor.cooldown <= 0) {
                         this.harvest(resourceNode);
                     }
-                } 
+                }
                 else {
                     this.harvest(resourceNode);
                 }
@@ -100,7 +91,7 @@ class CreepMiner extends CreepWorker {
                 }
             }
         }
-        
+
         if (this.load >= this.capacity) {
             if (this.room.containers.length > 0) {
                 let container = this.getFirstInRange(this.room.containers, 1);
@@ -143,14 +134,14 @@ class CreepMiner extends CreepWorker {
             if (!moveTarget && !this.atWork) {
                 moveTarget = this.moveToRoom(this.WorkRoom.name, false);
             }
-            
+
             if (!moveTarget) {
                 let resourceNode = this.ResourceNode;
                 if (resourceNode) {
                     if (!this.pos.isNearTo(resourceNode)) {
                         moveTarget = resourceNode;
                     }
-                    else if (!standsOnContainer && this.room.containers.length > 0){
+                    else if (!standsOnContainer && this.room.containers.length > 0) {
                         // Need to reposition to on top of the container.
                         let containers = resourceNode.pos.findInRange(this.room.containers, 1);
                         if (containers.length === 1) {
@@ -224,7 +215,9 @@ class CreepMiner extends CreepWorker {
         }
 
         if (moveTarget) {
-            this.moveTo(moveTarget);
+            // Miners should move on to the same tile as a container. Not stop right before.
+            let range = moveTarget.structureType === STRUCTURE_CONTAINER ? 0 : 1;
+            this.moveTo(moveTarget, { 'range': range });
         }
 
         return true;
@@ -235,7 +228,7 @@ class CreepMiner extends CreepWorker {
      * 
      * @param room - An instance of a visible smart room.
      */
-    static defineJob(room) {
+    static defineJob (room) {
         if (room.sources.length === 0) {
             return;
         }
@@ -261,7 +254,7 @@ class CreepMiner extends CreepWorker {
 
         let job = {};
         job.number = room.sources.length;
-        job.body = "" + workParts + ",W," + carryParts + ",C," + moveParts + ",M";
+        job.body = '' + workParts + ',W,' + carryParts + ',C,' + moveParts + ',M';
 
         return job;
     }

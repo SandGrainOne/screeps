@@ -6,22 +6,13 @@ let CreepWorker = require('./Creep.Worker');
  * Wrapper class for creeps with logic for an upgrader.
  * Primary purpose of these creeps are to perform upgrading on an owned controller.
  */
-class CreepUpgrader extends CreepWorker {   
-    /**
-     * Initializes a new instance of the CreepUpgrader class with the specified creep.
-     * 
-     * @param {Creep} creep - The creep to be wrapped
-     */
-    constructor(creep) {
-        super(creep);
-    }
-    
+class CreepUpgrader extends CreepWorker {
     /**
      * Perform upgrading related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
-    work() {
+    work () {
         if (this.atWork && this.energy > 0) {
             if (this.room.isMine) {
                 let rangeToController = this.pos.getRangeTo(this.room.controller);
@@ -41,10 +32,10 @@ class CreepUpgrader extends CreepWorker {
         if (this.atWork && this.energy < this.capacity) {
             let link = this.room.links.controller;
             if (link && link.energy > 0 && this.pos.isNearTo(link)) {
-                let res = this.withdraw(link, RESOURCE_ENERGY);
+                this.withdraw(link, RESOURCE_ENERGY);
             }
         }
-        
+
         if (this.atWork && this.energy < this.capacity) {
             if (this.room.containers.length > 0) {
                 let container = this.getFirstInRange(this.room.containers, 1);
@@ -53,7 +44,7 @@ class CreepUpgrader extends CreepWorker {
                 }
             }
         }
-        
+
         if (this.atWork && this.energy < this.capacity) {
             if (this.room.sources.length > 0) {
                 let source = this.getFirstInRange(this.room.sources, 1);
@@ -115,7 +106,7 @@ class CreepUpgrader extends CreepWorker {
                 }
                 if (!moveTarget && this.atWork) {
                     let source = this.pos.findClosestByPath(this.room.sources);
-                    
+
                     if (source && !this.pos.isNearTo(source)) {
                         moveTarget = source;
                     }
@@ -126,7 +117,7 @@ class CreepUpgrader extends CreepWorker {
         if (moveTarget) {
             this.moveTo(moveTarget);
         }
-        
+
         return true;
     }
 }

@@ -7,26 +7,16 @@ let CreepWorker = require('./Creep.Worker');
  * Primary purpose of these creeps are to keep the towers, spawn and extensions stocked with energy in that order.
  */
 class CreepBalancer extends CreepWorker {
-
-    /**
-     * Initializes a new instance of the CreepRefueler class with the specified creep.
-     * 
-     * @param {Creep} creep - The creep to be wrapped
-     */
-    constructor(creep) {
-        super(creep);
-    }
-    
     /**
      * Perform refueling related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
-    work() {
+    work () {
         if (!this.isRemoting) {
             return false;
         }
-        
+
         // If possible, perform road repairs on the move.
         if (this.strength > 0 && this.energy > 0) {
             let foundStructures = this.pos.lookFor(LOOK_STRUCTURES);
@@ -57,7 +47,7 @@ class CreepBalancer extends CreepWorker {
                 let links = this.pos.findInRange(this.room.links.inputs, 1);
                 if (links.length > 0) {
                     for (let link of links) {
-                        if (this.transfer(link, RESOURCE_ENERGY) === OK ) {
+                        if (this.transfer(link, RESOURCE_ENERGY) === OK) {
                             break;
                         }
                     }

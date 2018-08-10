@@ -12,7 +12,7 @@ class Labs {
      * 
      * @param {object} memory - The part of room memory assigned to the laboratory unit.
      */
-    constructor(memory) {
+    constructor (memory) {
         this._mem = memory;
 
         // Tick cache
@@ -22,7 +22,7 @@ class Labs {
     /**
      * Gets the lab assigned to be the first reaction source.
      */
-    get compoundOne() {
+    get compoundOne () {
         if (this._cache.sourceOne !== undefined) {
             return this._cache.sourceOne;
         }
@@ -41,7 +41,7 @@ class Labs {
     /**
      * Gets the lab assigned to be the first reaction source.
      */
-    get compoundTwo() {
+    get compoundTwo () {
         if (this._cache.sourceTwo !== undefined) {
             return this._cache.sourceTwo;
         }
@@ -60,7 +60,7 @@ class Labs {
     /**
      * Gets an array with all labs that are available to perform a reaction.
      */
-    get producers() {
+    get producers () {
         if (this._cache.producers !== undefined) {
             return this._cache.producers;
         }
@@ -84,7 +84,7 @@ class Labs {
      * @param {RoomReal} room - The room where this laboratory unit is located.
      * @param {Lab[]} labs - All the labs in the room.
      */
-    populate(room, labs) {
+    populate (room, labs) {
         if (labs.length < 3) {
             this._mem.canRun = false;
             return;
@@ -94,7 +94,7 @@ class Labs {
         this._mem.sourceTwo = null;
         this._mem.producers = [];
 
-        labs.sort(function(a, b) { return (a.pos.x + a.pos.y * 10) - (b.pos.x + b.pos.y * 10) });
+        labs.sort((a, b) => (a.pos.x + a.pos.y * 10) - (b.pos.x + b.pos.y * 10));
 
         let s1 = Math.floor((labs.length - 1) / 2) - 1;
         let s2 = s1 + Math.ceil((s1 + 2) / 2);
@@ -117,7 +117,7 @@ class Labs {
     /**
      * Run laboratory logic by having all producers run their reaction if possible.
      */
-    run() {
+    run () {
         if (!this._mem.canRun) {
             return;
         }
