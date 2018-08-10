@@ -14,7 +14,7 @@ class CreepChemist extends CreepWorker {
      */
     work () {
         if (!this.atWork) {
-            this.moveToRoom(this.WorkRoom.name);
+            this.moveToRoom(this._mem.rooms.work);
             return true;
         }
 
@@ -25,7 +25,7 @@ class CreepChemist extends CreepWorker {
         let reaction = {};
 
         if (this.room.name === 'E73N87') {
-            reaction = { compoundOne: RESOURCE_HYDROGEN, compoundTwo: RESOURCE_OXYGEN };
+            reaction = { compoundOne: RESOURCE_GHODIUM_HYDRIDE, compoundTwo: RESOURCE_HYDROXIDE };
         }
 
         if (this.room.name === 'E75N87') {
@@ -33,11 +33,11 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.room.name === 'E75N89') {
-            reaction = { compoundOne: RESOURCE_LEMERGIUM, compoundTwo: RESOURCE_UTRIUM };
+            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_GHODIUM_ACID };
         }
 
         if (this.room.name === 'E77N88') {
-            reaction = { compoundOne: RESOURCE_GHODIUM_HYDRIDE, compoundTwo: RESOURCE_HYDROXIDE };
+            reaction = { compoundOne: RESOURCE_OXYGEN, compoundTwo: RESOURCE_HYDROGEN };
         }
 
         if (this.room.name === 'E77N85') {
@@ -49,7 +49,7 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.room.name === 'E78N88') {
-            reaction = { compoundOne: RESOURCE_GHODIUM, compoundTwo: RESOURCE_HYDROGEN };
+            reaction = { compoundOne: RESOURCE_GHODIUM_ACID, compoundTwo: RESOURCE_CATALYST };
         }
 
         if (this.room.name === 'E79N85') {

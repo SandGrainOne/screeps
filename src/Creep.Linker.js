@@ -16,7 +16,7 @@ class CreepLinker extends CreepWorker {
      */
     work () {
         if (!this.atWork) {
-            this.moveTo(this.moveToRoom(this.WorkRoom.name, false));
+            this.moveTo(this.moveToRoom(this._mem.rooms.work, false));
             return true;
         }
 

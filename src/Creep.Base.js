@@ -14,14 +14,6 @@ class CreepBase {
     constructor (creep) {
         this._creep = creep;
         this._mem = creep.memory;
-
-        if (!this._mem.targets) {
-            this._mem.targets = {};
-        }
-
-        // Tick cache
-        this._cache = {};
-        this._cache.targets = {};
     }
 
     /**
@@ -95,6 +87,13 @@ class CreepBase {
      */
     get isRemoting () {
         return this._mem.rooms.home !== this._mem.rooms.work;
+    }
+
+    /**
+     * Gets the designated work room.
+     */
+    get workRoom () {
+        return Empire.getRoom(this._mem.rooms.work);
     }
 
     /**
@@ -191,42 +190,6 @@ class CreepBase {
         return false;
     }
 
-    setTarget (type, target) {
-        if (!type || !target || !target.id || !(target instanceof RoomObject)) {
-            console.log('Creep attempted to store an invalid target.');
-            return;
-        }
-
-        this._cache.targets[type] = target;
-        this._mem.targets[type] = { 'id': target.id, 'x': target.pos.x, 'y': target.pos.y, 'roomName': target.pos.roomName };
-    }
-
-    getTarget (type) {
-        if (this._cache.targets[type] !== undefined) {
-            return this._cache.targets[type];
-        }
-
-        if (this._mem.targets[type] !== undefined) {
-            let targetData = this._mem.targets[type];
-            let target = Game.getObjectById(targetData.id);
-            if (target) {
-                this._cache.targets[type] = target;
-                return this._cache.targets[type];
-            }
-
-            this._cache.targets[type] = new RoomPosition(targetData.x, targetData.y, targetData.roomName);
-            return this._cache.targets[type];
-        }
-
-        this._cache.targets[type] = null;
-        return this._cache.targets[type];
-    }
-
-    removeTarget (type) {
-        delete this._cache.targets[type];
-        delete this._mem.targets[type];
-    }
-
     /**
      * The creep will move to the given room. Use this if the creep don't have a full RoomPosition.
      * 
@@ -274,7 +237,8 @@ class CreepBase {
         // Create and set some default move options.
         options = options || {};
         _.defaults(options, {
-            ignoreCreeps: false,
+            ignoreCreeps: true,
+            reusePath: 60,
             range: 1,
             visualizePathStyle: { fill: 'transparent', stroke: '#fff', lineStyle: 'dashed', strokeWidth: 0.1, opacity: 0.2 }
         });
@@ -287,6 +251,23 @@ class CreepBase {
         if (this.pos.getRangeTo(target) <= options.range) {
             return OK;
         }
+
+        let previousPos = this._mem.previousPos || [0, 0];
+
+        if (this.pos.x === previousPos[0] && this.pos.y === previousPos[1]) {
+            this._mem.stuckCounter = (this._mem.stuckCounter || 0) + 1;
+            if (this._mem.stuckCounter > 3) {
+                // The thing blocking the path is probably a creep.
+                options.ignoreCreeps = false;
+                // Forget current path.
+                options.reusePath = 1;
+            }
+        }
+        else {
+            delete this._mem.stuckCounter;
+        }
+
+        this._mem.previousPos = [this.pos.x, this.pos.y];
 
         return this._creep.moveTo(target, options);
     }

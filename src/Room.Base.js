@@ -16,7 +16,7 @@ class RoomBase {
         this._name = name;
         this._visible = false;
 
-        if (!_.isUndefined(Memory.rooms) && !_.isUndefined(Memory.rooms[name])) {
+        if (!_.isUndefined(Memory.rooms[name])) {
             this._mem = Memory.rooms[name];
         }
         else {

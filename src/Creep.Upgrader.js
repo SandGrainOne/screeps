@@ -66,7 +66,7 @@ class CreepUpgrader extends CreepWorker {
 
         if (this.isWorking) {
             if (!this.atWork) {
-                this.moveToRoom(this.WorkRoom.name);
+                this.moveToRoom(this._mem.rooms.work);
             }
             else {
                 if (this.room.isMine) {
@@ -82,7 +82,7 @@ class CreepUpgrader extends CreepWorker {
         }
         else {
             if (!this.isHome) {
-                this.moveToRoom(this.HomeRoom.name);
+                this.moveToRoom(this._mem.rooms.home);
             }
             else {
                 if (this.atWork && this.room.links.controller && this.pos.isNearTo(this.room.links.controller)) {

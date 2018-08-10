@@ -10,6 +10,86 @@ let CreepWorker = require('./Creep.Worker');
  */
 class CreepHauler extends CreepWorker {
     /**
+     * Perform resource collection logic.
+     */
+    collecting () {
+        // Perform random repairs or construction work.
+        this.working();
+
+        // Drops can be picked up by any hauler on the move in any room
+        if (this.room.drops.length > 0) {
+            let drop = this.getFirstInRange(this.room.drops, 1);
+            if (!_.isNull(drop)) {
+                this.pickup(drop);
+            }
+        }
+
+        let room = this.workRoom;
+
+        if (!this.atWork && !room.isVisible) {
+            Empire.observe(room.name, 10);
+            this.moveTo(new RoomPosition(25, 25, room.name), { 'range': 20 });
+            return;
+        }
+
+        if (room.containers.length > 0) {
+            let container = this.getFirstInRange(room.containers, 1);
+            if (!_.isNull(container)) {
+                for (let resourceType in container.store) {
+                    if (this.withdraw(container, resourceType) === OK) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        let target = Game.getObjectById(this._mem.collectingTarget);
+        if (_.isNull(target)) {
+            delete this._mem.collectingTarget;
+        }
+
+        if (this.room.drops.length > 0) {
+            for (let drop of this.room.drops) {
+                if (this.room.reserve(drop.id, this.job, this.name)) {
+                    this._mem.collectingTarget = drop.id;
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Perform resource delivery logic.
+     */
+    delivering () {
+        // Perform random repairs or construction work.
+        this.working();
+    }
+
+    /**
+     * Perform random repairs or construction work.
+     */
+    working () {
+        if (this.strength > 0 && this.energy > 0) {
+            // This hauler can perform random work on the move.
+            if (this.room.repairs.length > 0) {
+                let target = this.getFirstInRange(this.room.repairs, 2);
+                if (!_.isNull(target)) {
+                    if (this.repair(target) === OK) {
+                        return;
+                    }
+                }
+            }
+            if (this.room.constructionSites.length > 0) {
+                let target = this.getFirstInRange(this.room.constructionSites, 2);
+                if (!_.isNull(target)) {
+                    this.build(target);
+                }
+            }
+        }
+    }
+
+    /**
      * Perform hauling related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
@@ -43,7 +123,6 @@ class CreepHauler extends CreepWorker {
             if (this.room.containers.length > 0) {
                 let container = this.getFirstInRange(this.room.containers, 1);
                 if (container) {
-                    // TODO: Object.keys(containers[0].store).length === 1)
                     for (let resourceType in container.store) {
                         if (this.withdraw(container, resourceType) === OK) {
                             break;
@@ -72,7 +151,6 @@ class CreepHauler extends CreepWorker {
                 }
             }
             if (this.energy > 0 && this.room.links.inputs.length > 0) {
-                // There might be more than one link in range. 
                 let links = this.pos.findInRange(this.room.links.inputs, 1);
                 if (links.length > 0) {
                     for (let link of links) {
@@ -119,7 +197,7 @@ class CreepHauler extends CreepWorker {
             }
 
             if (!moveTarget) {
-                // A hauler should pick up drops only in the room they have been ordered to work in.
+                // A hauler should seek out drops only in the room they have been ordered to work in.
                 if (this.atWork) {
                     if (this.room.drops.length > 0) {
                         for (let drop of this.room.drops) {
@@ -134,7 +212,7 @@ class CreepHauler extends CreepWorker {
             }
 
             if (!moveTarget && !this.atWork) {
-                moveTarget = this.moveToRoom(this.WorkRoom.name, false);
+                moveTarget = this.moveToRoom(this._mem.rooms.work, false);
             }
 
             if (!moveTarget) {
@@ -160,7 +238,7 @@ class CreepHauler extends CreepWorker {
         }
         else {
             if (!moveTarget && !this.isHome) {
-                moveTarget = this.moveToRoom(this.HomeRoom.name, false);
+                moveTarget = this.moveToRoom(this._mem.rooms.home, false);
             }
 
             if (!moveTarget) {

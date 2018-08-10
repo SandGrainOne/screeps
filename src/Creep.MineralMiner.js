@@ -66,7 +66,7 @@ class CreepMineralMiner extends CreepWorker {
 
         if (this.load < this.capacity) {
             if (!moveTarget && !this.atWork) {
-                moveTarget = this.moveToRoom(this.WorkRoom.name, false);
+                moveTarget = this.moveToRoom(this._mem.rooms.work, false);
             }
 
             if (!moveTarget) {
@@ -116,7 +116,7 @@ class CreepMineralMiner extends CreepWorker {
             }
 
             if (!moveTarget && !this.isHome) {
-                moveTarget = this.moveToRoom(this.HomeRoom.name, false);
+                moveTarget = this.moveToRoom(this._mem.rooms.home, false);
             }
 
             if (!moveTarget) {

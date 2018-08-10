@@ -33,6 +33,20 @@ class RoomReal extends RoomBase {
     }
 
     /**
+     * Gets the tick number where the room was analyzed.
+     */
+    get tickAnalyzed () {
+        return _.isUndefined(this._mem.tickAnalyzed) ? 0 : this._mem.tickAnalyzed;
+    }
+
+    /**
+     * Sets the tick number where the room was analyzed.
+     */
+    set tickAnalyzed (value) {
+        this._mem.tickAnalyzed = value;
+    }
+
+    /**
      * Gets the room controller if it exists.
      */
     get controller () {
@@ -335,18 +349,8 @@ class RoomReal extends RoomBase {
         // Forget all stored ids before refilling the data structure.
         this._mem.ids = {};
 
-        // In the first loop the labs are only collected in this array.
-        // The labs are later reorganized properly.
         let labs = [];
         let links = [];
-
-        if (!_.isUndefined(this._mem.resources)) {
-            delete this._mem.resources;
-        }
-
-        if (!_.isUndefined(this._mem.structures)) {
-            delete this._mem.structures;
-        }
 
         for (let source of this._room.find(FIND_SOURCES)) {
             this.remember(source.id, 'source');
@@ -366,15 +370,15 @@ class RoomReal extends RoomBase {
             }
 
             if (structure.structureType === STRUCTURE_ROAD) {
-                // Allow roads to decay a little bit. This is so that a builder need to spend a
-                // litle bit more time and energy repairing. This in turn reduce time spent on travel.
+                // Allow roads to decay a little bit. This is so that a builder would need to spend a
+                // litle bit more time and energy repairing before moving on. This to reduce travel time.
                 if (structure.hits < structure.hitsMax - 1000) {
                     this.remember(structure.id, 'repair');
                 }
             }
 
             if (structure.structureType === STRUCTURE_WALL) {
-                if (structure.hits < 2300000) {
+                if (this.isMine && structure.hits < 2500000) {
                     this.remember(structure.id, 'repair');
                 }
             }
@@ -390,7 +394,7 @@ class RoomReal extends RoomBase {
             if (structure.structureType === STRUCTURE_RAMPART) {
                 this.remember(structure.id, STRUCTURE_RAMPART);
                 // TODO: Create a way to determine a good wall size
-                if (structure.hits < 2300000) {
+                if (this.isMine && structure.hits < 2500000) {
                     this.remember(structure.id, 'repair');
                 }
             }
@@ -430,6 +434,15 @@ class RoomReal extends RoomBase {
         this.labs.populate(this, labs);
 
         // this.makeJobs();
+
+        if (_.isUndefined(this._mem.tickClaimed) && this.isMine) {
+            this._mem.tickClaimed = Game.time;
+        }
+        if (!_.isUndefined(this._mem.tickClaimed) && !this.isMine) {
+            delete this._mem.tickClaimed;
+        }
+
+        this.tickAnalyzed = Game.time;
     }
 
     createJobs () {
@@ -442,8 +455,13 @@ class RoomReal extends RoomBase {
         }
 
         this._mem.jobs.refuelers = 0;
-        if (this._room.storage) {
+        if (this.storage) {
             this._mem.jobs.refuelers = 2;
+        }
+        
+        this._mem.jobs.linkers = 0;
+        if (!_.isNull(this.storage) && !_.isNull(this.links.storage)) {
+            this._mem.jobs.linkers = 1;
         }
 
         this._mem.jobs.settlers = 0;

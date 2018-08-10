@@ -96,7 +96,7 @@ class CreepWorker extends CreepBase {
      */
     retreating () {
         if (!this.isHome) {
-            this.moveTo(this.moveToRoom(this.HomeRoom.name, false));
+            this.moveTo(this.moveToRoom(this._mem.rooms.home, false));
             return true;
         }
         else {

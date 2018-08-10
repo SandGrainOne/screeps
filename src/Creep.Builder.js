@@ -124,7 +124,7 @@ class CreepBuilder extends CreepWorker {
 
         if (this.task === 'work') {
             if (!this.atWork) {
-                moveTarget = this.moveToRoom(this.WorkRoom.name, false);
+                moveTarget = this.moveToRoom(this._mem.rooms.work, false);
             }
             else {
                 if (this.target !== null) {
@@ -153,7 +153,7 @@ class CreepBuilder extends CreepWorker {
             }
 
             if (!moveTarget && !this.isHome) {
-                moveTarget = this.moveToRoom(this.HomeRoom.name, false);
+                moveTarget = this.moveToRoom(this._mem.rooms.home, false);
             }
 
             if (!moveTarget && this.room.storage) {

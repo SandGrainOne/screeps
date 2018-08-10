@@ -14,7 +14,7 @@ class CreepAttacker extends CreepSoldier {
      */
     work () {
         if (!this.atWork) {
-            this.moveToRoom(this.WorkRoom.name);
+            this.moveToRoom(this._mem.rooms.work);
             return true;
         }
 

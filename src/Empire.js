@@ -23,6 +23,8 @@ class Empire {
 
         this._creeps = {};
         this._creeps.all = {};
+
+        this._roomsToBeAnalyzed = [];
     }
 
     /**
@@ -40,11 +42,34 @@ class Empire {
     }
 
     /**
+     * Get a specific room.
+     */
+    getRoom (name) {
+        if (this.rooms.has(name)) {
+            return this.rooms.get(name);
+        }
+        return new RoomBase(name);
+    }
+
+    /**
      * This method is responsible for arranging all important game objects in easy to access collections.
      */
     prepare () {
         for (let roomName in Game.rooms) {
-            this.rooms.set(roomName, new RoomReal(Game.rooms[roomName]));
+            let room = new RoomReal(Game.rooms[roomName]);
+
+            this.rooms.set(roomName, room);
+
+            if (Game.time - room.tickAnalyzed > 20) {
+                if (this._roomsToBeAnalyzed.length > 0) {
+                    if (room.tickAnalyzed < _.last(this._roomsToBeAnalyzed).tickAnalyzed) {
+                        this._roomsToBeAnalyzed.push(room);
+                    }
+                }
+                else {
+                    this._roomsToBeAnalyzed.push(room);
+                }
+            }
         }
 
         for (let roomName in Memory.rooms) {
@@ -66,7 +91,7 @@ class Empire {
             let smartCreep = CreepMaker.wrap(creep);
             this._creeps.all[smartCreep.name] = smartCreep;
 
-            smartCreep.HomeRoom = this.rooms.get(creep.memory.rooms.home);
+            // TODO: Remove these. The creeps should do this themselves.
             smartCreep.WorkRoom = this.rooms.get(creep.memory.rooms.work);
 
             if (smartCreep.isRetired) {
@@ -75,7 +100,7 @@ class Empire {
             }
 
             let job = smartCreep.job;
-            let workroom = smartCreep.WorkRoom.name;
+            let workroom = creep.memory.rooms.work;
 
             if (!this._mem.creeps[workroom]) {
                 this._mem.creeps[workroom] = {};
@@ -105,7 +130,7 @@ class Empire {
 
     tickObservations () {
         if (_.isUndefined(this._mem.observations)) {
-            this._mem.observations = {};
+            return;
         }
 
         let index = 0;
@@ -170,6 +195,22 @@ class Empire {
         }
     }
 
+    /**
+     * Analyze the next set of rooms.
+     */
+    analyzeRooms () {
+        if (_.isUndefined(this._roomsToBeAnalyzed) || this._roomsToBeAnalyzed.length <= 0) {
+            return;
+        }
+
+        let count = Math.min(this._roomsToBeAnalyzed.length, 2);
+        do {
+            count--;
+            let room = this._roomsToBeAnalyzed.pop();
+            room.analyze();
+        } while (count > 0);
+    }
+
     createCreep (job, task, spawnName, bodyCode, homeRoom, workRoom) {
         return CreepMaker.createCreep(job, task, spawnName, bodyCode, homeRoom, workRoom);
     }
@@ -184,29 +225,12 @@ class Empire {
         console.log(input);
     }
 
-    /**
-     * Analyze the next set of rooms.
-     */
-    analyzeRooms () {
-        let names = Array.from(this.rooms.keys());
-        // Ensure the ordering of the rooms are the same every time. 
-        // Order might already be consistent, but unsure. This is the safe solution.
-        names.sort();
-
-        let index = this._mem._roomIndex || 0;
-        let counter = 0;
-
-        do {
-            index = index < names.length - 1 ? index + 1 : 0;
-
-            if (this.rooms.get(names[index]).isVisible) {
-                this.rooms.get(names[index]).analyze();
+    checkRoomMemory () {
+        for (let room of this.rooms.values()) {
+            if (!_.isUndefined(room._mem.resources)) {
+                console.log('Room: ' + room.name);
             }
-
-            counter++;
-        } while (counter < 2);
-
-        this._mem._roomIndex = index;
+        }
     }
 }
 

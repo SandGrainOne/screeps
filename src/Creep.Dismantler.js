@@ -21,7 +21,7 @@ class CreepDismantler extends CreepWorker {
         let carry = _.sum(this.carry);
 
         if (this.isWorking) {
-            if (this.moveToRoom(this.WorkRoom.name)) {
+            if (this.moveToRoom(this._mem.rooms.work)) {
                 let tower = this.pos.findClosestByPath(FIND_STRUCTURES, {
                     filter: function (structure) {
                         return structure.structureType === STRUCTURE_TOWER;
@@ -59,7 +59,7 @@ class CreepDismantler extends CreepWorker {
             }
         }
         else {
-            if (this.moveToRoom(this.HomeRoom.name)) {
+            if (this.moveToRoom(this._mem.rooms.home)) {
                 if (carry === 0) {
                     this.isWorking = true;
                 }
