@@ -25,16 +25,15 @@ class CreepBalancer extends CreepWorker {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
-        if (this.AtWork && this.AtHome) {
-            this.creep.say("work?")
-            return true;
+        if (!this.isRemoting) {
+            return false;
         }
         
         // If possible, perform road repairs on the move.
-        if (this.Strength > 0 && this.StartEnergy >= Math.min(this.Strength, this.Capacity)) {
+        if (this.strength > 0 && this.energy > 0) {
             let foundStructures = this.creep.pos.lookFor(LOOK_STRUCTURES);
             if (foundStructures.length > 0) {
-                for (var structure of foundStructures) {
+                for (let structure of foundStructures) {
                     if (structure.structureType === STRUCTURE_ROAD) {
                         if (structure.hits < structure.hitsMax) {
                             if (this.repair(structure) === OK) {
@@ -46,7 +45,7 @@ class CreepBalancer extends CreepWorker {
             }
         }
 
-        if (this.AtWork && this.NextCarry <= 0) {
+        if (this.atWork && this.NextCarry <= 0) {
             let storage = this.Room.storage;
             if (storage) {
                 if (this.creep.pos.isNearTo(storage)) {
@@ -55,11 +54,11 @@ class CreepBalancer extends CreepWorker {
             }
         }
 
-        if (this.AtHome && this.NextCarry > 0) {
+        if (this.isHome && this.NextCarry > 0) {
             if (this.Room.Links.Inputs.length > 0) {
                 let links = this.creep.pos.findInRange(this.Room.Links.Inputs, 1);
                 if (links.length > 0) {
-                    for (var link of links) {
+                    for (let link of links) {
                         if (this.transfer(link, RESOURCE_ENERGY) === OK ) {
                             break;
                         }
@@ -69,7 +68,7 @@ class CreepBalancer extends CreepWorker {
 
             let storage = this.Room.storage;
             if (storage && this.creep.pos.isNearTo(storage)) {
-                for (var resourceType in this.creep.carry) {
+                for (let resourceType in this.creep.carry) {
                     if (this.transfer(storage, resourceType) === OK) {
                         break;
                     }
@@ -81,14 +80,14 @@ class CreepBalancer extends CreepWorker {
             this.IsWorking = true;
         }
 
-        if (this.NextCarry >= this.Capacity) {
+        if (this.NextCarry >= this.capacity) {
             this.IsWorking = false;
         }
 
         let moveTarget = null;
 
         if (this.IsWorking) {
-            if (!this.AtWork) {
+            if (!this.atWork) {
                 this.moveToRoom(this.WorkRoom.name);
             }
             else {
@@ -101,7 +100,7 @@ class CreepBalancer extends CreepWorker {
             }
         }
         else {
-            if (!this.AtHome) {
+            if (!this.isHome) {
                 this.moveToRoom(this.HomeRoom.name);
             }
             else {
@@ -109,7 +108,7 @@ class CreepBalancer extends CreepWorker {
                     if (this.Room.Links.Inputs.length > 0) {
                         let links = this.creep.pos.findInRange(this.Room.Links.Inputs, 1);
                         if (links.length > 0) {
-                            for (var link of links) {
+                            for (let link of links) {
                                 if (link.energy < link.energyCapacity) {
                                     moveTarget = link;
                                     break;

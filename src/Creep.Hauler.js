@@ -25,7 +25,7 @@ class CreepHauler extends CreepWorker {
      */
     work() {
         // If possible, perform road repairs on the move.
-        if (this.Strength > 0 && this.StartEnergy > 0) {
+        if (this.strength > 0 && this.energy > 0) {
             let foundStructures = this.creep.pos.lookFor(LOOK_STRUCTURES);
             if (foundStructures.length > 0) {
                 for (let structure of foundStructures) {
@@ -40,7 +40,7 @@ class CreepHauler extends CreepWorker {
             }
         }
 
-        if (this.NextCarry < this.Capacity) {
+        if (this.NextCarry < this.capacity) {
             let drops = this.creep.pos.findInRange(this.Room.drops, 1);
             if (drops.length > 0) {
                 for (let drop of drops) {
@@ -52,7 +52,7 @@ class CreepHauler extends CreepWorker {
         }
 
         // Taking from a container should only be done in the work room.
-        if (this.AtWork && this.NextCarry < this.Capacity) {
+        if (this.atWork && this.NextCarry < this.capacity) {
             if (this.Room.containers.length > 0) {
                 let containers = this.creep.pos.findInRange(this.Room.containers, 1);
                 if (containers.length > 0) {
@@ -66,14 +66,14 @@ class CreepHauler extends CreepWorker {
             }
         }
 
-        if (!this.isRemoting && this.AtHome && this.NextCarry < this.Capacity) {
+        if (!this.isRemoting && this.isHome && this.NextCarry < this.capacity) {
             if (this.Room.terminal && (this.Room.terminal.store.energy > C.TERMINAL_THRESHOLD_ENERGY || this.Room.terminal.store.energy > this.Room.storage.store.energy)) {
                 this.withdraw(this.Room.terminal, RESOURCE_ENERGY);
             }
         }
 
         // Delivering to a container or link should only be done by a remote hauler back at home.
-        if (this.isRemoting && this.AtHome && this.NextCarry > 0) {
+        if (this.isRemoting && this.isHome && this.NextCarry > 0) {
             if (this.Room.containers.length > 0) {
                 let containers = this.creep.pos.findInRange(this.Room.containers, 1);
                 if (containers.length > 0) {
@@ -84,7 +84,7 @@ class CreepHauler extends CreepWorker {
                     }
                 }
             }
-            if (this.EndEnergy > 0 && this.Room.Links.Inputs.length > 0) {
+            if (this.energy > 0 && this.Room.Links.Inputs.length > 0) {
                 let links = this.creep.pos.findInRange(this.Room.Links.Inputs, 1);
                 if (links.length > 0) {
                     for (let link of links) {
@@ -96,7 +96,7 @@ class CreepHauler extends CreepWorker {
             }
         }
 
-        if (this.AtHome) {
+        if (this.isHome) {
             let storage = this.Room.storage;
             if (storage && this.creep.pos.isNearTo(storage)) {
                 for (let resourceType in this.creep.carry) {
@@ -105,13 +105,20 @@ class CreepHauler extends CreepWorker {
                     }
                 }
             }
+
+            if (this.Room.Extensions.length > 0) {
+                let extensions = this.creep.pos.findInRange(this.Room.Extensions, 1);
+                if (extensions.length > 0) {
+                    this.transfer(extensions[0], RESOURCE_ENERGY);
+                }
+            }
         }
 
         if (this.NextCarry <= 0) {
             this.IsWorking = true;
         }
 
-        if (this.NextCarry >= this.Capacity) {
+        if (this.NextCarry >= this.capacity) {
             this.IsWorking = false;
         }
 
@@ -132,7 +139,7 @@ class CreepHauler extends CreepWorker {
             if (!moveTarget) {
                 // A hauler that is room jumping should pick up resources in any room
                 // except at home. Drops at home should be handled by local haulers.
-                if ((this.isRemoting && !this.AtHome) || (!this.isRemoting && this.AtWork)) {
+                if ((this.isRemoting && !this.isHome) || (!this.isRemoting && this.atWork)) {
                     if (this.Room.drops.length > 0) {
                         for (let drop of this.Room.drops) {
                             if (this.Room.reserve(drop.id, this.name)) {
@@ -145,7 +152,7 @@ class CreepHauler extends CreepWorker {
                 }
             }
 
-            if (!moveTarget && !this.AtWork) {
+            if (!moveTarget && !this.atWork) {
                 moveTarget = this.moveToRoom(this.WorkRoom.name, false);
             }
 
@@ -163,7 +170,7 @@ class CreepHauler extends CreepWorker {
                 }
             }
 
-            if (!moveTarget && !this.isRemoting && this.AtHome && this.NextCarry < this.Capacity) {
+            if (!moveTarget && !this.isRemoting && this.isHome && this.NextCarry < this.capacity) {
                 if (this.Room.terminal) {
                     this.mem.job.target = this.Room.terminal.id;
                     moveTarget = this.Room.terminal;
@@ -171,7 +178,7 @@ class CreepHauler extends CreepWorker {
             }
         }
         else {
-            if (!moveTarget && !this.AtHome) {
+            if (!moveTarget && !this.isHome) {
                 moveTarget = this.moveToRoom(this.HomeRoom.name, false);
             }
 
@@ -179,7 +186,7 @@ class CreepHauler extends CreepWorker {
                 let range = 50;
 
                 // Ensure the creep only carry energy. No need to seek out a link otherwise.
-                if (this.isRemoting && this.EndEnergy > 0 && this.EndEnergy === this.NextCarry && this.Room.Links.Inputs.length > 0) {
+                if (this.isRemoting && this.energy > 0 && this.energy === this.NextCarry && this.Room.Links.Inputs.length > 0) {
 
                     for (let link of this.Room.Links.Inputs) {
                         if (link.energy >= link.energyCapacity) {
@@ -204,7 +211,7 @@ class CreepHauler extends CreepWorker {
             if (!moveTarget) {
                 // This should only happen early on before there is a temporary or real storage.
                 // The this.Extensions array only holds extensions and spawns with available space.
-                if (this.EndEnergy > 0 && this.Room.Extensions.length > 0) {
+                if (this.energy > 0 && this.Room.Extensions.length > 0) {
                     let extension = this.creep.pos.findClosestByRange(this.Room.Extensions);
                     if (extension) {
                         moveTarget = extension;

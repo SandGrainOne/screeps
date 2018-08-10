@@ -117,7 +117,7 @@ class Empire {
             smartCreep.HomeRoom = this.getRoom(creep.memory.rooms.home);
             smartCreep.WorkRoom = this.getRoom(creep.memory.rooms.work);
 
-            if (smartCreep.IsRetired) {
+            if (smartCreep.isRetired) {
                 // Don't count creeps that are retired.
                 continue;
             }
@@ -145,14 +145,19 @@ class Empire {
     }
 
     balanceEnergy(){
+        // Run this only every 10th tick.
+        if (Game.time % 10 !== 0) {
+            return;
+        }
+
         let poorest = null;
         let poorestAmount = 3000000;
         let richest = null;
         let richestAmount = 0;
 
-        for (var room of this.rooms) {
-            if (!room.isVisible || !room.storage || !room.terminal) {
-                // Room can not take part in the energy game this tick.
+        for (let room of this.rooms) {
+            if (!room.isVisible || !room.isMine || !room.storage || !room.terminal) {
+                // Room can not take part in the energy balancing game.
                 continue;
             }
 
@@ -170,7 +175,8 @@ class Empire {
         }
 
         if (richestAmount - poorestAmount > 100000) {
-            if (richest.terminal.store.energy > 20000 && poorest.terminal.store.storeCapacity - _.sum(poorest.terminal.store) > 40000) {
+            if (richest.terminal.store.energy > 20000 && poorest.terminal.storeCapacity - _.sum(poorest.terminal.store) > 40000) {
+                this.print("Transfering 10000 energy from " + richest.name + "(" + richestAmount + ") to " + poorest.name + "(" + poorestAmount + ")");
                 richest.terminal.send(RESOURCE_ENERGY, 10000, poorest.name);
             }
         }
@@ -191,25 +197,23 @@ class Empire {
             "rooms": {
                 "home": homeRoom,
                 "work": workRoom
-            }
+            },
+            "spawnTime": body.length * 3
         }
 
         return Game.spawns[spawnName].createCreep(body, null, memory);
     }
 
-    print(input, log = true) {
+    print(input) {
         if (_.isObject(input)) {
             input = JSON.stringify(input);
         }
 
-        input = "<font style='color:#e6de99'>" + input + "</font>";
+        input = "<font style='color:#999999'>" + input + "</font>"; // e6de99 - "yellow"
 
-        if (!log) {
-            console.log(input);
-            return;
-        }
+        console.log(input);
 
-        return input;
+        return;
     }
 }
 

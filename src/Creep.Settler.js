@@ -24,12 +24,12 @@ class CreepSettler extends CreepWorker {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
-        if (this.AtWork) {
+        if (this.atWork) {
             if (this.Room.controller && this.creep.pos.isNearTo(this.Room.controller)) {
-                if (!this.Room.controller.sign || this.Room.controller.sign.username === C.USERNAME) {
+                if (!this.Room.controller.sign || this.Room.controller.sign.username !== C.USERNAME) {
                     this.creep.signController(this.Room.controller, "For the Sand empire!");
                 }
-                if (this.name === " ") {
+                if (this.Room.name === "E75N87") {
                     this.creep.claimController(this.Room.controller);
                 }
                 else {
@@ -38,7 +38,7 @@ class CreepSettler extends CreepWorker {
             }
         }
 
-        if (!this.AtWork) {
+        if (!this.atWork) {
             this.moveToRoom(this.WorkRoom.name);
         }
         else {

@@ -21,7 +21,7 @@ class CreepHealer extends CreepSoldier {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
-        if(!this.AtWork) {
+        if(!this.atWork) {
             this.moveToRoom(this.WorkRoom.name);
             return true;
         }

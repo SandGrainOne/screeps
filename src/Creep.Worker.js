@@ -24,7 +24,7 @@ class CreepWorker extends CreepBase {
         this._startCarry =_.sum(this.creep.carry);
 
         this._carry = this._startCarry - this._startEnergy;
-        this._energy = this._startEnergy;
+        this._energy = this.creep.carry.energy;
 
         this._performedWork = {};
     }
@@ -32,28 +32,21 @@ class CreepWorker extends CreepBase {
     /**
      * Gets the carry capacity of the creep.
      */
-    get Capacity() {
+    get capacity() {
         return this._capacity;
     }
 
     /**
      * Gets the work strength of the creep.
      */
-    get Strength() {
+    get strength() {
         return this._strength;
-    }
-
-    /**
-     * Gets the amount of energy carried by the creep at the start of its work cycle.
-     */
-    get StartEnergy() {
-        return this._startEnergy;
     }
 
     /**
      * Gets the amount of energy callculated to be held by the creep at the end of the work cycle.
      */
-    get EndEnergy() {
+    get energy() {
         return this._energy;
     }
 
@@ -89,7 +82,7 @@ class CreepWorker extends CreepBase {
      */
     retreat() {
         if (this.creep.hits < this.creep.hitsMax) {
-            if (!this.AtHome) {
+            if (!this.isHome) {
                 this.moveTo(this.moveToRoom(this.HomeRoom.name, false));
                 return true;
             }

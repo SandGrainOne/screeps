@@ -24,30 +24,30 @@ class CreepRefueler extends CreepWorker {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
-        if (!this.AtWork) {
+        if (!this.atWork) {
             this.moveToRoom(this.WorkRoom.name);
             return true;
         }
 
-        if (!this.Room.storage || this.NextCarry > this.EndEnergy) {
+        if (!this.Room.storage || this.NextCarry > this.energy) {
             return false;
         }
 
-        if (this.EndEnergy < this.Capacity) {
+        if (this.energy < this.capacity) {
             if (this.creep.pos.isNearTo(this.Room.storage)) {
                 this.withdraw(this.Room.storage, RESOURCE_ENERGY);
             }
         }
 
-        if (this.EndEnergy > 0 && this.Room.terminal) {
-            if (this.Room.terminal.store.energy < C.TERMINAL_THRESHOLD_ENERGY && this.Room.storage.store.energy > 200000) {
+        if (this.energy > 0 && this.Room.terminal) {
+            if (this.Room.terminal.store.energy < C.TERMINAL_THRESHOLD_ENERGY - 5000 && this.Room.storage.store.energy > 200000) {
                 if (this.creep.pos.isNearTo(this.Room.terminal)) {
                     this.transfer(this.Room.terminal, RESOURCE_ENERGY);
                 }
             }
         }
 
-        if (this.EndEnergy > 0 && this.Room.towers.length > 0) { 
+        if (this.energy > 0 && this.Room.towers.length > 0) { 
             // Towers are sorted. The one with less remaining energy first.
             let tower = this.Room.towers[0];
             if (this.creep.pos.isNearTo(tower)) {
@@ -55,7 +55,7 @@ class CreepRefueler extends CreepWorker {
             }
         }
 
-        if (this.EndEnergy > 0 && this.Room.Extensions.length > 0) {
+        if (this.energy > 0 && this.Room.Extensions.length > 0) {
             // The extensions array only contains extensions and spawns with space for energy.
             let extensions = this.creep.pos.findInRange(this.Room.Extensions, 1);
             if (extensions.length > 0) {
@@ -65,7 +65,7 @@ class CreepRefueler extends CreepWorker {
 
         let moveTarget = null;
 
-        if (this.EndEnergy > 0) { 
+        if (this.energy > 0) { 
             // Prioritise towers if the room is invaded.
             if (this.Room.state !== C.ROOM_STATE_NORMAL) {
                 if (this.Room.towers.length > 0) {
@@ -107,22 +107,6 @@ class CreepRefueler extends CreepWorker {
         }
 
         return true;
-    }
-
-    mustRenew() {
-        return false;
-        if (this.creep.ticksToLive > 1000) {
-            return false;
-        }
-
-        if (this.Room.Spawns.length > 0) {
-            let spawns = this.creep.pos.findInRange(this.Room.Spawns, 1);
-            if (spawns.length > 0) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }
 

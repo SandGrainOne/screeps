@@ -24,7 +24,7 @@ class CreepBroker extends CreepWorker {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
-        if (!this.AtWork) {
+        if (!this.atWork) {
             this.moveTo(this.moveToRoom(this.WorkRoom.name, false));
             return true;
         }
@@ -39,7 +39,7 @@ class CreepBroker extends CreepWorker {
 
         let performedWithdraw = false;
 
-        if (this.NextCarry < this.Capacity && !performedWithdraw) {
+        if (this.NextCarry < this.capacity && !performedWithdraw) {
             if (storageLink && storageLink.energy > 200 && this.creep.pos.isNearTo(storageLink)) {
                 if (this.withdraw(storageLink, RESOURCE_ENERGY) === OK ) {
                     performedWithdraw = true;
@@ -47,10 +47,10 @@ class CreepBroker extends CreepWorker {
             }
         }
 
-        if (this.NextCarry < this.Capacity && !performedWithdraw && this.creep.pos.isNearTo(storage)) {
+        if (this.NextCarry < this.capacity && !performedWithdraw && this.creep.pos.isNearTo(storage)) {
             // Do not move stuff out of the storage if the terminal is full.
             if (terminal && _.sum(terminal.store) < terminal.storeCapacity * 0.9) {
-                for (var resourceType in storage.store) {
+                for (let resourceType in storage.store) {
                     // Taking energy from the storage is handled by refuelers.
                     if (resourceType === RESOURCE_ENERGY) {
                         continue;
@@ -68,7 +68,7 @@ class CreepBroker extends CreepWorker {
         }
 
         if (this.NextCarry > 0 && this.creep.pos.isNearTo(storage)) {
-            for (var resourceType in this.creep.carry) { /*
+            for (let resourceType in this.creep.carry) { /*
                 if (resourceType === RESOURCE_ENERGY) {
                     if (storageLink && storageLink.energy < 400 && this.creep.pos.isNearTo(storageLink)) {
                         if (this.transfer(storageLink, RESOURCE_ENERGY) === OK) {

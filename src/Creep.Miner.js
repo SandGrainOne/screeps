@@ -1,5 +1,7 @@
 'use strict';
 
+let C = require('constants');
+
 let CreepWorker = require('Creep.Worker');
 
 /**
@@ -60,7 +62,7 @@ class CreepMiner extends CreepWorker {
         let standsOnContainer = false;
         let performedWork = false;
 
-        if (this.AtWork && this.StartEnergy > Math.min(this.Strength * 5, this.Capacity)) {
+        if (this.atWork && this.energy >= 0) {
             let foundStructures = this.creep.pos.lookFor(LOOK_STRUCTURES);
             if (foundStructures.length > 0) {
                 for (let structure of foundStructures) {
@@ -90,7 +92,7 @@ class CreepMiner extends CreepWorker {
         }
 
         // The creep can't both repair/build and harvest in the same tick.
-        if (!performedWork && this.AtWork && this.NextCarry <= this.Capacity) {
+        if (!performedWork && this.atWork && this.NextCarry <= this.capacity) {
             let resourceNode = this.ResourceNode;
             if (resourceNode && this.creep.pos.isNearTo(resourceNode)) {
                 if (resourceNode.mineralType) {
@@ -104,7 +106,7 @@ class CreepMiner extends CreepWorker {
             }
         }
 
-        if (this.NextCarry >= this.Capacity && standsOnContainer) {
+        if (this.NextCarry >= this.capacity && standsOnContainer) {
             for (let resourceType in this.creep.carry) {
                 if (this.drop(resourceType) === OK) {
                     break;
@@ -112,7 +114,7 @@ class CreepMiner extends CreepWorker {
             }
         }
         
-        if (this.NextCarry >= this.Capacity) {
+        if (this.NextCarry >= this.capacity) {
             if (this.Room.containers.length > 0) {
                 let containers = this.creep.pos.findInRange(this.Room.containers, 1);
                 if (containers.length > 0) {
@@ -150,8 +152,8 @@ class CreepMiner extends CreepWorker {
 
         let moveTarget = null;
 
-        if (this.NextCarry < this.Capacity) {
-            if (!moveTarget && !this.AtWork) {
+        if (this.NextCarry < this.capacity) {
+            if (!moveTarget && !this.atWork) {
                 moveTarget = this.moveToRoom(this.WorkRoom.name, false);
             }
             
@@ -181,7 +183,7 @@ class CreepMiner extends CreepWorker {
             if (!moveTarget) {
                 let range = 50;
                 // Ensure the creep only carry energy. No need to seek out a link otherwise.
-                if (this.EndEnergy > 0 && this.EndEnergy === this.NextCarry && this.Room.Links.Inputs.length > 0) {
+                if (this.energy > 0 && this.energy === this.NextCarry && this.Room.Links.Inputs.length > 0) {
                     for (let link of this.Room.Links.Inputs) {
                         if (link.energy >= link.energyCapacity) {
                             continue;
@@ -207,7 +209,7 @@ class CreepMiner extends CreepWorker {
                     }
                 }
 
-                if (this.AtHome && this.Room.storage) {
+                if (this.isHome && this.Room.storage) {
                     let rangeToStorage = this.creep.pos.getRangeTo(this.Room.storage);
                     if (range > 10 || range >= rangeToStorage) {
                         range = rangeToStorage;
@@ -216,14 +218,14 @@ class CreepMiner extends CreepWorker {
                 }
             }
 
-            if (!moveTarget && !this.AtHome) {
+            if (!moveTarget && !this.isHome) {
                 moveTarget = this.moveToRoom(this.HomeRoom.name, false);
             }
 
             if (!moveTarget) {
                 // This should only happen early on before there is a storage in the room.
                 // The this.Extensions array only holds extensions and spawns with available space.
-                if (this.EndEnergy > 0 && this.Room.Extensions.length > 0) {
+                if (this.energy > 0 && this.Room.Extensions.length > 0) {
                     let extension = this.creep.pos.findClosestByRange(this.Room.Extensions);
                     if (extension) {
                         if (!this.creep.pos.isNearTo(extension)) {

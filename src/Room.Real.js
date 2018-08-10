@@ -471,13 +471,14 @@ class RoomReal extends RoomBase {
     }
 
     defend() {
+        let hostiles = this._room.find(FIND_HOSTILE_CREEPS);
+
         if (this.towers.length === 0) {
             return;
         }
 
         for (let tower of this.towers) {
 
-            let hostiles = tower.room.find(FIND_HOSTILE_CREEPS);
             let hostileCreep = tower.pos.findClosestByRange(hostiles);
 
             if (hostileCreep !== null && hostileCreep.pos.y < 49) {
@@ -513,7 +514,7 @@ class RoomReal extends RoomBase {
 
             let rampartToRepair = tower.pos.findClosestByRange(FIND_STRUCTURES, { 
                 filter: (s) => { 
-                    return s.structureType === STRUCTURE_RAMPART && (s.hits < 600000);
+                    return s.structureType === STRUCTURE_RAMPART && (s.hits < 800000);
                 } 
             });
 
@@ -524,7 +525,7 @@ class RoomReal extends RoomBase {
 
             let wallToRepair = tower.pos.findClosestByRange(FIND_STRUCTURES, { 
                 filter: (wall) => { 
-                    return wall.structureType === STRUCTURE_WALL && (wall.hits < 600000);
+                    return wall.structureType === STRUCTURE_WALL && (wall.hits < 800000);
                 } 
             });
 
@@ -572,12 +573,12 @@ class RoomReal extends RoomBase {
                     }
                 }
             }
-            
+
             if (linkAbove && linkBelow) {
                 let amount = Math.min(400, linkBelow.energy)
                 linkAbove.transferEnergy(linkBelow, amount);
             }
-        } 
+        }
         else {
             if (this.Links.Inputs.length === 0) {
                 return;
@@ -595,13 +596,19 @@ class RoomReal extends RoomBase {
                 if (inputLink.cooldown > 0 || inputLink.energy < 100) {
                     continue;
                 }
-
+                
+                let performedTransfer = false;
                 for (let roomLink of roomLinks) {
-                    if (roomLink.energy < roomLink.energyCapacity / 2) {
+                    if (roomLink.energy < roomLink.energyCapacity - 200) {
                         let amount = Math.min(inputLink.energy, roomLink.energyCapacity - roomLink.energy)
                         let res = inputLink.transferEnergy(roomLink, amount);
+                        performedTransfer = true;
                         break;
                     }
+                }
+                
+                if (performedTransfer) {
+                    break;
                 }
             }
 
@@ -609,7 +616,7 @@ class RoomReal extends RoomBase {
                 let storageLink = this.Links.Storage;
                 if (storageLink.cooldown === 0 && storageLink.energy > 0) {
                     let controllerLink = this.Links.Controller;
-                    if (controllerLink.energy < controllerLink.energyCapacity / 2) {
+                    if (controllerLink.energy < controllerLink.energyCapacity) {
                         let amount = Math.min(storageLink.energy, controllerLink.energyCapacity - controllerLink.energy)
                         let res = storageLink.transferEnergy(controllerLink, amount);
                     }

@@ -32,6 +32,9 @@ let constants = {
         "L": CLAIM,
         "T": TOUGH
     },
+    
+    "BUILD_COST": BUILD_POWER,
+    "REPAIR_COST": REPAIR_POWER * REPAIR_COST,
 
     "EXIT": {
         // Recommended exit locations when going from one room to another.
@@ -43,14 +46,15 @@ let constants = {
         "E77N85": {
             "E77N89": { x: 19, y: 0 },
             "E77N88": { x: 19, y: 0 },
-            "E76N89": { x: 19, y: 0 },
-            "E74N89": { x: 19, y: 0 }
+            "E75N87": { x: 19, y: 0 }
         },
         "E77N86": {
             "E77N89": { x: 31, y: 0 },
             "E77N88": { x: 31, y: 0 },
-            "E76N89": { x: 31, y: 0 },
-            "E74N89": { x: 31, y: 0 }
+            "E75N87": { x: 31, y: 0 }
+        },
+        "E77N87": {
+            "E75N87": { x: 0, y: 36 }
         },
         "E78N89": {
             "E77N88": { x: 0, y: 39 }

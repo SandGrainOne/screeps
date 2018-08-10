@@ -18,30 +18,6 @@ class CreepBase {
         this.mem = creep.memory;
 
         this.mem.ticksToLive = this.creep.ticksToLive;
-        this.mem.spawnTime = this.creep.body.length * 3;
-
-        // Ensure that there is memory space for job related information.
-        if (!this.mem.job) {
-            this.mem.job = {};
-        }
-        if (!this.mem.job.name) {
-            this.mem.job.name = "unassigned";
-        }
-        if (!this.mem.job.task) {
-            this.mem.job.task = "unassigned";
-        }
-
-        // Make sure the creep has been given rooms to work in.
-        if (!this.mem.rooms) {
-            this.mem.rooms = {};
-        }
-        this.mem.rooms.current = this.creep.room.name;
-        if (!this.mem.rooms.home) {
-            this.mem.rooms.home = this.creep.room.name;
-        }
-        if (!this.mem.rooms.work) {
-            this.mem.rooms.work = this.creep.room.name;
-        }
     }
 
     /**
@@ -68,21 +44,21 @@ class CreepBase {
     /**
      * Gets a value indicating whether the creep is retired.
      */
-    get IsRetired() {
+    get isRetired() {
         return this.mem.ticksToLive < (this.mem.spawnTime + C.RETIREMENT);
     }
 
     /**
      * Gets a value indicating whether the creep is in the work room.
      */
-    get AtWork() {
+    get atWork() {
         return this.Room.name === this.mem.rooms.work;
     }
 
     /**
      * Gets a value indicating whether the creep is in the home room.
      */
-    get AtHome() {
+    get isHome() {
         return this.Room.name === this.mem.rooms.home;
     }
 
@@ -108,10 +84,6 @@ class CreepBase {
             return this._performRecycle();
         }
 
-        if (this.mustRenew()) {
-            return this._performRenew();
-        }
-        
         if (this.retreat()) {
             return true;
         }
@@ -141,7 +113,7 @@ class CreepBase {
      * Perform the actual recycling. This includes moving to the home room, finding a spawn and calling recycle.
      */
     _performRecycle() {
-        if (!this.AtHome) {
+        if (!this.isHome) {
             this.moveTo(this.moveToRoom(this.mem.rooms.home, false));
         }
         else {
@@ -149,42 +121,6 @@ class CreepBase {
                 let spawns = this.creep.pos.findInRange(this.Room.Spawns, 1);
                 if (spawns.length > 0) {
                     spawns[0].recycleCreep(this.creep);
-                }
-                else {
-                    let spawn = this.creep.pos.findClosestByRange(this.Room.Spawns);
-                    if (spawn) {
-                        this.moveTo(spawn);
-                    }
-                    else {
-                        this.creep.say("spawn!?");
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Check if the creep should be renewed. This base method always return false.
-     * 
-     * @returns {Boolean} true if the creep should be renewed.
-     */
-    mustRenew() {
-        return false;
-    }
-
-    /**
-     * Perform the actual renewing. This includes moving to the home room, finding a spawn and calling renew.
-     */
-    _performRenew() {
-        if (!this.AtHome) {
-            this.moveTo(this.moveToRoom(this.HomeRoom.name, false));
-        }
-        else {
-            if (this.Room.Spawns.length > 0) {
-                let spawns = this.creep.pos.findInRange(this.Room.Spawns, 1);
-                if (spawns.length > 0) {
-                    spawns[0].renewCreep(this.creep);
                 }
                 else {
                     let spawn = this.creep.pos.findClosestByRange(this.Room.Spawns);
@@ -256,17 +192,6 @@ class CreepBase {
         }
 
         let pos = target && target.pos ? target.pos : target;
-        
-        //let room = new RoomBase(pos.roomName);
-
-        //if (false && room.state !== C.ROOM_STATE_NORMAL) {
-        //    let flag = this.creep.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
-        //    if (flag) {
-        //        let moveResult = this.creep.moveTo(flag);
-        //        return moveResult;
-        //    }
-        //    return OK;
-        //}
 
         let ops = { 
             ignoreCreeps: false,
