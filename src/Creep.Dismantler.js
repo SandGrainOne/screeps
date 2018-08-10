@@ -31,10 +31,10 @@ class CreepDismantler extends CreepWorker {
 
         let carry = _.sum(this.creep.carry);
 
-        if (this.IsWorking) {
+        if (this.isWorking) {
             if (this.moveToRoom(this.WorkRoom.name)) {
                 if (carry >= this.creep.carryCapacity) {
-                    //this.IsWorking = false;
+                    //this.isWorking = false;
                 }
         
                 let tower = this.creep.pos.findClosestByPath(FIND_STRUCTURES, { 
@@ -76,7 +76,7 @@ class CreepDismantler extends CreepWorker {
         else {
             if (this.moveToRoom(this.HomeRoom.name)) {
                 if (carry === 0) {
-                    this.IsWorking = true;
+                    this.isWorking = true;
                 }
                 let storage = this.Room.storage;
 

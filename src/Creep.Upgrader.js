@@ -63,17 +63,17 @@ class CreepUpgrader extends CreepWorker {
             }
         }
 
-        if (this.NextCarry >= this.capacity) {
-            this.IsWorking = true;
+        if (this.load >= this.capacity) {
+            this.isWorking = true;
         }
 
-        if (this.NextCarry <= 0) {
-            this.IsWorking = false;
+        if (this.load <= 0) {
+            this.isWorking = false;
         }
 
         let moveTarget = null;
 
-        if (this.IsWorking) {
+        if (this.isWorking) {
             if (!this.atWork) {
                 this.moveToRoom(this.WorkRoom.name);
             }

@@ -23,7 +23,7 @@ class CreepMiner extends CreepWorker {
             if (this.mem.resourceid) {
                 let source = Game.getObjectById(this.mem.resourceid);
                 if (source && (source.energy > 0 || (source.ticksToRegeneration || 300) < 50)) {
-                    if (this.Room.reserve(source.id, this.name)) {
+                    if (this.Room.reserve(source.id, this.job, this.name)) {
                         return source;
                     }
                 }
@@ -32,7 +32,7 @@ class CreepMiner extends CreepWorker {
             if (this.Room.sources.length > 0) {
                 for (let source of this.Room.sources) {
                     if (source && (source.energy > 0 || (source.ticksToRegeneration || 300) < 50)) {
-                        if (this.Room.reserve(source.id, this.name)) {
+                        if (this.Room.reserve(source.id, this.job, this.name)) {
                             this.mem.resourceid = source.id;
                             return source;
                         }
@@ -92,7 +92,7 @@ class CreepMiner extends CreepWorker {
         }
 
         // The creep can't both repair/build and harvest in the same tick.
-        if (!performedWork && this.atWork && this.NextCarry <= this.capacity) {
+        if (!performedWork && this.atWork && this.load <= this.capacity) {
             let resourceNode = this.ResourceNode;
             if (resourceNode && this.creep.pos.isNearTo(resourceNode)) {
                 if (resourceNode.mineralType) {
@@ -106,7 +106,7 @@ class CreepMiner extends CreepWorker {
             }
         }
 
-        if (this.NextCarry >= this.capacity && standsOnContainer) {
+        if (this.load >= this.capacity && standsOnContainer) {
             for (let resourceType in this.creep.carry) {
                 if (this.drop(resourceType) === OK) {
                     break;
@@ -114,7 +114,7 @@ class CreepMiner extends CreepWorker {
             }
         }
         
-        if (this.NextCarry >= this.capacity) {
+        if (this.load >= this.capacity) {
             if (this.Room.containers.length > 0) {
                 let containers = this.creep.pos.findInRange(this.Room.containers, 1);
                 if (containers.length > 0) {
@@ -152,7 +152,7 @@ class CreepMiner extends CreepWorker {
 
         let moveTarget = null;
 
-        if (this.NextCarry < this.capacity) {
+        if (this.load < this.capacity) {
             if (!moveTarget && !this.atWork) {
                 moveTarget = this.moveToRoom(this.WorkRoom.name, false);
             }
@@ -183,7 +183,7 @@ class CreepMiner extends CreepWorker {
             if (!moveTarget) {
                 let range = 50;
                 // Ensure the creep only carry energy. No need to seek out a link otherwise.
-                if (this.energy > 0 && this.energy === this.NextCarry && this.Room.Links.Inputs.length > 0) {
+                if (this.energy > 0 && this.energy === this.load && this.Room.Links.Inputs.length > 0) {
                     for (let link of this.Room.Links.Inputs) {
                         if (link.energy >= link.energyCapacity) {
                             continue;

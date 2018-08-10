@@ -42,6 +42,13 @@ class CreepBase {
     }
 
     /**
+     * Sets the current task
+     */
+    set task(value) {
+        this.mem.job.task = value;
+    }
+
+    /**
      * Gets a value indicating whether the creep is retired.
      */
     get isRetired() {
@@ -200,6 +207,24 @@ class CreepBase {
 
         let res = this.creep.moveTo(pos, ops);
         return res;
+    }
+
+    getFirstInRange(objects, range) {
+        if (!Array.isArray(objects)) {
+            return null;
+        }
+
+        if (objects.length === 1) {
+            return objects[0];
+        }
+
+        for (let obj of objects) {
+            if (this.creep.pos.getRangeTo(obj) <= range) {
+                return obj;
+            }
+        }
+
+        return null;
     }
 }
 

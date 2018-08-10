@@ -45,7 +45,7 @@ class CreepBalancer extends CreepWorker {
             }
         }
 
-        if (this.atWork && this.NextCarry <= 0) {
+        if (this.atWork && this.load <= 0) {
             let storage = this.Room.storage;
             if (storage) {
                 if (this.creep.pos.isNearTo(storage)) {
@@ -54,7 +54,7 @@ class CreepBalancer extends CreepWorker {
             }
         }
 
-        if (this.isHome && this.NextCarry > 0) {
+        if (this.isHome && this.load > 0) {
             if (this.Room.Links.Inputs.length > 0) {
                 let links = this.creep.pos.findInRange(this.Room.Links.Inputs, 1);
                 if (links.length > 0) {
@@ -76,17 +76,17 @@ class CreepBalancer extends CreepWorker {
             }
         }
 
-        if (this.NextCarry <= 0) {
-            this.IsWorking = true;
+        if (this.load <= 0) {
+            this.isWorking = true;
         }
 
-        if (this.NextCarry >= this.capacity) {
-            this.IsWorking = false;
+        if (this.load >= this.capacity) {
+            this.isWorking = false;
         }
 
         let moveTarget = null;
 
-        if (this.IsWorking) {
+        if (this.isWorking) {
             if (!this.atWork) {
                 this.moveToRoom(this.WorkRoom.name);
             }

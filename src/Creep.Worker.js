@@ -17,14 +17,15 @@ class CreepWorker extends CreepBase {
     constructor(creep) {
         super(creep);
 
-        this._strength = this.creep.getActiveBodyparts(WORK);
+        this._baseStrength = this.creep.getActiveBodyparts(WORK);
+
         this._capacity = this.creep.getActiveBodyparts(CARRY) * 50;
 
         this._startEnergy = this.creep.carry.energy;
-        this._startCarry =_.sum(this.creep.carry);
+        this._startLoad =_.sum(this.creep.carry);
 
-        this._carry = this._startCarry - this._startEnergy;
-        this._energy = this.creep.carry.energy;
+        this._energy = this._startEnergy;
+        this._minerals = this._startLoad - this._startEnergy;
 
         this._performedWork = {};
     }
@@ -40,7 +41,7 @@ class CreepWorker extends CreepBase {
      * Gets the work strength of the creep.
      */
     get strength() {
-        return this._strength;
+        return this._baseStrength;
     }
 
     /**
@@ -53,26 +54,22 @@ class CreepWorker extends CreepBase {
     /**
      * Gets the amount of resources callculated to be carried by the creep at the end of the work cycle.
      */
-    get NextCarry() {
-        return this._carry + this._energy;
+    get load() {
+        return this._energy + this._minerals;
     }
 
     /**
      * Gets a value indicating whether the creep is working.
      */
-    get IsWorking() {
+    get isWorking() {
         return !!this.mem.isworking;
     }
 
     /**
      * Sets a value indicating whether the creep is working.
      */
-    set IsWorking(value) {
+    set isWorking(value) {
         this.mem.isworking = !!value;
-    }
-
-    work() {
-        return false;
     }
 
     /**
@@ -110,7 +107,7 @@ class CreepWorker extends CreepBase {
 
         let res = this.creep.build(target);
         if (res === OK) {
-            this._energy = this._energy - (this._strength * 5);
+            this._energy = Math.max(0, this._energy - (this._baseStrength * C.BUILD_COST));
             this._performedWork.build = true;
         }
         return res;
@@ -129,7 +126,7 @@ class CreepWorker extends CreepBase {
 
         let res = this.creep.repair(target);
         if (res === OK) {
-            this._energy = this._energy - this._strength;
+            this._energy = Math.max(0, this._energy - (this._baseStrength * C.REPAIR_COST));
             this._performedWork.repair = true;
         }
         return res;
@@ -148,7 +145,7 @@ class CreepWorker extends CreepBase {
 
         let res = this.creep.upgradeController(target);
         if (res === OK) {
-            this._energy = this._energy - this._strength;
+            this._energy = Math.max(0, this._energy - (this._baseStrength * C.UPGRADE_COST));
             this._performedWork.upgrade = true;
         }
         return res;
@@ -168,10 +165,10 @@ class CreepWorker extends CreepBase {
         let res = this.creep.harvest(target);
         if (res === OK) {
             if (target instanceof Source) {
-                this._energy = this._energy + (this._strength * 2);
+                this._energy = Math.min(this._capacity, this._energy + (this._baseStrength * C.HARVEST_ENERGY_GAIN));
             }        
             if (target instanceof Mineral) {
-                this._carry = this._carry + (this._strength);
+                this._minerals = Math.min(this._capacity, this._minerals + (this._baseStrength * C.HARVEST_MINERAL_GAIN));
             }
             this._performedWork.harvest = true;
         }
@@ -200,7 +197,7 @@ class CreepWorker extends CreepBase {
                 this._energy = this._energy - carriedAmount;
             }
             else {
-                this._carry = this._carry - carriedAmount;
+                this._minerals = this._minerals - carriedAmount;
             }
             this._performedWork.drop = true;
         }
@@ -220,12 +217,12 @@ class CreepWorker extends CreepBase {
 
         let res = this.creep.pickup(target);
         if (res === OK) {
-            let creepSpace = this._capacity - this._carry - this._energy;
+            let creepSpace = this._capacity - this._minerals - this._energy;
             if (target.resourceType === RESOURCE_ENERGY) {
                 this._energy = this._energy + Math.min(target.amount, creepSpace);
             }
             else {
-                this._carry = this._carry + Math.min(target.amount, creepSpace);
+                this._minerals = this._minerals + Math.min(target.amount, creepSpace);
             }
             this._performedWork.pickup = true;
         }
@@ -285,7 +282,7 @@ class CreepWorker extends CreepBase {
                 this._energy = this._energy - amountTransfered;
             }
             else {
-                this._carry = this._carry - amountTransfered;
+                this._minerals = this._minerals - amountTransfered;
             }
             this._performedWork.transfer = true;
         }
@@ -330,7 +327,7 @@ class CreepWorker extends CreepBase {
             }
         }
 
-        let restCapacity = this._capacity - this._carry - this._energy;
+        let restCapacity = this._capacity - this._minerals - this._energy;
         let amountTransfered = Math.min(amountStored, restCapacity);
 
         if (amountTransfered <= 0) {
@@ -344,7 +341,7 @@ class CreepWorker extends CreepBase {
                 this._energy = this._energy + amountTransfered;
             }
             else {
-                this._carry = this._carry + amountTransfered;
+                this._minerals = this._minerals + amountTransfered;
             }
             this._performedWork.withdraw = true;
         }

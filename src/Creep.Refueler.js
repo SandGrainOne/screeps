@@ -29,7 +29,7 @@ class CreepRefueler extends CreepWorker {
             return true;
         }
 
-        if (!this.Room.storage || this.NextCarry > this.energy) {
+        if (!this.Room.storage || this.load > this.energy) {
             return false;
         }
 
@@ -60,6 +60,12 @@ class CreepRefueler extends CreepWorker {
             let extensions = this.creep.pos.findInRange(this.Room.Extensions, 1);
             if (extensions.length > 0) {
                 this.transfer(extensions[0], RESOURCE_ENERGY);
+            }
+        }
+
+        if (this.energy > 0 && this.Room.nuker !== null) {
+            if (this.creep.pos.isNearTo(this.Room.nuker)) {
+                this.transfer(this.Room.nuker, RESOURCE_ENERGY);
             }
         }
 
@@ -95,6 +101,12 @@ class CreepRefueler extends CreepWorker {
                         moveTarget = tower;
                         break;
                     }
+                }
+            }
+
+            if (!moveTarget && this.Room.nuker !== null) {
+                if (this.Room.nuker.energy < this.Room.nuker.energyCapacity) {
+                    moveTarget = this.Room.nuker;
                 }
             }
         }

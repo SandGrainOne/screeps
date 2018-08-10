@@ -1,5 +1,7 @@
 'use strict';
 
+let C = require('constants');
+
 let CreepWorker = require('Creep.Worker');
 
 /**
@@ -14,21 +16,37 @@ class CreepBuilder extends CreepWorker {
      */
     constructor(creep) {
         super(creep);
+        
+        if (this.task === null) {
+            this.task = "charge";
+        }
+
+        // Tick cache
+        this._cache = {};
     }
 
     /**
      * Gets the creep job target. 
      */
     get target() {
-        return Game.getObjectById(this.mem.job.target);
+        if (this._cache.target === undefined) {
+            return this._cache.target = Game.getObjectById(this.mem.job.target); // job.target might be undefined.
+        }
+        return this._cache.target;
     }
 
     /**
      * Sets the creep job target. 
      */
-    set target(id) {
-        // TODO: Make it possible to provide object instead of id? Need to support removing target.
-        this.mem.job.target = id;
+    set target(obj) {
+        if (obj !== null) {
+            this._cache.target = obj;
+            this.mem.job.target = obj.id;
+        }
+        else {
+            this._cache.target = null;
+            delete this.mem.job.target;
+        }
     }
 
     /**
@@ -37,47 +55,127 @@ class CreepBuilder extends CreepWorker {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work() {
-        if (this.name === "nobody") {
+        let moveTarget = null;
+        let moveRequired = false;
+
+        //if (this.name === "Eva") {
             // TODO: Ensure that the creep carry nothing but energy?
 
-            if (this.atWork && this.energy > 0 && this.target !== null) {
-                if (!this.Room.reserve(this.target.id, this.name)) {
-                    this.target = null;
-                }
-
-                if (this.creep.pos.getRangeTo(this.target) <= 3) {
-                    if (this.target instanceof ConstructionSite) {
-                        console.log("Found construction site at " + JSON.stringify(this.target.pos));
-                        this.build(this.target);
+            if (this.atWork) {
+                if (this.target !== null) {
+                    if (this.target instanceof ConstructionSite || this.target.hits < this.target.hitsMax) {
+                        if (!this.Room.reserve(this.target.id, this.job, this.name)) {
+                            this.target = null;
+                        }
                     }
                     else {
-                        console.log("Repairing '" + this.target.structureType + "' at posistion: " + JSON.stringify(this.target.pos));
-                        this.repair(this.target);
+                        this.target = null;
+                    }
+                }
+
+                if (this.target === null && this.energy > 0) {
+                    this.target = this.findTarget();
+                }
+
+                if (this.target !== null && this.energy > 0) {
+                    if (this.creep.pos.getRangeTo(this.target) <= 3) {
+                        if (this.target instanceof ConstructionSite) {
+                            this.build(this.target);
+                        }
+                        else {
+                            this.repair(this.target);
+                        }
                     }
                 }
             }
 
             if (this.energy < this.capacity) {
-                let storage = this.Room.storage;
-                if (storage && storage.store.energy > 0 && this.creep.pos.isNearTo(storage)) {
-                    this.withdraw(storage, RESOURCE_ENERGY);
+                if (this.isHome) {
+                    let storage = this.Room.storage;
+                    if (storage && storage.store.energy > 0 && this.creep.pos.isNearTo(storage)) {
+                        this.withdraw(storage, RESOURCE_ENERGY);
+                    }
                 }
 
                 if (this.Room.containers.length > 0) {
-                    let containers = this.creep.pos.findInRange(this.Room.containers, 1);
-                    if (containers.length > 0) {
-                        this.withdraw(containers[0], RESOURCE_ENERGY);
+                    let container = this.getFirstInRange(this.Room.containers, 1);
+                    if (container !== null && container.store.energy > 0) {
+                        this.withdraw(container, RESOURCE_ENERGY);
                     }
                 }
 
                 if (this.Room.sources.length > 0) {
                     let sources = this.creep.pos.findInRange(this.Room.sources, 1);
                     if (sources[0] && this.creep.pos.isNearTo(sources[0])) {
-                        let res = this.harvest(sources[0]);
+                        this.harvest(sources[0]);
                     }
                 }
             }
-        }
+
+            if (this.energy <= 0) {
+                this.task = "charge";
+
+                if (this.target !== null) {
+                    this.target = null;
+                }
+            }
+
+            if (this.energy >= this.capacity) {
+                this.task = "work";
+
+                if (this.target === null && this.atWork) {
+                    this.target = this.findTarget();
+                }
+            }
+
+            if (this.task === "work") {
+                if (!this.atWork) {
+                    moveTarget = this.moveToRoom(this.WorkRoom.name, false);
+                }
+                else {
+                    if (this.target !== null) {
+                        if (this.creep.pos.getRangeTo(this.target) > 3) {
+                            moveTarget = this.target;
+                        }
+                    }
+                }
+            }
+
+            if (this.task === "charge") {
+                if (!moveTarget && (this.isHome || this.atWork) && !this.Room.storage) {
+                    if (!moveTarget && this.Room.containers.length > 0) {
+                        let container = this.creep.pos.findClosestByRange(this.Room.containers);
+                        if (container && container.store.energy > 0) {
+                            moveTarget = container;
+                        }
+                    }
+
+                    if (!moveTarget && this.Room.sources.length > 0) {
+                        let source = this.creep.pos.findClosestByRange(this.Room.sources);
+                        if (source) {
+                            moveTarget = source;
+                        }
+                    }
+                }
+
+                if (!moveTarget && !this.isHome) {
+                    moveTarget = this.moveToRoom(this.HomeRoom.name, false);
+                }
+
+                if (!moveTarget && this.Room.storage) {
+                    let storage = this.Room.storage;
+                    if (storage && storage.store.energy > 0) {
+                        moveTarget = storage;
+                    }
+                }
+            }
+
+            if (moveTarget !== null) {
+                this.moveTo(moveTarget);
+            }
+
+            return true;
+        /*}
 
         if (this.atWork && this.energy > 0) {
             let performedWork = false;
@@ -132,16 +230,16 @@ class CreepBuilder extends CreepWorker {
             }
         }
 
-        if (this.NextCarry < this.capacity) {
+        if (this.load < this.capacity) {
             let storage = this.Room.storage;
             if (storage && storage.store.energy > 0 && this.creep.pos.isNearTo(storage)) {
                 this.withdraw(storage, RESOURCE_ENERGY);
             }
 
             if (this.Room.containers.length > 0) {
-                let containers = this.creep.pos.findInRange(this.Room.containers, 1);
-                if (containers.length > 0) {
-                    this.withdraw(containers[0], RESOURCE_ENERGY);
+                let container = this.getFirstInRange(this.Room.containers, 1);
+                if (container !== null && container.store.energy > 0) {
+                    this.withdraw(container, RESOURCE_ENERGY);
                 }
             }
 
@@ -153,18 +251,15 @@ class CreepBuilder extends CreepWorker {
             }
         }
 
-        if (this.NextCarry >= this.capacity) {
-            this.IsWorking = true;
+        if (this.load >= this.capacity) {
+            this.isWorking = true;
         }
 
-        if (this.NextCarry <= 0) {
-            this.IsWorking = false;
+        if (this.load <= 0) {
+            this.isWorking = false;
         }
 
-        let moveTarget = null;
-        let moveRequired = false;
-        
-        if (this.IsWorking) {
+        if (this.isWorking) {
 
             if (!moveTarget && !this.atWork) {
                 moveTarget = this.moveToRoom(this.WorkRoom.name, false);
@@ -255,7 +350,29 @@ class CreepBuilder extends CreepWorker {
             this.moveTo(moveTarget);
         }
 
-        return true;
+        return true;*/
+    }
+
+    findTarget() {
+        if (Game.time % 2 === 0) {
+            if (this.Room.constructionSites.length > 0) {
+                for (let site of this.Room.constructionSites) {
+                    if (this.Room.reserve(site.id, this.job, this.name)) {
+                        return site;
+                    }
+                }
+            }
+        }
+
+        if (this.Room.Repairs.length > 0) {
+            for (let repairs of this.Room.Repairs) {
+                if (this.Room.reserve(repairs.id, this.job, this.name)) {
+                    return repairs;
+                }
+            }
+        }
+
+        return null;
     }
 }
 

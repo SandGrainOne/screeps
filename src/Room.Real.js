@@ -40,7 +40,15 @@ class RoomReal extends RoomBase {
      * Gets the room storage if it exists. Otherwise undefined.
      */
     get storage() {
-        return this._room.storage;
+        if (this._room.storage) {
+            return this._room.storage;
+        }
+
+        if (this._mem.structures.miniStorage) {
+            return Game.getObjectById(this._mem.structures.miniStorage);
+        }
+
+        return null;
     }
 
     /**
@@ -104,10 +112,20 @@ class RoomReal extends RoomBase {
         if (this._cache.containers !== undefined) {
             return this._cache.containers;
         }
-        let containers = this._room.find(FIND_STRUCTURES, { filter: (s) => s.structureType === STRUCTURE_CONTAINER });
+
+        let allContainers = this._room.find(FIND_STRUCTURES, { filter: (s) => s.structureType === STRUCTURE_CONTAINER });
+
+        let containers = [];
+        for (let container of allContainers) {
+            if (container.id !== this._mem.structures.miniStorage) {
+                containers.push(container);
+            }
+        }
+
         if (containers.length > 1) {
             containers.sort((a, b) => _.sum(b.store) - _.sum(a.store));
         }
+
         return this._cache.containers = containers;
     }
 
@@ -153,20 +171,34 @@ class RoomReal extends RoomBase {
     }
 
     /**
+     * Gets the nuker structure in the room is it exists.
+     */
+    get nuker() {
+        if (this._cache.nuker !== undefined) {
+            return this._cache.nuker;
+        }
+        let nukers = this._room.find(FIND_STRUCTURES, { filter: (s) => s.structureType === STRUCTURE_NUKER });
+        let nuker = nukers.length > 0 ? nukers[0] : null;
+        return this._cache.nuker = nuker;
+    }
+
+    /**
      * Attempt to reserve a game object or something with a unique id to prevent other
      * creeps, towers, etc from targeting the same thing. A reservation will time out and 
      * be released after 2 ticks. This means a reservation must be renewed.
      * 
      * @param {string} id - A unique id identifying what is being reserved.
+     * @param {string} type - Type of reservation describe different reasons for reserving a target.
      * @param {string} creepName - The name of the creep making the reservation.
      */
-    reserve(id, creepName) {
-        if (!this._mem.reservations[id]) {
-            this._mem.reservations[id] = { creepName: creepName, ttl: 2 };
+    reserve(id, type, creepName) {
+        let key = type + "_" + id;
+        if (!this._mem.reservations[key]) {
+            this._mem.reservations[key] = { creepName: creepName, ttl: 2 };
             return true;
         }
-        if (this._mem.reservations[id].creepName === creepName) {
-            this._mem.reservations[id].ttl = 2;
+        if (this._mem.reservations[key].creepName === creepName) {
+            this._mem.reservations[key].ttl = 2;
             return true;
         }
         return false;
@@ -185,18 +217,20 @@ class RoomReal extends RoomBase {
 
         this._mem.jobs.miners = this.sources.length;
 
+        this._mem.jobs.haulers = this.containers.length + this._room.terminal ? 1 : 0;
+
         if (this.hasMinerals) {
             this._mem.jobs.mineralminers = 1;
+        }
+
+        if (this._room.storage) {
+            this._mem.jobs.refuelers = 2;
         }
 
         if (this._room.controller && this._room.controller.reservation) {
             if (this._room.controller.reservation.username === C.USERNAME && this._room.controller.reservation.ticksToEnd < 4000){
                 this._mem.jobs.settlers = 1;
             }
-        }
-
-        if (this.storage) {
-            this._mem.jobs.refuelers = 2;
         }
     }
 
@@ -217,6 +251,7 @@ class RoomReal extends RoomBase {
         this._mem.structures = {};
         this._mem.structures.spawns = [];
         this._mem.structures.extensions = [];
+        this._mem.structures.miniStorage = null;
         this._mem.structures.links = {};
         this._mem.structures.links.storage = null;
         this._mem.structures.links.controller = null;
@@ -246,12 +281,23 @@ class RoomReal extends RoomBase {
                 }
             }
 
+            if (structure.structureType === STRUCTURE_CONTAINER) {
+                if (!this._room.storage) {
+                    let spawnsInRange = structure.pos.findInRange(FIND_MY_SPAWNS, 1);
+                    if (spawnsInRange.length > 0) {
+                        this._mem.structures.miniStorage = spawnsInRange[0].id;
+                    }
+                }
+            }
+
             if (!this.isMine) {
                 continue;
             }
 
             if (structure.structureType === STRUCTURE_SPAWN) {
                 this._mem.structures.spawns.push(structure.id);
+
+                // Adding all spawns to the extensions collection for the purpose of refueling
                 this._mem.structures.extensions.push(structure.id);
             }
 
@@ -266,6 +312,10 @@ class RoomReal extends RoomBase {
                 let rangeToController = structure.pos.getRangeTo(this.controller);
 
                 if (Math.min(rangeToStorage, rangeToController) > 5) {
+                    //let energyInRange = structure.pos.findInRange(FIND_SOURCES, 1);
+                    //if (energyInRange.length === 0) {
+                    //    this._mem.structures.links.storage = structure.id;
+                    //}
                     this._mem.structures.links.inputs.push(structure.id);
                 }
                 else if (rangeToController < rangeToStorage) {
@@ -301,10 +351,10 @@ class RoomReal extends RoomBase {
     }
 
     tickReservations() {
-        for (let targetId in this._mem.reservations) {
-            this._mem.reservations[targetId].ttl = this._mem.reservations[targetId].ttl - 1;
-            if (this._mem.reservations[targetId].ttl === 0) {
-                delete this._mem.reservations[targetId];
+        for (let key in this._mem.reservations) {
+            this._mem.reservations[key].ttl = this._mem.reservations[key].ttl - 1;
+            if (this._mem.reservations[key].ttl === 0) {
+                delete this._mem.reservations[key];
             }
         }
     }
@@ -402,13 +452,13 @@ class RoomReal extends RoomBase {
             for (let structure of structures) {
                 if (structure.structureType === STRUCTURE_WALL || structure.structureType === STRUCTURE_RAMPART) {
                     if (this.isMine) {
-                        if (structure.hits < 600000) {
+                        if (structure.hits < 2000000) {
                             this.Repairs.push(structure);
                         }
                     }
                 }
                 else {
-                    if (structure.hits < structure.hitsMax) {
+                    if (structure.hits < structure.hitsMax - 1000) {
                         this.Repairs.push(structure);
                     }
                 }
@@ -497,6 +547,7 @@ class RoomReal extends RoomBase {
                 continue;
             }
 
+            /*
             if (tower.energy < tower.energyCapacity - 200) {
                 continue;
             }
@@ -514,7 +565,7 @@ class RoomReal extends RoomBase {
 
             let rampartToRepair = tower.pos.findClosestByRange(FIND_STRUCTURES, { 
                 filter: (s) => { 
-                    return s.structureType === STRUCTURE_RAMPART && (s.hits < 800000);
+                    return s.structureType === STRUCTURE_RAMPART && (s.hits < 1100000);
                 } 
             });
 
@@ -525,7 +576,7 @@ class RoomReal extends RoomBase {
 
             let wallToRepair = tower.pos.findClosestByRange(FIND_STRUCTURES, { 
                 filter: (wall) => { 
-                    return wall.structureType === STRUCTURE_WALL && (wall.hits < 800000);
+                    return wall.structureType === STRUCTURE_WALL && (wall.hits < 1100000);
                 } 
             });
 
@@ -533,7 +584,7 @@ class RoomReal extends RoomBase {
                 tower.repair(wallToRepair);
                 continue;
             } 
-
+            
             let roadToRepair = tower.pos.findClosestByRange(FIND_STRUCTURES, { 
                 filter: function (road) { 
                     return road.structureType === STRUCTURE_ROAD && (road.hits < road.hitsMax); 
@@ -544,6 +595,7 @@ class RoomReal extends RoomBase {
                 tower.repair(roadToRepair);
                 continue;
             }
+            */
         }
     }
 

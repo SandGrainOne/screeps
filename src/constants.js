@@ -35,6 +35,9 @@ let constants = {
     
     "BUILD_COST": BUILD_POWER,
     "REPAIR_COST": REPAIR_POWER * REPAIR_COST,
+    "UPGRADE_COST": UPGRADE_CONTROLLER_POWER,
+    "HARVEST_ENERGY_GAIN": HARVEST_POWER,
+    "HARVEST_MINERAL_GAIN": HARVEST_MINERAL_POWER,
 
     "EXIT": {
         // Recommended exit locations when going from one room to another.
@@ -67,6 +70,9 @@ let constants = {
         },
         "E76N85": {
             "E77N85": { x: 49, y: 31 }
+        },
+        "E75N87": {
+            "E76N87": { x: 49, y: 26 }
         }
     }
 }

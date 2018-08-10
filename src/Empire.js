@@ -72,15 +72,17 @@ class Empire {
      * be released after 2 ticks. This means a reservation must be renewed.
      * 
      * @param {string} id - A unique id identifying what is being reserved.
+     * @param {string} type - Type of reservation describe different reasons for reserving a target.
      * @param {string} creepName - The name of the creep making the reservation.
      */
-    reserve(id, creepName) {
-        if (!this._mem.reservations[id]) {
-            this._mem.reservations[id] = { creepName: creepName, ttl: 2 };
+    reserve(id, type, creepName) {
+        let key = type + "_" + id;
+        if (!this._mem.reservations[key]) {
+            this._mem.reservations[key] = { creepName: creepName, ttl: 2 };
             return true;
         }
-        if (this._mem.reservations[id].creepName === creepName) {
-            this._mem.reservations[id].ttl = 2;
+        if (this._mem.reservations[key].creepName === creepName) {
+            this._mem.reservations[key].ttl = 2;
             return true;
         }
         return false;
@@ -175,6 +177,8 @@ class Empire {
         }
 
         if (richestAmount - poorestAmount > 100000) {
+            //this.print(richest.name + ".terminal.store.energy: " + richest.terminal.store.energy);
+            //this.print(poorest.name + ".terminal.storeCapacity - _.sum(" + poorest.name + ".terminal.store): " + (poorest.terminal.storeCapacity - _.sum(poorest.terminal.store)));
             if (richest.terminal.store.energy > 20000 && poorest.terminal.storeCapacity - _.sum(poorest.terminal.store) > 40000) {
                 this.print("Transfering 10000 energy from " + richest.name + "(" + richestAmount + ") to " + poorest.name + "(" + poorestAmount + ")");
                 richest.terminal.send(RESOURCE_ENERGY, 10000, poorest.name);
