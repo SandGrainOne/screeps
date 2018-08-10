@@ -4,7 +4,7 @@ let CreepSoldier = require('./Creep.Soldier');
 
 /**
  * Wrapper class for creeps with logic for an attacker.
- * Primary purpose of these creeps are to perform offencive actions with the goal of damaging hostile creeps and structures.
+ * Primary purpose of these creeps are to perform offensive actions with the goal of damaging hostile creeps and structures.
  */
 class CreepAttacker extends CreepSoldier {
     /**

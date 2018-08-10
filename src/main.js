@@ -4,7 +4,7 @@ let code = require('./code');
 let Empire = require('./Empire');
 
 module.exports.loop = function () {
-    // Ensure that the empire is up to date with what the code expects.
+    // Ensure that the empire memory and state is up to date with what the code expects.
     code.update();
 
     // Make the empire available from the gobal scope
@@ -31,9 +31,9 @@ module.exports.loop = function () {
                 'homeRoom': room.name,
                 'jobs': {
                     'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
-                    'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWCCMMMM' },
+                    // 'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWCCMMMMMM' },
                     'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
-                    'upgrader': { 'count': 2, 'body': 'WWWWWWWWWWCCCCCMMMMMMMMMM' },
+                    'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
                     'hauler': { 'count': 3, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' },
                     'linker': { 'count': room.jobs.linkers, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
@@ -47,7 +47,7 @@ module.exports.loop = function () {
                 'spawnName': 'Arna',
                 'homeRoom': 'E73N87',
                 'jobs': {
-                    'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWCCMMMMMM' },
+                    // 'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWCCMMMMMM' },
                     'builder': { 'count': 1, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                     'hauler': { 'count': 3, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWWCCCMMMMM' },
@@ -88,7 +88,7 @@ module.exports.loop = function () {
                 'homeRoom': room.name,
                 'jobs': {
                     'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
-                    'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWCCMMMM' },
+                    // 'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWCCMMMM' },
                     'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                     'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
                     'hauler': { 'count': 2, 'body': 'CCCCCCCCCCMMMMM' },
@@ -104,7 +104,7 @@ module.exports.loop = function () {
                 'spawnName': 'Mandal',
                 'homeRoom': 'E75N87',
                 'jobs': {
-                    'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWCCMMMMMM' },
+                    // 'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWCCMMMMMM' },
                     'builder': { 'count': 1, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                     'hauler': { 'count': 3, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWWCCCMMMMM' },
@@ -145,7 +145,7 @@ module.exports.loop = function () {
                 'homeRoom': room.name,
                 'jobs': {
                     'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
-                    'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWCCMMMMMMM' },
+                    // 'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWCCMMMMMMM' },
                     'linker': { 'count': room.jobs.linkers, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
                     'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
                     'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
@@ -188,7 +188,7 @@ module.exports.loop = function () {
                 'homeRoom': room.name,
                 'jobs': {
                     'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
-                    'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWCCCMMMM' },
+                    // 'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWCCCMMMM' },
                     'linker': { 'count': room.jobs.linkers, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
                     'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
                     'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
@@ -231,7 +231,7 @@ module.exports.loop = function () {
                 'homeRoom': room.name,
                 'jobs': {
                     'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
-                    'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWCCMMMMMMM' },
+                    // 'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWCCMMMMMM' },
                     'linker': { 'count': room.jobs.linkers, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
                     'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
                     'builder': { 'count': 3, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
@@ -247,7 +247,7 @@ module.exports.loop = function () {
                 'spawnName': 'Kirkenes',
                 'homeRoom': 'E77N85',
                 'jobs': {
-                    'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWCCMMMMMMM' },
+                    // 'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWCCMMMMMMM' },
                     'patroler': { 'count': 1, 'body': 'MMMMMMMMMMMMMMMMMMMMMMMMRRRRRRRRRRRRRRRRRRRRMHHHHH' },
                     'builder': { 'count': 1, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                     'hauler': { 'count': 1, 'body': 'WCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' }
@@ -260,7 +260,7 @@ module.exports.loop = function () {
                 'spawnName': 'Kirkenes',
                 'homeRoom': 'E77N85',
                 'jobs': {
-                    'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWCCMMMMMMM' },
+                    // 'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWCCMMMMMMM' },
                     'builder': { 'count': 1, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                     'hauler': { 'count': 4, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWWCCCMMMMM' }
@@ -287,7 +287,7 @@ module.exports.loop = function () {
                 'homeRoom': room.name,
                 'jobs': {
                     'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
-                    'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWCCMMMMM' },
+                    // 'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWCCMMMMM' },
                     'linker': { 'count': room.jobs.linkers, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
                     'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
                     'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
@@ -369,7 +369,7 @@ module.exports.loop = function () {
                 'homeRoom': room.name,
                 'jobs': {
                     'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
-                    'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWCCCMMMMMMMMM' },
+                    // 'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWCCCMMMMMMMMM' },
                     'linker': { 'count': room.jobs.linkers, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
                     'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
                     'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
@@ -386,7 +386,7 @@ module.exports.loop = function () {
                 'homeRoom': room.name,
                 'jobs': {
                     'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
-                    'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWCCCMMMMMMMMM' },
+                    // 'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWCCCMMMMMMMMM' },
                     'linker': { 'count': room.jobs.linkers, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
                     'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
                     'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
@@ -429,7 +429,7 @@ module.exports.loop = function () {
                 'homeRoom': room.name,
                 'jobs': {
                     'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
-                    'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWWWWWWCCCCMMMMMMMMMMMM' },
+                    // 'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWWWWWWCCCCMMMMMMMMMMMM' },
                     'linker': { 'count': room.jobs.linkers, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
                     'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
                     'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
@@ -459,7 +459,7 @@ module.exports.loop = function () {
                 'homeRoom': room.name,
                 'jobs': {
                     'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
-                    'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWWWWWWCCCCCCMMMMMMMMMMMMM' },
+                    // 'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWWWWWWCCCCCCMMMMMMMMMMMMM' },
                     'linker': { 'count': room.jobs.linkers, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
                     'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
                     'builder': { 'count': 1, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },

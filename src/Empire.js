@@ -229,8 +229,38 @@ class Empire {
         for (let room of this.rooms.values()) {
             if (!_.isUndefined(room._mem.resources)) {
                 console.log('Room: ' + room.name);
+                return;
             }
         }
+
+        console.log('Found no issues');
+    }
+
+    findSpawn (roomName) {
+        for (let spawnName in Game.spawns) {
+            let spawn = Game.spawns[spawnName];
+
+            let distance = 0;
+            if (spawn.room.name !== roomName) {
+                distance = Game.map.getRoomLinearDistance(spawn.room.name, roomName);
+                if (distance < 5) {
+                    distance = Game.map.findRoute(spawn.room.name, roomName).length;
+                }
+            }
+
+            console.log('Distance from ' + spawnName + ' to ' + roomName + ': ' + distance);
+        }
+    }
+
+    createId () {
+        var dt = new Date().getTime();
+        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = (dt + Math.random() * 16) % 16 | 0;
+            dt = Math.floor(dt / 16);
+            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
+
+        return uuid;
     }
 }
 

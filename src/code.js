@@ -23,18 +23,18 @@ let code = {
      */
     update: function () {
         // Ensure that a code object is defined. First update.
-        if (Memory.code === undefined) {
+        if (_.isUndefined(Memory.code)) {
             Memory.code = {};
         }
 
         // Ensure that the version is defined. First update.
-        if (Memory.code.version === undefined) {
+        if (_.isUndefined(Memory.code.version)) {
             this._setVersion('1.0');
         }
 
         // Adding the empire memory space
         if (this._getVersion() === '1.0') {
-            if (Memory.empire === undefined) {
+            if (_.isUndefined(Memory.empire)) {
                 Memory.empire = {};
             }
             this._setVersion('1.1');

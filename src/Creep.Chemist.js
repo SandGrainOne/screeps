@@ -24,8 +24,12 @@ class CreepChemist extends CreepWorker {
 
         let reaction = {};
 
+        if (this.room.name === 'E71N87') {
+            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_GHODIUM_ACID };
+        }
+
         if (this.room.name === 'E73N87') {
-            reaction = { compoundOne: RESOURCE_GHODIUM_HYDRIDE, compoundTwo: RESOURCE_HYDROXIDE };
+            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_GHODIUM_ACID };
         }
 
         if (this.room.name === 'E75N87') {
@@ -33,15 +37,15 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.room.name === 'E75N89') {
-            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_GHODIUM_ACID };
+            reaction = { compoundOne: RESOURCE_HYDROXIDE, compoundTwo: RESOURCE_GHODIUM_OXIDE };
         }
 
         if (this.room.name === 'E77N88') {
-            reaction = { compoundOne: RESOURCE_OXYGEN, compoundTwo: RESOURCE_HYDROGEN };
+            reaction = { compoundOne: RESOURCE_HYDROGEN, compoundTwo: RESOURCE_OXYGEN };
         }
 
         if (this.room.name === 'E77N85') {
-            reaction = { compoundOne: RESOURCE_GHODIUM, compoundTwo: RESOURCE_ZYNTHIUM };
+            reaction = { compoundOne: RESOURCE_KEANIUM, compoundTwo: RESOURCE_ZYNTHIUM };
         }
 
         if (this.room.name === 'E78N85') {
@@ -49,15 +53,15 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.room.name === 'E78N88') {
-            reaction = { compoundOne: RESOURCE_GHODIUM_ACID, compoundTwo: RESOURCE_CATALYST };
+            reaction = { compoundOne: RESOURCE_GHODIUM_OXIDE, compoundTwo: RESOURCE_HYDROXIDE };
         }
 
         if (this.room.name === 'E79N85') {
-            reaction = { compoundOne: RESOURCE_GHODIUM, compoundTwo: RESOURCE_HYDROGEN };
+            reaction = { compoundOne: RESOURCE_LEMERGIUM, compoundTwo: RESOURCE_UTRIUM };
         }
 
         if (this.room.name === 'E79N86') {
-            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_UTRIUM_ACID };
+            reaction = { compoundOne: RESOURCE_UTRIUM, compoundTwo: RESOURCE_LEMERGIUM };
         }
 
         let emptyCreep = false;

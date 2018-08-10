@@ -378,7 +378,7 @@ class RoomReal extends RoomBase {
             }
 
             if (structure.structureType === STRUCTURE_WALL) {
-                if (this.isMine && structure.hits < 2500000) {
+                if (this.isMine && structure.hits < 3000000) {
                     this.remember(structure.id, 'repair');
                 }
             }
@@ -394,7 +394,7 @@ class RoomReal extends RoomBase {
             if (structure.structureType === STRUCTURE_RAMPART) {
                 this.remember(structure.id, STRUCTURE_RAMPART);
                 // TODO: Create a way to determine a good wall size
-                if (this.isMine && structure.hits < 2500000) {
+                if (this.isMine && structure.hits < 3000000) {
                     this.remember(structure.id, 'repair');
                 }
             }
@@ -458,7 +458,7 @@ class RoomReal extends RoomBase {
         if (this.storage) {
             this._mem.jobs.refuelers = 2;
         }
-        
+
         this._mem.jobs.linkers = 0;
         if (!_.isNull(this.storage) && !_.isNull(this.links.storage)) {
             this._mem.jobs.linkers = 1;
