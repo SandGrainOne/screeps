@@ -42,12 +42,7 @@ class CreepBase {
      * Gets the room where there creep currently reside.
      */
     get room () {
-        // if (this._cache.room !== undefined) {
-        //     return this._cache.room;
-        // }
-
-        // this._cache.room = Empire.getRoom(this._creep.room.name);
-        return Empire.rooms[this._creep.room.name]; this._cache.room;
+        return Empire.rooms.get(this._creep.room.name);
     }
 
     /**
@@ -144,11 +139,11 @@ class CreepBase {
      */
     getTask () {
         if (this._creep.spawning) {
-            return "spawning";
+            return 'spawning';
         }
 
         if (this._mem.recycle) {
-            return "recycling";
+            return 'recycling';
         }
 
         return null;
@@ -270,16 +265,16 @@ class CreepBase {
         if (this._creep.fatigue > 0) {
             return ERR_TIRED;
         }
-        
+
         // Normalize the input.
         if (!(target instanceof RoomPosition)) {
             target = target.pos;
         }
-        
+
         // Create and set some default move options.
         options = options || {};
-        _.defaults(options, { 
-            ignoreCreeps: false, 
+        _.defaults(options, {
+            ignoreCreeps: false,
             range: 1,
             visualizePathStyle: { fill: 'transparent', stroke: '#fff', lineStyle: 'dashed', strokeWidth: 0.1, opacity: 0.2 }
         });
@@ -292,7 +287,7 @@ class CreepBase {
         if (this.pos.getRangeTo(target) <= options.range) {
             return OK;
         }
-        
+
         return this._creep.moveTo(target, options);
     }
 
@@ -332,8 +327,8 @@ class CreepBase {
      */
     static defineJob (room) {
     }
-    
-    isExit(target) {
+
+    isExit (target) {
         return target.x === 0 || target.y === 0 || target.x === 49 || target.y === 49;
     }
 }

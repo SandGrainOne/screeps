@@ -44,6 +44,57 @@ class CreepMaker {
     }
 
     /**
+     * Trigger the spawning of a new creep.
+     */
+    static createCreep (job, task, spawnName, bodyCode, homeRoom, workRoom) {
+        if (!Game.spawns[spawnName]) {
+            console.log('Error: No spawn with the name "' + spawnName + '".');
+            return ERR_BUSY;
+        }
+
+        let body = CreepMaker.buildBody(bodyCode);
+        let memory = {
+            'job': job,
+            'work': {
+                'task': task
+            },
+            'rooms': {
+                'home': homeRoom,
+                'work': workRoom
+            },
+            'spawnTime': body.length * 3
+        };
+
+        return Game.spawns[spawnName].createCreep(body, CreepMaker.generateName(), memory);
+    }
+
+    /**
+     * Generate a name that can be used for a new creep.
+     */
+    static generateName () {
+        let isVowel = false;
+        let charArray = C.VOWELS;
+        let name = charArray[Math.round(Math.random() * (charArray.length - 1))].toUpperCase();
+
+        let nameComplete = false;
+        while (!nameComplete) {
+            if (isVowel) {
+                charArray = C.VOWELS;
+            }
+            else {
+                charArray = C.CONSONANTS;
+            }
+            isVowel = !isVowel;
+
+            name += charArray[Math.round(Math.random() * (charArray.length - 1))];
+
+            nameComplete = name.length > C.CREEP_NAME_LENGTH && !Empire.creeps.all[name];
+        }
+
+        return name;
+    }
+
+    /**
      * Build a body based on a shortened code.
      * 
      * Eg: 

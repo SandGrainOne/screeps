@@ -81,7 +81,7 @@ class CreepWorker extends CreepBase {
     getTask () {
         let task = super.getTask();
         if (!_.isNull(task)) {
-            return task; 
+            return task;
         }
 
         if (this._creep.hits < this._creep.hitsMax) {

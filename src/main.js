@@ -14,28 +14,16 @@ module.exports.loop = function () {
     // Wrap all rooms and creeps in custom logic and make them easily available.
     empire.prepare();
 
-    for (let roomName in empire.rooms) {
-        var room = empire.rooms[roomName];
-
+    for (let room of empire.rooms.values()) {
         if (room.isVisible) {
             // Perform all room logic.
             room.run();
         }
 
-        // TEMPORARY To be done as a step during analysis.
+        // TEMPORARY. To be done as a step during analysis.
         room.createJobs();
 
         let rule = null;
-
-        if (room.name === 'sim') {
-            rule = {
-                'spawnName': 'Spawn1',
-                'homeRoom': room.name,
-                'jobs': {
-                    'miner': { 'count': room.jobs.miners, 'body': 'WCMM' }
-                }
-            };
-        }
 
         if (room.name === 'E74N86') {
             rule = {
@@ -43,7 +31,7 @@ module.exports.loop = function () {
                 'homeRoom': 'E73N87',
                 'jobs': {
                     'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWCCMMMMMM' },
-                    'builder': { 'count': 1, 'body': 'WWWWWWCCCCCCCCCCCCCCMMMMMMMMMM' },
+                    'builder': { 'count': 1, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                     'hauler': { 'count': 3, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWWCCCMMMMM' },
                     'patroler': { 'count': 1, 'body': 'MMMMMMMMMMMMMMMMMMMMMMMMRRRRRRRRRRRRRRRRRRRRMHHHHH' }
@@ -58,7 +46,7 @@ module.exports.loop = function () {
                 'jobs': {
                     'settler': { 'count': room.jobs.settlers, 'body': 'LLMM' },
                     'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
-                    'hauler': { 'count': 2, 'body': 'WCCCCCCCCCMMMMM' },
+                    'hauler': { 'count': 2, 'body': 'WCCCCCCCCCCCCCCCMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMM' }
                 }
             };
@@ -71,7 +59,7 @@ module.exports.loop = function () {
                 'jobs': {
                     'settler': { 'count': room.jobs.settlers, 'body': 'LLMM' },
                     'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
-                    'hauler': { 'count': 2, 'body': 'WCCCCCCCCCMMMMM' },
+                    'hauler': { 'count': 2, 'body': 'WCCCCCCCCCCCCCCCMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMM' }
                 }
             };
@@ -84,7 +72,7 @@ module.exports.loop = function () {
                 'jobs': {
                     'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
                     'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWCCMMMM' },
-                    'builder': { 'count': 2, 'body': 'WWWCCMMM' },
+                    'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                     'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
                     'hauler': { 'count': 2, 'body': 'CCCCCCCCCCMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' },
@@ -100,7 +88,7 @@ module.exports.loop = function () {
                 'homeRoom': 'E75N87',
                 'jobs': {
                     'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWCCMMMMMM' },
-                    'builder': { 'count': 1, 'body': 'WWWWWWCCCCCCCCCCCCCCMMMMMMMMMM' },
+                    'builder': { 'count': 1, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                     'hauler': { 'count': 3, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWWCCCMMMMM' },
                     'patroler': { 'count': 1, 'body': 'MMMMMMMMMMMMMMMMMMMMMMMMRRRRRRRRRRRRRRRRRRRRMHHHHH' }
@@ -143,7 +131,7 @@ module.exports.loop = function () {
                     'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWCCMMMMMMM' },
                     'linker': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
                     'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
-                    'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCMMMMMM' },
+                    'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                     'hauler': { 'count': 2, 'body': 'CCCCCCCCCCMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' },
                     'refueler': { 'count': room.jobs.refuelers, 'body': 'CCCCCCMMM' }
@@ -186,7 +174,7 @@ module.exports.loop = function () {
                     'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWCCCMMMM' },
                     'linker': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
                     'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
-                    'builder': { 'count': 2, 'body': 'WWWWWCCCCCMMMMM' },
+                    'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                     'hauler': { 'count': 3, 'body': 'CCCCCCCCCCMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWCCCMMMM' },
                     'refueler': { 'count': room.jobs.refuelers, 'body': 'CCCCCCCCMMMM' }
@@ -229,7 +217,7 @@ module.exports.loop = function () {
                     'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWCCMMMMMMM' },
                     'linker': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
                     'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
-                    'builder': { 'count': 3, 'body': 'WWWWWWCCCCCCCCCCCCCCMMMMMMMMMM' },
+                    'builder': { 'count': 3, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                     'hauler': { 'count': 2, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' },
                     'refueler': { 'count': room.jobs.refuelers, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' }
@@ -244,7 +232,7 @@ module.exports.loop = function () {
                 'jobs': {
                     'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWCCMMMMMMM' },
                     'patroler': { 'count': 1, 'body': 'MMMMMMMMMMMMMMMMMMMMMMMMRRRRRRRRRRRRRRRRRRRRMHHHHH' },
-                    'builder': { 'count': 1, 'body': 'WWWWWWCCCCCCCCCCCCCCMMMMMMMMMM' },
+                    'builder': { 'count': 1, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                     'hauler': { 'count': 1, 'body': 'WCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' }
                 }
             };
@@ -256,7 +244,7 @@ module.exports.loop = function () {
                 'homeRoom': 'E77N85',
                 'jobs': {
                     'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWCCMMMMMMM' },
-                    'builder': { 'count': 1, 'body': 'WWWWWCCCCCCCMMMMMM' },
+                    'builder': { 'count': 1, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                     'hauler': { 'count': 4, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWWCCCMMMMM' }
                 }
@@ -285,7 +273,7 @@ module.exports.loop = function () {
                     'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWCCMMMMM' },
                     'linker': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
                     'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
-                    'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCMMMMMM' },
+                    'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                     'hauler': { 'count': 2, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' },
                     'refueler': { 'count': room.jobs.refuelers, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' }
@@ -367,7 +355,7 @@ module.exports.loop = function () {
                     'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWCCCMMMMMMMMM' },
                     'linker': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
                     'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
-                    'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCMMMMMM' },
+                    'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                     'hauler': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' },
                     'refueler': { 'count': room.jobs.refuelers, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' }
@@ -384,7 +372,7 @@ module.exports.loop = function () {
                     'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWCCCMMMMMMMMM' },
                     'linker': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
                     'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
-                    'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCMMMMMM' },
+                    'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                     'hauler': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' },
                     'refueler': { 'count': room.jobs.refuelers, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' }
@@ -405,131 +393,67 @@ module.exports.loop = function () {
             };
         }
 
-        let roomPop = empire.creeps[room.name];
+        if (room.name === 'E79N86') {
+            rule = {
+                'spawnName': 'Rygge',
+                'homeRoom': room.name,
+                'jobs': {
+                    'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
+                    'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWWWWWWCCCCMMMMMMMMMMMM' },
+                    'linker': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
+                    'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
+                    'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
+                    'hauler': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' },
+                    'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' },
+                    'refueler': { 'count': room.jobs.refuelers, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' }
+                }
+            };
+        }
 
-        if (!roomPop) {
-            roomPop = {};
+        if (room.name === 'E79N84') {
+            rule = {
+                'spawnName': 'Elverum',
+                'homeRoom': 'E79N85',
+                'jobs': {
+                    'settler': { 'count': room.jobs.settlers, 'body': 'LLMM' },
+                    'attacker': { 'count': 2, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
+                    'hauler': { 'count': 3, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMM' },
+                    'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' }
+                }
+            };
+        }
+
+        if (room.name === 'E79N85') {
+            rule = {
+                'spawnName': 'Oslo',
+                'homeRoom': room.name,
+                'jobs': {
+                    'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
+                    'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWWWWWWCCCCCCMMMMMMMMMMMMM' },
+                    'linker': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
+                    'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
+                    'builder': { 'count': 1, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
+                    'hauler': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' },
+                    'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' },
+                    'refueler': { 'count': room.jobs.refuelers, 'body': 'CCCCCCCCCCCCMMMMMM' }
+                }
+            };
         }
 
         if (rule) {
             let spawn = Game.spawns[rule.spawnName];
 
-            if (!spawn || spawn.spawning) {
-                continue;
-            }
+            if (!_.isUndefined(spawn) && !spawn.spawning) {
+                let roomPop = empire.creeps[room.name];
 
-            for (let job in rule.jobs) {
-                if ((!roomPop[job + 's'] ? 0 : roomPop[job + 's'].length) < rule.jobs[job].count) {
-                    empire.createCreep(job, null, rule.spawnName, rule.jobs[job].body, rule.homeRoom, room.name);
-                }
-            }
-
-            continue;
-        }
-
-        if (room.name === 'E79N86') {
-            let homeRoom = room.name;
-
-            let spawnName = 'Rygge';
-            let roomSpawn = Game.spawns[spawnName];
-
-            if (roomSpawn && !roomSpawn.spawning) {
-                if ((!roomPop.chemists ? 0 : roomPop.chemists.length) < 1) {
-                    empire.createCreep('chemist', null, spawnName, 'CCCCCCCCMMMM', homeRoom, room.name);
+                if (_.isUndefined(roomPop)) {
+                    roomPop = {};
                 }
 
-                if ((!roomPop.mineralminers ? 0 : roomPop.mineralminers.length) < room.jobs.mineralminers) {
-                    empire.createCreep('mineralminer', null, spawnName, 'WWWWWWWWWWWWWWWWWWWWCCCCMMMMMMMMMMMM', homeRoom, room.name);
-                }
-
-                if ((!roomPop.builders ? 0 : roomPop.builders.length) < 2) {
-                    empire.createCreep('builder', null, spawnName, 'WWWWWCCCCCCCMMMMMM', homeRoom, room.name);
-                }
-
-                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 1) {
-                    empire.createCreep('upgrader', null, spawnName, 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM', homeRoom, room.name);
-                }
-
-                if ((!roomPop.linkers ? 0 : roomPop.linkers.length) < 1) {
-                    empire.createCreep('linker', null, spawnName, 'CCCCCCCCCCCCCCCCMMMM', homeRoom, room.name);
-                }
-
-                if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 1) {
-                    empire.createCreep('hauler', null, spawnName, 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM', homeRoom, room.name);
-                }
-
-                if ((!roomPop.miners ? 0 : roomPop.miners.length) < room.jobs.miners) {
-                    empire.createCreep('miner', null, spawnName, 'WWWWWWCCMMMM', homeRoom, room.name);
-                }
-
-                if ((!roomPop.refuelers ? 0 : roomPop.refuelers.length) < room.jobs.refuelers) {
-                    empire.createCreep('refueler', null, spawnName, 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM', homeRoom, room.name);
-                }
-            }
-        }
-
-        if (room.name === 'E79N84') {
-            let homeRoom = 'E79N85';
-
-            let spawnName = 'Elverum';
-            let roomSpawn = Game.spawns[spawnName];
-
-            if (roomSpawn && !roomSpawn.spawning) {
-                if ((!roomPop.settlers ? 0 : roomPop.settlers.length) < room.jobs.settlers) {
-                    empire.createCreep('settler', null, spawnName, 'LLMM', homeRoom, room.name);
-                }
-
-                if ((!roomPop.attackers ? 0 : roomPop.attackers.length) < 2) {
-                    empire.createCreep('attacker', null, spawnName, 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM', homeRoom, room.name);
-                }
-
-                if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 3) {
-                    empire.createCreep('hauler', null, spawnName, 'WCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMM', homeRoom, room.name);
-                }
-
-                if ((!roomPop.miners ? 0 : roomPop.miners.length) < room.jobs.miners) {
-                    empire.createCreep('miner', null, spawnName, 'WWWWWWCCMMMM', homeRoom, room.name);
-                }
-            }
-        }
-
-        if (room.name === 'E79N85') {
-            let homeRoom = room.name;
-
-            let spawnName = 'Oslo';
-            let roomSpawn = Game.spawns[spawnName];
-
-            if (roomSpawn && !roomSpawn.spawning) {
-                if ((!roomPop.chemists ? 0 : roomPop.chemists.length) < 1) {
-                    empire.createCreep('chemist', null, spawnName, 'CCCCCCCCMMMM', homeRoom, room.name);
-                }
-
-                if ((!roomPop.mineralminers ? 0 : roomPop.mineralminers.length) < room.jobs.mineralminers) {
-                    empire.createCreep('mineralminer', null, spawnName, 'WWWWWWWWWWWWWWWWWWWWCCCCCCMMMMMMMMMMMMM', homeRoom, room.name);
-                }
-
-                if ((!roomPop.builders ? 0 : roomPop.builders.length) < 1) {
-                    empire.createCreep('builder', null, spawnName, 'WWWWWCCCCCCCMMMMMM', homeRoom, room.name);
-                }
-
-                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 1) {
-                    empire.createCreep('upgrader', null, spawnName, 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM', homeRoom, room.name);
-                }
-
-                if ((!roomPop.linkers ? 0 : roomPop.linkers.length) < 1) {
-                    empire.createCreep('linker', null, spawnName, 'CCCCCCCCCCCCCCCCMMMM', homeRoom, room.name);
-                }
-
-                if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 1) {
-                    empire.createCreep('hauler', null, spawnName, 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM', homeRoom, room.name);
-                }
-
-                if ((!roomPop.miners ? 0 : roomPop.miners.length) < room.jobs.miners) {
-                    empire.createCreep('miner', null, spawnName, 'WWWWWWCCMMMM', homeRoom, room.name);
-                }
-
-                if ((!roomPop.refuelers ? 0 : roomPop.refuelers.length) < room.jobs.refuelers) {
-                    empire.createCreep('refueler', null, spawnName, 'CCCCCCCCMMMM', homeRoom, room.name);
+                for (let job in rule.jobs) {
+                    if ((!roomPop[job + 's'] ? 0 : roomPop[job + 's'].length) < rule.jobs[job].count) {
+                        empire.createCreep(job, null, rule.spawnName, rule.jobs[job].body, rule.homeRoom, room.name);
+                    }
                 }
             }
         }
@@ -542,6 +466,8 @@ module.exports.loop = function () {
     for (let creepName in empire.creeps.all) {
         empire.creeps.all[creepName].act();
     }
+
+    empire.tickObservations();
 
     // Balance the energy in the empire over the rooms.
     empire.balanceEnergy();

@@ -23,14 +23,6 @@ class RoomBase {
             this._mem = {};
         }
 
-        if (_.isUndefined(this._mem.resources)) {
-            this._mem.resources = {};
-        }
-
-        if (_.isUndefined(this._mem.structures)) {
-            this._mem.structures = {};
-        }
-
         if (_.isUndefined(this._mem.jobs)) {
             this._mem.jobs = {
                 settlers: 0,

@@ -9,7 +9,7 @@ let Links = require('./Links');
 let Labs = require('./Labs');
 
 /**
- * Wrapper class with basic logic for rooms.
+ * Wrapper class with logic for visible rooms.
  */
 class RoomReal extends RoomBase {
     /**
@@ -33,81 +33,72 @@ class RoomReal extends RoomBase {
     }
 
     /**
-     * Gets the room controller if it exists. Otherwise null.
+     * Gets the room controller if it exists.
      */
     get controller () {
-        return this._room.controller || null;
+        if (_.isUndefined(this._room.controller)) {
+            return null;
+        }
+        return this._room.controller;
     }
 
     /**
      * Gets a value indicating whether the room is owned by current user.
      */
     get isMine () {
-        return !!this.controller && this.controller.my;
+        return !_.isNull(this.controller) && this.controller.my;
     }
 
     /**
-     * Gets the room storage if it exists. Otherwise null.
+     * Gets the room storage if it exists.
      */
     get storage () {
-        return this._room.storage || null;
+        if (_.isUndefined(this._room.storage)) {
+            return null;
+        }
+        return this._room.storage;
     }
 
     /**
-     * Gets the room terminal if it exists. Otherwise null.
+     * Gets the room terminal if it exists.
      */
     get terminal () {
-        return this._room.terminal || null;
+        if (_.isUndefined(this._room.terminal)) {
+            return null;
+        }
+        return this._room.terminal;
     }
 
     /**
-     * Gets an array with all sources in the room. Empty if there are no sources.
+     * Gets an array with all sources in the room.
      */
     get sources () {
-        if (this._cache.sources !== undefined) {
+        if (!_.isUndefined(this._cache.sources)) {
             return this._cache.sources;
         }
-
-        this._cache.sources = [];
-        if (this._mem.resources.sources && this._mem.resources.sources.length > 0) {
-            for (let id of this._mem.resources.sources) {
-                let source = Game.getObjectById(id);
-                if (source) {
-                    this._cache.sources.push(source);
-                }
-            }
-        }
-
+        this._cache.sources = this.recall('source');
         return this._cache.sources;
     }
 
     /**
-     * Gets the room mineral node if it exists. Otherwise null.
+     * Gets the room mineral node if it exists.
      */
     get minerals () {
-        if (this._cache.minerals !== undefined) {
+        if (!_.isUndefined(this._cache.minerals)) {
             return this._cache.minerals;
         }
-
-        this._cache.minerals = null;
-        if (this._mem.resources.minerals) {
-            let minerals = Game.getObjectById(this._mem.resources.minerals);
-            if (minerals) {
-                this._cache.minerals = minerals;
-            }
-        }
-
+        let minerals = this.recall('minerals');
+        this._cache.minerals = minerals.length > 0 ? minerals[0] : null;
         return this._cache.minerals;
     }
 
     /**
-     * Gets an array with all drops in the room. Empty if there are no drops. 
+     * Gets an array with all drops in the room.
      */
     get drops () {
-        if (this._cache.drops !== undefined) {
+        if (!_.isUndefined(this._cache.drops)) {
             return this._cache.drops;
         }
-
         // TODO: Sort or prioritise the drops in some way?
         this._cache.drops = this._room.find(FIND_DROPPED_RESOURCES);
         return this._cache.drops;
@@ -119,24 +110,13 @@ class RoomReal extends RoomBase {
      * containers with the most resources.
      */
     get containers () {
-        if (this._cache.containers !== undefined) {
+        if (!_.isUndefined(this._cache.containers)) {
             return this._cache.containers;
         }
-
-        this._cache.containers = [];
-        if (this._mem.structures.containers && this._mem.structures.containers.length > 0) {
-            for (let id of this._mem.structures.containers) {
-                let container = Game.getObjectById(id);
-                if (container) {
-                    this._cache.containers.push(container);
-                }
-            }
-
-            if (this._cache.containers.length > 1) {
-                this._cache.containers.sort((a, b) => _.sum(b.store) - _.sum(a.store));
-            }
+        this._cache.containers = this.recall(STRUCTURE_CONTAINER);
+        if (this._cache.containers.length > 1) {
+            this._cache.containers.sort((a, b) => _.sum(b.store) - _.sum(a.store));
         }
-
         return this._cache.containers;
     }
 
@@ -144,15 +124,13 @@ class RoomReal extends RoomBase {
      * Gets the linking system in the room and easy access to individual links.
      */
     get links () {
-        if (this._cache.links !== undefined) {
+        if (!_.isUndefined(this._cache.links)) {
             return this._cache.links;
         }
-
         // Ensure that the linking system has some memory reserved from the room
-        if (!this._mem.links) {
+        if (_.isUndefined(this._mem.links)) {
             this._mem.links = {};
         }
-
         this._cache.links = new Links(this._mem.links);
         return this._cache.links;
     }
@@ -161,18 +139,11 @@ class RoomReal extends RoomBase {
      * Gets the room extractor if it exists. Otherwise null.
      */
     get extractor () {
-        if (this._cache.extractor !== undefined) {
+        if (!_.isUndefined(this._cache.extractor)) {
             return this._cache.extractor;
         }
-
-        this._cache.extractor = null;
-        if (this._mem.structures.extractor) {
-            let extractor = Game.getObjectById(this._mem.structures.extractor);
-            if (extractor) {
-                this._cache.extractor = extractor;
-            }
-        }
-
+        let extractors = this.recall(STRUCTURE_EXTRACTOR);
+        this._cache.extractor = extractors.length > 0 ? extractors[0] : null;
         return this._cache.extractor;
     }
 
@@ -180,15 +151,13 @@ class RoomReal extends RoomBase {
      * Gets the laboratory unit in the room and easy access to individual labs.
      */
     get labs () {
-        if (this._cache.labs !== undefined) {
+        if (!_.isUndefined(this._cache.labs)) {
             return this._cache.labs;
         }
-
         // Ensure that the laboratory unit has some memory reserved from the room.
-        if (!this._mem.labs) {
+        if (_.isUndefined(this._mem.labs)) {
             this._mem.labs = {};
         }
-
         this._cache.labs = new Labs(this._mem.labs);
         return this._cache.labs;
     }
@@ -199,24 +168,13 @@ class RoomReal extends RoomBase {
      * refuelers to prioritise towers with the least resources.
      */
     get towers () {
-        if (this._cache.towers !== undefined) {
+        if (!_.isUndefined(this._cache.towers)) {
             return this._cache.towers;
         }
-
-        this._cache.towers = [];
-        if (this._mem.structures.towers && this._mem.structures.towers.length > 0) {
-            for (let id of this._mem.structures.towers) {
-                let tower = Game.getObjectById(id);
-                if (tower) {
-                    this._cache.towers.push(tower);
-                }
-            }
-
-            if (this._cache.towers.length > 1) {
-                this._cache.towers.sort((a, b) => a.energy - b.energy);
-            }
+        this._cache.towers = this.recall(STRUCTURE_TOWER);
+        if (this._cache.towers.length > 1) {
+            this._cache.towers.sort((a, b) => a.energy - b.energy);
         }
-
         return this._cache.towers;
     }
 
@@ -225,10 +183,9 @@ class RoomReal extends RoomBase {
      * are no construction sites.
      */
     get constructionSites () {
-        if (this._cache.constructionSites !== undefined) {
+        if (!_.isUndefined(this._cache.constructionSites)) {
             return this._cache.constructionSites;
         }
-
         this._cache.constructionSites = this._room.find(FIND_CONSTRUCTION_SITES);
         return this._cache.constructionSites;
     }
@@ -237,20 +194,10 @@ class RoomReal extends RoomBase {
      * Gets an array with all spawns in the room. Empty if there are no spawns.
      */
     get spawns () {
-        if (this._cache.spawns !== undefined) {
+        if (!_.isUndefined(this._cache.spawns)) {
             return this._cache.spawns;
         }
-
-        this._cache.spawns = [];
-        if (this._mem.structures.spawns && this._mem.structures.spawns.length > 0) {
-            for (let id of this._mem.structures.spawns) {
-                let spawn = Game.getObjectById(id);
-                if (spawn) {
-                    this._cache.spawns.push(spawn);
-                }
-            }
-        }
-
+        this._cache.spawns = this.recall(STRUCTURE_SPAWN);
         return this._cache.spawns;
     }
 
@@ -259,20 +206,15 @@ class RoomReal extends RoomBase {
      * Empty if there are no such structure. This should only be used by creeps doing refueling.
      */
     get extensions () {
-        if (this._cache.extensions !== undefined) {
+        if (!_.isUndefined(this._cache.extensions)) {
             return this._cache.extensions;
         }
-
         this._cache.extensions = [];
-        if (this._mem.structures.extensions && this._mem.structures.extensions.length > 0) {
-            for (let id of this._mem.structures.extensions) {
-                let extension = Game.getObjectById(id);
-                if (extension && extension.energy < extension.energyCapacity) {
-                    this._cache.extensions.push(extension);
-                }
+        for (let extension of this.recall(STRUCTURE_EXTENSION)) {
+            if (extension.energy < extension.energyCapacity) {
+                this._cache.extensions.push(extension);
             }
         }
-
         return this._cache.extensions;
     }
 
@@ -287,43 +229,37 @@ class RoomReal extends RoomBase {
      * Gets the nuker structure in the room is it exists. Otherwise null.
      */
     get nuker () {
-        if (this._cache.nuker !== undefined) {
+        if (!_.isUndefined(this._cache.nuker)) {
             return this._cache.nuker;
         }
-
-        this._cache.nuker = null;
-        if (this._mem.structures.nuker) {
-            let nuker = Game.getObjectById(this._mem.structures.nuker);
-            if (nuker) {
-                this._cache.nuker = nuker;
-            }
-        }
-
+        let nukers = this.recall(STRUCTURE_NUKER);
+        this._cache.nuker = nukers.length > 0 ? nukers[0] : null;
         return this._cache.nuker;
+    }
+
+    /**
+     * Gets the room observer if it exists.
+     */
+    get observer () {
+        if (!_.isUndefined(this._cache.observer)) {
+            return this._cache.observer;
+        }
+        let observers = this.recall(STRUCTURE_OBSERVER);
+        this._cache.observer = observers.length > 0 ? observers[0] : null;
+        return this._cache.observer;
     }
 
     /**
      * Gets an array with all keeper lairs in the room. Empty if there are no keeper lairs.
      */
     get keeperLairs () {
-        if (this._cache.keeperLairs !== undefined) {
+        if (!_.isUndefined(this._cache.keeperLairs)) {
             return this._cache.keeperLairs;
         }
-
-        this._cache.keeperLairs = [];
-        if (this._mem.structures.keeperLairs && this._mem.structures.keeperLairs.length > 0) {
-            for (let id of this._mem.structures.keeperLairs) {
-                let keeperLair = Game.getObjectById(id);
-                if (keeperLair) {
-                    this._cache.keeperLairs.push(keeperLair);
-                }
-            }
-
-            if (this._cache.keeperLairs.length > 1) {
-                this._cache.keeperLairs.sort((a, b) => a.ticksToSpawn - b.ticksToSpawn);
-            }
+        this._cache.keeperLairs = this.recall(STRUCTURE_KEEPER_LAIR);
+        if (this._cache.keeperLairs.length > 1) {
+            this._cache.keeperLairs.sort((a, b) => a.ticksToSpawn - b.ticksToSpawn);
         }
-
         return this._cache.keeperLairs;
     }
 
@@ -331,32 +267,18 @@ class RoomReal extends RoomBase {
      * Gets an array of structures that need repairs. Empty if there are no such structures.
      */
     get repairs () {
-        if (this._cache.repairs !== undefined) {
+        if (!_.isUndefined(this._cache.repairs)) {
             return this._cache.repairs;
         }
-
         this._cache.repairs = [];
-        if (this._mem.structures.repairs && this._mem.structures.repairs.length > 0) {
-            for (let id of this._mem.structures.repairs) {
-                let structure = Game.getObjectById(id);
-                if (structure) {
-                    if (structure.hits < structure.hitsMax) {
-                        this._cache.repairs.push(structure);
-                    }
-                    else {
-                        // TODO: Remove the id of structures that are repaired?
-                    }
-                }
-                else {
-                    // TODO: Was the structure destroyed by an enemy?
-                }
-
-                if (this._cache.repairs.length > 5) {
-                    break;
-                }
+        for (let structure of this.recall('repair')) {
+            if (structure.hits < structure.hitsMax) {
+                this._cache.repairs.push(structure);
+            }
+            if (this._cache.repairs.length > 5) {
+                break;
             }
         }
-
         return this._cache.repairs;
     }
 
@@ -410,43 +332,36 @@ class RoomReal extends RoomBase {
      * Perform an analysis of the room.
      */
     analyze () {
-        this._mem.resources = {};
-        this._mem.resources.sources = [];
-        this._mem.resources.minerals = null;
-
-        for (let source of this._room.find(FIND_SOURCES)) {
-            this._mem.resources.sources.push(source.id);
-        }
-
-        for (let minerals of this._room.find(FIND_MINERALS)) {
-            this._mem.resources.minerals = minerals.id;
-        }
-
-        this._mem.structures = {};
-        this._mem.structures.spawns = [];
-        this._mem.structures.extensions = [];
-        this._mem.structures.containers = [];
-        this._mem.structures.extractor = null;
-        this._mem.structures.towers = [];
-        this._mem.structures.ramparts = [];
-        this._mem.structures.nuker = null;
-        this._mem.structures.keeperLairs = [];
-        this._mem.structures.repairs = [];
+        // Forget all stored ids before refilling the data structure.
+        this._mem.ids = {};
 
         // In the first loop the labs are only collected in this array.
         // The labs are later reorganized properly.
         let labs = [];
         let links = [];
 
-        for (let structure of this._room.find(FIND_STRUCTURES)) {
-            if (structure.structureType === STRUCTURE_CONTROLLER) {
-                // console.log('Found controller in room: ' + this.name);
-            }
+        if (!_.isUndefined(this._mem.resources)) {
+            delete this._mem.resources;
+        }
 
+        if (!_.isUndefined(this._mem.structures)) {
+            delete this._mem.structures;
+        }
+
+        for (let source of this._room.find(FIND_SOURCES)) {
+            this.remember(source.id, 'source');
+        }
+
+        for (let minerals of this._room.find(FIND_MINERALS)) {
+            this.remember(minerals.id, 'minerals');
+        }
+
+        for (let structure of this._room.find(FIND_STRUCTURES)) {
             if (structure.structureType === STRUCTURE_CONTAINER) {
-                this._mem.structures.containers.push(structure.id);
+                this.remember(structure.id, STRUCTURE_CONTAINER);
+
                 if (structure.hits < structure.hitsMax) {
-                    this._mem.structures.repairs.push(structure.id);
+                    this.remember(structure.id, 'repair');
                 }
             }
 
@@ -454,53 +369,52 @@ class RoomReal extends RoomBase {
                 // Allow roads to decay a little bit. This is so that a builder need to spend a
                 // litle bit more time and energy repairing. This in turn reduce time spent on travel.
                 if (structure.hits < structure.hitsMax - 1000) {
-                    this._mem.structures.repairs.push(structure.id);
+                    this.remember(structure.id, 'repair');
                 }
             }
 
             if (structure.structureType === STRUCTURE_WALL) {
-                if (structure.hits < 2000000) {
-                    this._mem.structures.repairs.push(structure.id);
+                if (structure.hits < 2300000) {
+                    this.remember(structure.id, 'repair');
                 }
             }
 
             if (structure.structureType === STRUCTURE_EXTRACTOR) {
-                this._mem.structures.extractor = structure.id;
+                this.remember(structure.id, STRUCTURE_EXTRACTOR);
             }
 
             if (structure.structureType === STRUCTURE_KEEPER_LAIR) {
-                this._mem.structures.keeperLairs.push(structure.id);
-            }
-
-            if (!this.isMine) {
-                continue;
+                this.remember(structure.id, STRUCTURE_KEEPER_LAIR);
             }
 
             if (structure.structureType === STRUCTURE_RAMPART) {
-                this._mem.structures.ramparts.push(structure.id);
+                this.remember(structure.id, STRUCTURE_RAMPART);
                 // TODO: Create a way to determine a good wall size
-                if (structure.hits < 2000000) {
-                    this._mem.structures.repairs.push(structure.id);
+                if (structure.hits < 2300000) {
+                    this.remember(structure.id, 'repair');
                 }
             }
 
             if (structure.structureType === STRUCTURE_TOWER) {
-                this._mem.structures.towers.push(structure.id);
+                this.remember(structure.id, STRUCTURE_TOWER);
             }
 
             if (structure.structureType === STRUCTURE_NUKER) {
-                this._mem.structures.nuker = structure.id;
+                this.remember(structure.id, STRUCTURE_NUKER);
             }
 
             if (structure.structureType === STRUCTURE_SPAWN) {
-                this._mem.structures.spawns.push(structure.id);
-
+                this.remember(structure.id, STRUCTURE_SPAWN);
                 // Adding all spawns to the extensions collection for the purpose of refueling
-                this._mem.structures.extensions.push(structure.id);
+                this.remember(structure.id, STRUCTURE_EXTENSION);
             }
 
             if (structure.structureType === STRUCTURE_EXTENSION) {
-                this._mem.structures.extensions.push(structure.id);
+                this.remember(structure.id, STRUCTURE_EXTENSION);
+            }
+
+            if (structure.structureType === STRUCTURE_OBSERVER) {
+                this.remember(structure.id, STRUCTURE_OBSERVER);
             }
 
             if (structure.structureType === STRUCTURE_LINK) {
@@ -640,6 +554,33 @@ class RoomReal extends RoomBase {
 
             Empire.createCreep(rule.job, null, spawn.name, rule.body, this.name, rule.workRoom);
         }
+    }
+
+    remember (id, type) {
+        if (_.isUndefined(this._mem.ids)) {
+            this._mem.ids = {};
+        }
+        if (_.isUndefined(this._mem.ids[type])) {
+            this._mem.ids[type] = [];
+        }
+        this._mem.ids[type].push(id);
+    }
+
+    recall (type) {
+        if (_.isUndefined(this._mem.ids)) {
+            return [];
+        }
+        if (_.isUndefined(this._mem.ids[type])) {
+            return [];
+        }
+        let gameObjects = [];
+        for (let id of this._mem.ids[type]) {
+            let gameObject = Game.getObjectById(id);
+            if (!_.isNull(gameObject)) {
+                gameObjects.push(gameObject);
+            }
+        }
+        return gameObjects;
     }
 }
 

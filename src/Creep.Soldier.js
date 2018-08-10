@@ -12,7 +12,7 @@ class CreepSoldier extends CreepBase {
     getTask () {
         let task = super.getTask();
         if (!_.isNull(task)) {
-            return task; 
+            return task;
         }
 
         return null;
