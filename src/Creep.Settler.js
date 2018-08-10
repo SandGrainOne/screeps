@@ -29,7 +29,7 @@ class CreepSettler extends CreepWorker {
                 if (!this.Room.controller.sign || this.Room.controller.sign.username !== C.USERNAME) {
                     this.creep.signController(this.Room.controller, "For the Sand empire!");
                 }
-                if (this.Room.name === "E73N87") {
+                if (this.Room.name === "E78N88") {
                     this.creep.claimController(this.Room.controller);
                 }
                 else {

@@ -6,7 +6,7 @@ let CreepSoldier = require('Creep.Soldier');
  * Wrapper class for creeps with logic for a room defender.
  * Primary purpose of these creeps are to defend against attacks from enemies.
  */
-class CreepDefender extends CreepSoldier {   
+class CreepDefender extends CreepSoldier { 
     /**
      * Initializes a new instance of the CreepDefender class with the specified creep.
      * 
@@ -24,7 +24,7 @@ class CreepDefender extends CreepSoldier {
     work() {
         let hostileCreep = this.creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
         if (hostileCreep) {
-            if (this.Room.isMine && this.Room.mem.rampcount > 0) {
+            if (this.Room.isMine && this.Room.ramparts > 0) {
                 let ramps = hostileCreep.pos.findInRange(FIND_MY_STRUCTURES, 1, { filter: (s) => s.structureType === STRUCTURE_RAMPART })
                 if (ramps.length > 0) {
                     if (!this.creep.pos.isEqualTo(ramps[0])) {

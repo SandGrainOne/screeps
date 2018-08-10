@@ -55,9 +55,9 @@ class CreepRefueler extends CreepWorker {
             }
         }
 
-        if (this.energy > 0 && this.Room.Extensions.length > 0) {
+        if (this.energy > 0 && this.Room.extensions.length > 0) {
             // The extensions array only contains extensions and spawns with space for energy.
-            let extensions = this.creep.pos.findInRange(this.Room.Extensions, 1);
+            let extensions = this.creep.pos.findInRange(this.Room.extensions, 1);
             if (extensions.length > 0) {
                 this.transfer(extensions[0], RESOURCE_ENERGY);
             }
@@ -84,9 +84,9 @@ class CreepRefueler extends CreepWorker {
                 } 
             }
 
-            if (!moveTarget && this.Room.Extensions.length > 0) {
-                // All structures in the Extensions array have room for energy. Pick the closest.
-                moveTarget = this.creep.pos.findClosestByRange(this.Room.Extensions);
+            if (!moveTarget && this.Room.extensions.length > 0) {
+                // All structures in the extensions array have room for energy. Pick the closest.
+                moveTarget = this.creep.pos.findClosestByRange(this.Room.extensions);
             }
 
             if (!moveTarget && this.Room.terminal) {

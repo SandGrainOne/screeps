@@ -124,13 +124,13 @@ class CreepBase {
             this.moveTo(this.moveToRoom(this.mem.rooms.home, false));
         }
         else {
-            if (this.Room.Spawns.length > 0) {
-                let spawns = this.creep.pos.findInRange(this.Room.Spawns, 1);
+            if (this.Room.spawns.length > 0) {
+                let spawns = this.creep.pos.findInRange(this.Room.spawns, 1);
                 if (spawns.length > 0) {
                     spawns[0].recycleCreep(this.creep);
                 }
                 else {
-                    let spawn = this.creep.pos.findClosestByRange(this.Room.Spawns);
+                    let spawn = this.creep.pos.findClosestByRange(this.Room.spawns);
                     if (spawn) {
                         this.moveTo(spawn);
                     }
@@ -225,6 +225,15 @@ class CreepBase {
         }
 
         return null;
+    }
+
+    /**
+     * Analyze the room and identify the appropriate number of miners as well as their body.
+     * This base function is empty. Overload in child classes.
+     * 
+     * @param room - An instance of a visible smart room.
+     */
+    static makeBody(room) {
     }
 }
 

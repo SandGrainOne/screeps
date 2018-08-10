@@ -37,9 +37,6 @@ let code = {
             if (Memory.empire === undefined) {
                 Memory.empire = {};
             }
-            if (Memory.empire.reservations === undefined) {
-                Memory.empire.reservations = {};
-            }
             this._setVersion("1.1");
         }
     }

@@ -16,6 +16,7 @@ let CreepUpgrader = require('Creep.Upgrader');
 let CreepRefueler = require('Creep.Refueler');
 let CreepDefender = require('Creep.Defender');
 let CreepAttacker = require('Creep.Attacker');
+let CreepPatroler = require('Creep.Patroler');
 let CreepBalancer = require('Creep.Balancer');
 let CreepDismantler = require('Creep.Dismantler');
 
@@ -45,7 +46,7 @@ class CreepFactory {
                 smartCreep = new CreepMiner(creep);
                 break;
             case 'hauler':
-                if (creep.name === "Scarlett") {
+                if (creep.name === "FFF") {
                     smartCreep = new CreepHauler(creep);
                 }
                 else {
@@ -78,6 +79,9 @@ class CreepFactory {
                 break;
             case 'soldier':
                 smartCreep =  new CreepSoldier(creep);
+                break;
+            case 'patroler':
+                smartCreep =  new CreepPatroler(creep);
                 break;
             case 'settler':
                 smartCreep =  new CreepSettler(creep);

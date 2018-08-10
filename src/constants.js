@@ -22,6 +22,9 @@ let constants = {
 
     "RETIREMENT": 10,
 
+    "SPAWN_PRIORITY_HIGH": "high",
+    "SPAWN_PRIORITY_NORMAL": "normal",
+
     "BODY_PART_CODES": {
         "M": MOVE,
         "W": WORK,
@@ -73,6 +76,12 @@ let constants = {
         },
         "E75N87": {
             "E76N87": { x: 49, y: 26 }
+        },
+        "E75N89": {
+            "E76N89": { x: 49, y: 29 }
+        },
+        "E76N89": {
+            "E75N89": { x: 0, y: 29 }
         }
     }
 }

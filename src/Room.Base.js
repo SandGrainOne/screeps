@@ -29,14 +29,16 @@ class RoomBase {
 
         if (!this._mem.update) {
             this._mem.update = {};
-        }
-
-        if (!this._mem.update.last) {
             this._mem.update.last = 0;
+            this._mem.update.next = 0;
         }
 
-        if (!this._mem.update.next) {
-            this._mem.update.next = 0;
+        if (!this._mem.resources) {
+            this._mem.resources = {};
+        }
+
+        if (!this._mem.structures) {
+            this._mem.structures = {};
         }
 
         if (!this._mem.reservations) {
@@ -53,14 +55,6 @@ class RoomBase {
                 mineralminers: 0,
                 refuelers: 0
             };
-        }
-
-        if (this._mem.wallcount) {
-            this._mem.wallcount = 0;
-        }
-
-        if (this._mem.rampcount) {
-            this._mem.rampcount = 0;
         }
     }
 
@@ -106,7 +100,7 @@ class RoomBase {
         return this._mem.jobs[jobName + "s"];
     }
 
-    populate() {
+    createJobs() {
 
     }
 }

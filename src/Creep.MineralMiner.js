@@ -8,7 +8,7 @@ let CreepWorker = require('Creep.Worker');
  * Wrapper class for creeps with logic for a miner.
  * Primary purpose of these creeps are to harvest energy or minerals.
  */
-class CreepMiner extends CreepWorker {
+class CreepMineralMiner extends CreepWorker {
     /**
      * Initializes a new instance of the CreepMiner class with the specified creep.
      * 
@@ -19,35 +19,12 @@ class CreepMiner extends CreepWorker {
     }
 
     get ResourceNode() {
-        if (this.job === "miner") {
-            if (this.mem.resourceid) {
-                let source = Game.getObjectById(this.mem.resourceid);
-                if (source && (source.energy > 0 || (source.ticksToRegeneration || 300) < 50)) {
-                    if (this.isRetired || this.Room.reserve(source.id, this.job, this.name)) {
-                        return source;
-                    }
-                }
-            }
-
-            if (this.Room.sources.length > 0) {
-                for (let source of this.Room.sources) {
-                    if (source && (source.energy > 0 || (source.ticksToRegeneration || 300) < 50)) {
-                        if (this.Room.reserve(source.id, this.job, this.name)) {
-                            this.mem.resourceid = source.id;
-                            return source;
-                        }
-                    }
-                }
-            }
+        if (this.Room.hasMinerals) {
+            return this.Room.minerals;
         }
-        else if (this.job === "mineralminer") {
-            if (this.Room.hasMinerals) {
-                return this.Room.minerals;
-            }
-            else {
-                // This will cause the creeper to seek a spawn and order recycling.
-                this.mem.recycle = true;
-            }
+        else {
+            // This will cause the creeper to seek a spawn and order recycling.
+            this.mem.recycle = true;
         }
 
         return null;
@@ -242,32 +219,6 @@ class CreepMiner extends CreepWorker {
 
         return true;
     }
-
-    /**
-     * Analyze the room and identify the appropriate number of miners as well as their body.
-     * 
-     * @param room - An instance of a visible smart room.
-     */
-    static makeBody(room) {
-        let job = { "number": 0, "body": "" };
-
-        if (room.sources.length > 0) {
-            job.number = room.sources.length;
-            // Assumption: A room will never take on the responsibility of other
-            // rooms unless it can handle everything that room might need.
-            let workParts = Math.ceil(room.sources[0].energyCapacity / 600);
-            if (room.isMine) {
-                workParts = Math.min(Math.floor(room.energyCapacityAvailable / 250), workParts);
-            }
-
-            let carryParts = Math.ceil(workParts / 3);
-            let moveParts = Math.min(Math.max(workParts + carryParts, 2), Math.ceil((workParts + carryParts) / 2));
-
-            console.log(room.name + " miner work parts: " + workParts + "." + carryParts + "." + moveParts);
-        }
-
-        return job;
-    }
 }
 
-module.exports = CreepMiner;
+module.exports = CreepMineralMiner;

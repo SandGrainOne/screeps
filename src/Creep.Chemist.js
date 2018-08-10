@@ -40,15 +40,15 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.Room.name === "E75N89") {
-            reaction = { compoundOne: RESOURCE_UTRIUM, compoundTwo: RESOURCE_HYDROGEN };
+            reaction = { compoundOne: RESOURCE_LEMERGIUM, compoundTwo: RESOURCE_UTRIUM };
         }
 
         if (this.Room.name === "E77N88") {
-            reaction = { compoundOne: RESOURCE_GHODIUM_OXIDE, compoundTwo: RESOURCE_HYDROXIDE };
+            reaction = { compoundOne: RESOURCE_HYDROGEN, compoundTwo: RESOURCE_OXYGEN };
         }
 
         if (this.Room.name === "E77N85") {
-            reaction = { compoundOne: RESOURCE_KEANIUM, compoundTwo: RESOURCE_KEANIUM };
+            reaction = { compoundOne: RESOURCE_GHODIUM, compoundTwo: RESOURCE_HYDROGEN };
         }
 
         if (this.Room.name === "E78N85") {
@@ -56,11 +56,11 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.Room.name === "E79N85") {
-            reaction = { compoundOne: RESOURCE_GHODIUM, compoundTwo: RESOURCE_GHODIUM };
+            reaction = { compoundOne: RESOURCE_GHODIUM_HYDRIDE, compoundTwo: RESOURCE_HYDROXIDE };
         }
 
         if (this.Room.name === "E79N86") {
-            reaction = { compoundOne: RESOURCE_ZYNTHIUM_KEANITE, compoundTwo: RESOURCE_UTRIUM_LEMERGITE };
+            reaction = { compoundOne: RESOURCE_UTRIUM_ACID, compoundTwo: RESOURCE_CATALYST };
         }
 
         let emptyCreep = false;

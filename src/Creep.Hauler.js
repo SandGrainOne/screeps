@@ -106,8 +106,8 @@ class CreepHauler extends CreepWorker {
                 }
             }
 
-            if (this.Room.Extensions.length > 0) {
-                let extensions = this.creep.pos.findInRange(this.Room.Extensions, 1);
+            if (this.Room.extensions.length > 0) {
+                let extensions = this.creep.pos.findInRange(this.Room.extensions, 1);
                 if (extensions.length > 0) {
                     this.transfer(extensions[0], RESOURCE_ENERGY);
                 }
@@ -143,9 +143,8 @@ class CreepHauler extends CreepWorker {
             }
             */
             if (!moveTarget) {
-                // A hauler that is room jumping should pick up resources in any room
-                // except at home. Drops at home should be handled by local haulers.
-                if ((this.isRemoting && !this.isHome) || (!this.isRemoting && this.atWork)) {
+                // A hauler should pick up drops only in the room they have been ordered to work in.
+                if (this.atWork) {
                     if (this.Room.drops.length > 0) {
                         for (let drop of this.Room.drops) {
                             if (this.Room.reserve(drop.id, this.job, this.name)) {
@@ -216,9 +215,9 @@ class CreepHauler extends CreepWorker {
 
             if (!moveTarget) {
                 // This should only happen early on before there is a temporary or real storage.
-                // The this.Extensions array only holds extensions and spawns with available space.
-                if (this.energy > 0 && this.Room.Extensions.length > 0) {
-                    let extension = this.creep.pos.findClosestByRange(this.Room.Extensions);
+                // The this.extensions array only holds extensions and spawns with available space.
+                if (this.energy > 0 && this.Room.extensions.length > 0) {
+                    let extension = this.creep.pos.findClosestByRange(this.Room.extensions);
                     if (extension) {
                         moveTarget = extension;
                     }
