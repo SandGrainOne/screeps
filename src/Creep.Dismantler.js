@@ -5,12 +5,12 @@ let C = require('constants');
 let CreepWorker = require('Creep.Worker');
 
 /**
- * Wrapper class for creeps with logic for a broker.
- * Primary purpose of these creeps are to move energy between links, storage and terminal.
+ * Wrapper class for creeps with logic for a dismantler.
+ * Primary purpose of these creeps are to break down both friendly and hostile structures.
  */
 class CreepDismantler extends CreepWorker {
     /**
-     * Initializes a new instance of the CreepBroker class with the specified creep.
+     * Initializes a new instance of the CreepDismantler class with the specified creep.
      * 
      * @param {Creep} creep - The creep to be wrapped
      */
@@ -19,7 +19,7 @@ class CreepDismantler extends CreepWorker {
     }
     
     /**
-     * Perform broker related logic.
+     * Perform dismantler related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */

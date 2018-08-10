@@ -105,10 +105,10 @@ class CreepMiner extends CreepWorker {
         
         if (this.load >= this.capacity) {
             if (this.room.containers.length > 0) {
-                let containers = this.pos.findInRange(this.room.containers, 1);
-                if (containers.length > 0) {
+                let container = this.getFirstInRange(this.room.containers, 1);
+                if (container) {
                     for (let resourceType in this.carry) {
-                        if (this.transfer(containers[0], resourceType) === OK) {
+                        if (this.transfer(container, resourceType) === OK) {
                             break;
                         }
                     }
@@ -116,9 +116,9 @@ class CreepMiner extends CreepWorker {
             }
 
             if (this.room.Links.Inputs.length > 0) {
-                let links = this.pos.findInRange(this.room.Links.Inputs, 1);
-                if (links.length > 0) {
-                    this.transfer(links[0], RESOURCE_ENERGY);
+                let link = this.getFirstInRange(this.room.Links.Inputs, 1);
+                if (link) {
+                    this.transfer(link, RESOURCE_ENERGY);
                 }
             }
 
@@ -132,9 +132,9 @@ class CreepMiner extends CreepWorker {
             }
 
             if (this.room.extensions.length > 0) {
-                let extensions = this.pos.findInRange(this.room.extensions, 1);
-                if (extensions.length > 0) {
-                    this.transfer(extensions[0], RESOURCE_ENERGY);
+                let extension = this.getFirstInRange(this.room.extensions, 1);
+                if (extension) {
+                    this.transfer(extension, RESOURCE_ENERGY);
                 }
             }
         }
@@ -243,21 +243,21 @@ class CreepMiner extends CreepWorker {
         }
 
         let sourceCapacity = room.sources[0].energyCapacity;
-        // Assumptions: 
-        // 1. A room will never take on the responsibility of other rooms unless it can handle it.
-        // 2. Rooms not owned will not have a builder. Miners are given extra work part to perform repairs.
-        let workParts = Math.ceil(sourceCapacity / 600);
+        // Miners should be able to harvest all enery from a source alone.
+        let workParts = Math.ceil(sourceCapacity / HARVEST_POWER * ENERGY_REGEN_TIME);
         if (room.isMine) {
+            // Rooms at lower energy capacity will not be able to create creeps large enough.
             workParts = Math.min(Math.floor(room.energyCapacityAvailable / 250), workParts);
         }
         else {
+            // Rooms not owned might not have a builder. Miners are given an extra part to perform repairs.
             workParts = workParts + (Math.ceil(sourceCapacity / 600) === (sourceCapacity / 600) ? 1 : 0);
         }
 
-        let carryParts = Math.ceil(workParts / 3);
+        let carryParts = 1;
         // Make it an even number of parts before adding move.
         carryParts = carryParts + (workParts + carryParts) % 2;
-        
+
         // A miner should have at least 2 move parts or 1 for every two other parts.
         let moveParts = Math.max((workParts + carryParts) / 2, 2);
 

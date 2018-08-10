@@ -49,9 +49,9 @@ class CreepRefueler extends CreepWorker {
 
         if (this.energy > 0 && this.room.extensions.length > 0) {
             // The extensions array only contains extensions and spawns with space for energy.
-            let extensions = this.pos.findInRange(this.room.extensions, 1);
-            if (extensions.length > 0) {
-                this.transfer(extensions[0], RESOURCE_ENERGY);
+            let extension = this.getFirstInRange(this.room.extensions, 1);
+            if (extension) {
+                this.transfer(extension, RESOURCE_ENERGY);
             }
         }
 
@@ -119,6 +119,38 @@ class CreepRefueler extends CreepWorker {
         }
 
         return true;
+    }
+
+    /**
+     * Analyze the room and identify the appropriate number of refuelers as well as their body.
+     * 
+     * @param room - An instance of a visible smart room.
+     */
+    static defineJob(room) {
+        // Refuelers operate in owned rooms with a storage.
+        if (!room.isMine || !room.storage) {
+            return;
+        }
+
+        return;
+
+        // Might add work parts for road repairs?
+        let workParts = 0;
+
+        let factor = room.extensions[0].energyCapacity / CARRY_CAPACITY;
+        let carryParts = 1;
+
+        // Make it an even number of parts before adding move.
+        carryParts = carryParts + (workParts + carryParts) % 2;
+
+        // Should have 1 move part for every two other parts.
+        let moveParts = Math.max((workParts + carryParts) / 2, 2);
+
+        let job = {};
+        job.number = 2;
+        job.body = Array(workParts).fill(WORK).concat(Array(carryParts).fill(CARRY)).concat(Array(moveParts).fill(MOVE));
+
+        return job;
     }
 }
 

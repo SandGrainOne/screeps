@@ -1,10 +1,6 @@
 'use strict';
 
-require("prototype.creep");
-
-let C = require('constants');
 let code = require('code');
-
 let Empire = require('Empire');
 
 module.exports.loop = function () {
@@ -18,7 +14,9 @@ module.exports.loop = function () {
     // Wrap all rooms and creeps in custom logic and make them easily available.
     empire.prepare();
 
-    for (let room of empire.rooms) {
+    for (let roomName in empire.rooms) {
+        var room = empire.rooms[roomName];
+        
         if (room.isVisible) {
             // Analyse the room structures, organize them and make jobs.
             room.analyze(false);
@@ -56,7 +54,21 @@ module.exports.loop = function () {
 
         if (room.name === "E73N88") {
             rule = {
-                "spawnName": "Grimstad",
+                "spawnName": "Skien",
+                "homeRoom": "E73N87",
+                "jobs": {
+                    "builder": { "count": 1, "body": "WCCCCCMMM" },
+                    "settler": { "count": room.jobs.settlers, "body": "LLMM" },
+                    "attacker": { "count": 1, "body": "TTTTAAMMMMM" },
+                    "hauler": { "count": 2, "body": "WCCCCCCCCCMMMMM" },
+                    "miner": { "count": room.jobs.miners, "body": "WWWWCCMMM" }
+                }
+            };
+        }
+
+        if (room.name === "E74N87") {
+            rule = {
+                "spawnName": "Skien",
                 "homeRoom": "E73N87",
                 "jobs": {
                     "settler": { "count": room.jobs.settlers, "body": "LLMM" },
@@ -72,9 +84,10 @@ module.exports.loop = function () {
                 "spawnName": "Grimstad",
                 "homeRoom": room.name,
                 "jobs": {
+                    "chemist": { "count": 1, "body": "CCCCCCCCMMMM" },
+                    "mineralminer": { "count": room.jobs.mineralminers, "body": "WWWWWWCCMMMM" },
                     "builder": { "count": 2, "body": "WWWCCMMM" },
-                    "upgrader": { "count": 2, "body": "WWWWWWWWCCMMMMM" },
-                    "attacker": { "count": 1, "body": "TTTTAAMMMMM" },
+                    "upgrader": { "count": 4, "body": "WWWWWWWWCCMMMMM" },
                     "hauler": { "count": 3, "body": "CCCCCCCCCCMMMMM" },
                     "miner": { "count": room.jobs.miners, "body": "WWWWWWCCMMMM" },
                     "linker": { "count": 1, "body": "CCCCCCCCCCCCCCCCMMMM" },
@@ -127,12 +140,10 @@ module.exports.loop = function () {
                 "spawnName": "Kopervik",
                 "homeRoom": room.name,
                 "jobs": {
-                    "chemist": { "count": 1, "body": "CCCCMM" },
+                    "chemist": { "count": 1, "body": "CCCCCCCCMMMM" },
                     "mineralminer": { "count": room.jobs.mineralminers, "body": "WWWWWWWCCMMMMMMM" },
-                    "attacker": { "count": 1, "body": "TTTTTTTTTTMMMMMMMMMMAMAMAMAMAMAMAMAMAMAM" },
                     "linker": { "count": 1, "body": "CCCCCCCCCCCCCCCCMMMM" },
-                    "broker": { "count": 1, "body": "CCCCM" },
-                    "upgrader": { "count": 3, "body": "WWWWWWWWWWCCCCCCCMMMMMMMMM" },
+                    "upgrader": { "count": 1, "body": "WWWWWWWWWWWWWWWCCCCCCMMMMMMMMMMMMM" },
                     "builder": { "count": 2, "body": "WWWWWCCCCCCCMMMMMM" },
                     "hauler": { "count": 2, "body": "CCCCCCCCCCMMMMM" },
                     "miner": { "count": room.jobs.miners, "body": "WWWWWWCCMMMM" },
@@ -141,7 +152,35 @@ module.exports.loop = function () {
             };
         }
 
-        let roomPop = empire.getCreeps(room.name);
+        if (room.name === "E79N88") {
+            rule = {
+                "spawnName": "Farsund",
+                "homeRoom": "E78N88",
+                "jobs": {
+                    "attacker": { "count": 1, "body": "TAMTAMTAMTAM" },
+                    "hauler": { "count": 1, "body": "WCCCCCMMM" },
+                    "miner": { "count": room.jobs.miners, "body": "WWWCMMM" },
+                }
+            };
+        }
+
+        if (room.name === "E78N87") {
+            rule = {
+                "spawnName": "Farsund",
+                "homeRoom": "E78N88",
+                "jobs": {
+                    "attacker": { "count": 1, "body": "TAMTAMTAMTAM" },
+                    "hauler": { "count": 2, "body": "WCCCCCMMM" },
+                    "miner": { "count": room.jobs.miners, "body": "WWWCMMM" },
+                }
+            };
+        }
+
+        let roomPop = empire.creeps[room.name];
+
+        if (!roomPop) {
+            roomPop = {};
+        }
 
         if (rule) {
             let spawn = Game.spawns[rule.spawnName];
@@ -152,58 +191,11 @@ module.exports.loop = function () {
 
             for (let job in rule.jobs) {
                 if ((!roomPop[job + "s"] ? 0 : roomPop[job + "s"].length) < rule.jobs[job].count) {
-                    if (rule.queue) {
-                        room.queueCreep({ "job": job , "body": rule.jobs[job].body, "workRoom": room.name });
-                    }
-                    else {
-                        empire.createCreep(job, null, rule.spawnName, rule.jobs[job].body, rule.homeRoom, room.name);
-                    }
+                    empire.createCreep(job, null, rule.spawnName, rule.jobs[job].body, rule.homeRoom, room.name);
                 }
             }
-        }
 
-        if (room.name === "E79N88") {
-            let homeRoom = "E78N88";
-
-            let spawnName = "Farsund";
-            let roomSpawn = Game.spawns[spawnName];
-
-            if (roomSpawn && !roomSpawn.spawning) {
-                
-                if ((!roomPop.attackers ? 0 : roomPop.attackers.length) < 1) {
-                    let res = empire.createCreep("attacker", null, spawnName, "TAMTAMTAMTAM", homeRoom, room.name);
-                }
-
-                if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 1) {
-                    let res = empire.createCreep("hauler", null, spawnName, "WCCCCCMMM", homeRoom, room.name);
-                }
-
-                if ((!roomPop.miners ? 0 : roomPop.miners.length) < room.jobs.miners) {
-                    let res = empire.createCreep("miner", null, spawnName, "WWWCMMM", homeRoom, room.name);
-                }
-            }
-        }
-
-        if (room.name === "E78N87") {
-            let homeRoom = "E78N88";
-
-            let spawnName = "Farsund";
-            let roomSpawn = Game.spawns[spawnName];
-
-            if (roomSpawn && !roomSpawn.spawning) {
-                
-                if ((!roomPop.attackers ? 0 : roomPop.attackers.length) < 1) {
-                    let res = empire.createCreep("attacker", null, spawnName, "TAMTAMTAMTAM", homeRoom, room.name);
-                }
-
-                if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 2) {
-                    let res = empire.createCreep("hauler", null, spawnName, "WCCCCCMMM", homeRoom, room.name);
-                }
-
-                if ((!roomPop.miners ? 0 : roomPop.miners.length) < room.jobs.miners) {
-                    let res = empire.createCreep("miner", null, spawnName, "WWWCMMM", homeRoom, room.name);
-                }
-            }
+            continue;
         }
 
         if (room.name === "E78N88") {
@@ -213,13 +205,13 @@ module.exports.loop = function () {
             let roomSpawn = Game.spawns[spawnName];
 
             if (roomSpawn && !roomSpawn.spawning) {
-                
-                if ((!roomPop.attackers ? 0 : roomPop.attackers.length) < 1) {
-                    let res = empire.createCreep("attacker", null, spawnName, "TAMTAMTAMTAM", homeRoom, room.name);
+
+                if ((!roomPop.mineralminers ? 0 : roomPop.mineralminers.length) < room.jobs.mineralminers) {
+                    let res = empire.createCreep("mineralminer", null, spawnName, "WWWWWCCCMMMM", homeRoom, room.name);
                 }
 
-                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 2) {
-                    let res = empire.createCreep("upgrader", null, spawnName, "WWWCCCCCMMMM", homeRoom, room.name);
+                if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 4) {
+                    let res = empire.createCreep("upgrader", null, spawnName, "WWWWWWCCMMMM", homeRoom, room.name);
                 }
 
                 if ((!roomPop.builders ? 0 : roomPop.builders.length) < 2) {
@@ -305,23 +297,15 @@ module.exports.loop = function () {
             if (roomSpawn && !roomSpawn.spawning) {
 
                 if ((!roomPop.chemists ? 0 : roomPop.chemists.length) < 1) {
-                    let res = empire.createCreep("chemist", null, spawnName, "CCCCMM", homeRoom, room.name);
+                    let res = empire.createCreep("chemist", null, spawnName, "CCCCCCCCMMMM", homeRoom, room.name);
                 }
 
                 if ((!roomPop.mineralminers ? 0 : roomPop.mineralminers.length) < room.jobs.mineralminers) {
                     let res = empire.createCreep("mineralminer", null, spawnName, "WWWWWWWCCMMMMMMM", homeRoom, room.name);
                 }
 
-                if ((!roomPop.attackers ? 0 : roomPop.attackers.length) < 1) {
-                    let res = empire.createCreep("attacker", null, spawnName, "TTTTTMMMMMAMAMAMAMAM", homeRoom, room.name);
-                }
-
                 if ((!roomPop.linkers ? 0 : roomPop.linkers.length) < 1) {
                     let res = empire.createCreep("linker", null, spawnName, "CCCCCCCCCCCCCCCCMMMM", homeRoom, room.name);
-                }
-
-                if ((!roomPop.brokers ? 0 : roomPop.brokers.length) < 1) {
-                    let res = empire.createCreep("broker", null, spawnName, "CCCCM", homeRoom, room.name);
                 }
 
                 if ((!roomPop.upgraders ? 0 : roomPop.upgraders.length) < 1) {
@@ -384,7 +368,7 @@ module.exports.loop = function () {
                     let res = empire.createCreep("mineralminer", null, spawnName, "WWWWWWWCCCMMMMM", homeRoom, room.name);
                 }
 
-                if ((!roomPop.builders ? 0 : roomPop.builders.length) < 2) {
+                if ((!roomPop.builders ? 0 : roomPop.builders.length) < 1) {
                     let res = empire.createCreep("builder", null, spawnName, "WWWWWCCCCCCCMMMMMM", homeRoom, room.name);
                 }
 
@@ -406,12 +390,12 @@ module.exports.loop = function () {
 
             if (roomSpawn && !roomSpawn.spawning) {
 
-                if ((!roomPop.attackers ? 0 : roomPop.attackers.length) < 1) {
-                    let res = empire.createCreep("attacker", null, spawnName, "TTTTTMMMMMAMAMAMAMAM", homeRoom, room.name);
-                }
-
                 if ((!roomPop.builders ? 0 : roomPop.builders.length) < 1) {
                     let res = empire.createCreep("builder", null, spawnName, "WCCCCCMMM", homeRoom, room.name);
+                }
+
+                if ((!roomPop.attackers ? 0 : roomPop.attackers.length) < 1) {
+                    let res = empire.createCreep("attacker", null, spawnName, "TTTTTMMMMMAMAMAMAMAM", homeRoom, room.name);
                 }
 
                 if ((!roomPop.settlers ? 0 : roomPop.settlers.length) < room.jobs.settlers) {
@@ -437,7 +421,7 @@ module.exports.loop = function () {
             if (roomSpawn && !roomSpawn.spawning) {
 
                 if ((!roomPop.chemists ? 0 : roomPop.chemists.length) < 1) {
-                    let res = empire.createCreep("chemist", null, spawnName, "CCCCMM", homeRoom, room.name);
+                    let res = empire.createCreep("chemist", null, spawnName, "CCCCCCCCMMMM", homeRoom, room.name);
                 }
 
                 if ((!roomPop.mineralminers ? 0 : roomPop.mineralminers.length) < room.jobs.mineralminers) {
@@ -460,16 +444,8 @@ module.exports.loop = function () {
                     let res = empire.createCreep("defender", null, spawnName, "TTTTTTTTTTMMMMMMMMMMRMRMRMRMRM", homeRoom, room.name);
                 }
 
-                if ((!roomPop.attackers ? 0 : roomPop.attackers.length) < 0) {
-                    let res = empire.createCreep("attacker", null, spawnName, "TTTTTMMMMMAMAMAMAMAM", homeRoom, room.name);
-                }
-
                 if ((!roomPop.linkers ? 0 : roomPop.linkers.length) < 1) {
                     let res = empire.createCreep("linker", null, spawnName, "CCCCCCCCCCCCCCCCMMMM", homeRoom, room.name);
-                }
-
-                if ((!roomPop.brokers ? 0 : roomPop.brokers.length) < 1) {
-                    let res = empire.createCreep("broker", null, spawnName, "CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM", homeRoom, room.name);
                 }
 
                 if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 2) {
@@ -603,7 +579,7 @@ module.exports.loop = function () {
             if (roomSpawn && !roomSpawn.spawning) {
 
                 if ((!roomPop.chemists ? 0 : roomPop.chemists.length) < 1) {
-                    let res = empire.createCreep("chemist", null, spawnName, "CCM", homeRoom, room.name);
+                    let res = empire.createCreep("chemist", null, spawnName, "CCCCCCCCMMMM", homeRoom, room.name);
                 }
 
                 if ((!roomPop.mineralminers ? 0 : roomPop.mineralminers.length) < room.jobs.mineralminers) {
@@ -620,10 +596,6 @@ module.exports.loop = function () {
 
                 if ((!roomPop.linkers ? 0 : roomPop.linkers.length) < 1) {
                     let res = empire.createCreep("linker", null, spawnName, "CCCCCCCCCCCCCCCCMMMM", homeRoom, room.name);
-                }
-
-                if ((!roomPop.brokers ? 0 : roomPop.brokers.length) < 1) {
-                    let res = empire.createCreep("broker", null, spawnName, "CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM", homeRoom, room.name);
                 }
 
                 if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 1) {
@@ -649,7 +621,7 @@ module.exports.loop = function () {
             if (roomSpawn && !roomSpawn.spawning) {
 
                 if ((!roomPop.chemists ? 0 : roomPop.chemists.length) < 1) {
-                    let res = empire.createCreep("chemist", null, spawnName, "CCCCMM", homeRoom, room.name);
+                    let res = empire.createCreep("chemist", null, spawnName, "CCCCCCCCMMMM", homeRoom, room.name);
                 }
 
                 if ((!roomPop.mineralminers ? 0 : roomPop.mineralminers.length) < room.jobs.mineralminers) {
@@ -674,10 +646,6 @@ module.exports.loop = function () {
 
                 if ((!roomPop.linkers ? 0 : roomPop.linkers.length) < 1) {
                     let res = empire.createCreep("linker", null, spawnName, "CCCCCCCCCCCCCCCCMMMM", homeRoom, room.name);
-                }
-
-                if ((!roomPop.brokers ? 0 : roomPop.brokers.length) < 1) {
-                    let res = empire.createCreep("broker", null, spawnName, "CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM", homeRoom, room.name);
                 }
 
                 if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 1) {//room.jobs.haulers) {
@@ -729,7 +697,7 @@ module.exports.loop = function () {
             if (roomSpawn && !roomSpawn.spawning) {
 
                 if ((!roomPop.chemists ? 0 : roomPop.chemists.length) < 1) {
-                    let res = empire.createCreep("chemist", null, spawnName, "CCCCMM", homeRoom, room.name);
+                    let res = empire.createCreep("chemist", null, spawnName, "CCCCCCCCMMMM", homeRoom, room.name);
                 }
 
                 if ((!roomPop.mineralminers ? 0 : roomPop.mineralminers.length) < room.jobs.mineralminers) {
@@ -748,10 +716,6 @@ module.exports.loop = function () {
                     let res = empire.createCreep("linker", null, spawnName, "CCCCCCCCCCCCCCCCMMMM", homeRoom, room.name);
                 }
 
-                if ((!roomPop.brokers ? 0 : roomPop.brokers.length) < 1) {
-                    let res = empire.createCreep("broker", null, spawnName, "CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM", homeRoom, room.name);
-                }
-
                 if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 1){//room.jobs.haulers) {
                     let res = empire.createCreep("hauler", null, spawnName, "CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM", homeRoom, room.name);
                 }
@@ -762,19 +726,6 @@ module.exports.loop = function () {
 
                 if ((!roomPop.refuelers ? 0 : roomPop.refuelers.length) < room.jobs.refuelers) {
                     let res = empire.createCreep("refueler", null, spawnName, "CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM", homeRoom, room.name);
-                }
-            }
-        }
-
-        if (room.name === "E80N85") {
-            let homeRoom = "E79N85";
-
-            let spawnName = "Larvik";
-            let roomSpawn = Game.spawns[spawnName];
-            
-            if (roomSpawn && !roomSpawn.spawning) {
-                if ((!roomPop.builders ? 0 : roomPop.builders.length) < 1) {
-                    let res = empire.createCreep("builder", null, spawnName, "WWWCCCCCCMMMMMMMMM", homeRoom, room.name);
                 }
             }
         }
@@ -818,7 +769,7 @@ module.exports.loop = function () {
             if (roomSpawn && !roomSpawn.spawning) {
 
                 if ((!roomPop.chemists ? 0 : roomPop.chemists.length) < 1) {
-                    let res = empire.createCreep("chemist", null, spawnName, "CCCCCCMMM", homeRoom, room.name);
+                    let res = empire.createCreep("chemist", null, spawnName, "CCCCCCCCMMMM", homeRoom, room.name);
                 }
 
                 if ((!roomPop.mineralminers ? 0 : roomPop.mineralminers.length) < room.jobs.mineralminers) {
@@ -845,10 +796,6 @@ module.exports.loop = function () {
                     let res = empire.createCreep("linker", null, spawnName, "", homeRoom, room.name);
                 }
 
-                if ((!roomPop.brokers ? 0 : roomPop.brokers.length) < 1) {
-                    let res = empire.createCreep("broker", null, spawnName, "CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM", homeRoom, room.name);
-                }
-
                 if ((!roomPop.haulers ? 0 : roomPop.haulers.length) < 1) {
                     let res = empire.createCreep("hauler", null, spawnName, "CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM", homeRoom, room.name);
                 }
@@ -868,8 +815,8 @@ module.exports.loop = function () {
         }
     }
 
-    for (let creep of empire.creeps) {
-        creep.act();
+    for (let creepName in empire.creeps.all) {
+        empire.creeps.all[creepName].act();
     }
     
     // Balance the energy in the empire over the rooms.

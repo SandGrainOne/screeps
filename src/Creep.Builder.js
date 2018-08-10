@@ -102,9 +102,9 @@ class CreepBuilder extends CreepWorker {
             }
 
             if (this.room.sources.length > 0) {
-                let sources = this.pos.findInRange(this.room.sources, 1);
-                if (sources[0] && this.pos.isNearTo(sources[0])) {
-                    this.harvest(sources[0]);
+                let source = this.getFirstInRange(this.room.sources, 1);
+                if (source) {
+                    this.harvest(source);
                 }
             }
         }

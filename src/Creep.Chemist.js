@@ -19,7 +19,7 @@ class CreepChemist extends CreepWorker {
     }
     
     /**
-     * Perform broker related logic.
+     * Perform chemist related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
@@ -32,8 +32,12 @@ class CreepChemist extends CreepWorker {
         if (!this.room.terminal || !this.room.Labs.compoundOne || !this.room.Labs.compoundTwo || this.room.Labs.producers.length <= 0) {
             return false;
         }
-        
+
         let reaction = {};
+
+        if (this.room.name === "E73N87") {
+            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_GHODIUM_ALKALIDE };
+        }
 
         if (this.room.name === "E75N87") {
             reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_GHODIUM_ALKALIDE };
@@ -44,23 +48,23 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.room.name === "E77N88") {
-            reaction = { compoundOne: RESOURCE_HYDROGEN, compoundTwo: RESOURCE_OXYGEN };
+            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_GHODIUM_ALKALIDE };
         }
 
         if (this.room.name === "E77N85") {
-            reaction = { compoundOne: RESOURCE_GHODIUM, compoundTwo: RESOURCE_HYDROGEN };
+            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_GHODIUM_ACID };
         }
 
         if (this.room.name === "E78N85") {
-            reaction = { compoundOne: RESOURCE_LEMERGIUM_OXIDE, compoundTwo: RESOURCE_HYDROXIDE };
+            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_LEMERGIUM_ALKALIDE };
         }
 
         if (this.room.name === "E79N85") {
-            reaction = { compoundOne: RESOURCE_GHODIUM_ACID, compoundTwo: RESOURCE_CATALYST };
+            reaction = { compoundOne: RESOURCE_GHODIUM, compoundTwo: RESOURCE_HYDROGEN };
         }
 
         if (this.room.name === "E79N86") {
-            reaction = { compoundOne: RESOURCE_UTRIUM, compoundTwo: RESOURCE_LEMERGIUM };
+            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_UTRIUM_ACID };
         }
 
         let emptyCreep = false;
@@ -82,7 +86,7 @@ class CreepChemist extends CreepWorker {
             }
         }
 
-        if (Object.keys(this.carry).length > 2 || (this.load > 0 && this.load < this.capacity)) {
+        if (Object.keys(this.carry).length > 1) {
             emptyCreep = true;
         }
 
@@ -127,15 +131,17 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.load <= 0) {
-            for (let compound in reaction) {
-                if (this.room.Labs[compound].mineralAmount <= 0) {
-                    if (this.pos.isNearTo(this.room.terminal)) {
-                        this.withdraw(this.room.terminal, reaction[compound]);
+            if (this.room.terminal.store[reaction.compoundOne] && this.room.terminal.store[reaction.compoundTwo]) {
+                for (let compound in reaction) {
+                    if (this.room.Labs[compound].mineralAmount <= 0) {
+                        if (this.pos.isNearTo(this.room.terminal)) {
+                            this.withdraw(this.room.terminal, reaction[compound]);
+                        }
+                        else {
+                            this.moveTo(this.room.terminal);
+                        }
+                        return true;
                     }
-                    else {
-                        this.moveTo(this.room.terminal);
-                    }
-                    return true;
                 }
             }
         }
@@ -162,6 +168,28 @@ class CreepChemist extends CreepWorker {
                 }
                 else {
                     this.moveTo(this.room.Labs.producers[0]);
+                }
+            }
+            if (Object.keys(this.room.storage.store).length > 1) {
+                if (_.sum(this.room.terminal.store) < this.room.terminal.storeCapacity * 0.9) {
+                    if (this.pos.isNearTo(this.room.storage)) {
+                        for (let resourceType in this.room.storage.store) {
+                            // Taking energy from the storage is handled by refuelers.
+                            if (resourceType === RESOURCE_ENERGY) {
+                                continue;
+                            }
+        
+                            // Moving all resources except energy to the terminal.
+                            if (this.room.storage.store[resourceType] > 0) {
+                                if (this.withdraw(this.room.storage, resourceType) === OK) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        this.moveTo(this.room.storage);
+                    }
                 }
             }
             return true;

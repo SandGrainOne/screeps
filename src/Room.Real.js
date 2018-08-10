@@ -5,6 +5,8 @@ let C = require('constants');
 let CreepMaker = require('CreepMaker');
 let RoomBase = require('Room.Base');
 
+let Links = require('Links');
+
 /**
  * Wrapper class with basic logic for rooms.
  */
@@ -97,6 +99,18 @@ class RoomReal extends RoomBase {
     }
 
     /**
+     * Gets an array with all drops in the room. Empty if there are no drops. 
+     */
+    get drops() {
+        if (this._cache.drops !== undefined) {
+            return this._cache.drops;
+        }
+
+        // TODO: Sort or prioritise the drops in some way?
+        return this._cache.drops = this._room.find(FIND_DROPPED_RESOURCES);
+    }
+
+    /**
      * Gets an array with all containers in the room. Empty if there are no containers.
      * The array is sorted decending based the amount stored. Used by haulers to prioritise
      * containers with the most resources.
@@ -122,6 +136,25 @@ class RoomReal extends RoomBase {
 
         return this._cache.containers;
     }
+    
+    /**
+     * Gets the linking system in the room and easy access to individual links.
+     */
+    get links() {
+        if (this._cache.links !== undefined) {
+            return this._cache.links;
+        }
+
+        this._cache.links = null;
+        if (this._mem.structures && this._mem.structures.links) {
+            let links = this._mem.structures.links;
+            if (links.inputs.length > 0 && (links.storage || links.controller)) {
+                this._cache.links = new Links(this, links);
+            }
+        }
+
+        return this._cache.links;
+    }
 
     /**
      * Gets the room extractor if it exists. Otherwise null.
@@ -140,18 +173,6 @@ class RoomReal extends RoomBase {
         }
 
         return this._cache.extractor;
-    }
-
-    /**
-     * Gets an array with all drops in the room. Empty if there are no drops. 
-     */
-    get drops() {
-        if (this._cache.drops !== undefined) {
-            return this._cache.drops;
-        }
-
-        // TODO: Sort or prioritise the drops in some way?
-        return this._cache.drops = this._room.find(FIND_DROPPED_RESOURCES);
     }
 
     /**
@@ -512,7 +533,7 @@ class RoomReal extends RoomBase {
             }
         }
 
-        this.makeJobs();
+        //this.makeJobs();
     }
 
     createJobs() {

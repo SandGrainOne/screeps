@@ -1,5 +1,6 @@
 'use strict';
 
+let C = require('constants');
 let CreepMaker = require('CreepMaker');
 
 let RoomBase = require('Room.Base');
@@ -20,24 +21,22 @@ class Empire {
         this._mem.creeps = {};
 
         this._rooms = {};
-        this._allRooms = [];
-
         this._creeps = {};
-        this._allCreeps = [];
+        this._creeps.all = {};
     }
 
     /**
      * Get an array of all known rooms.
      */
     get rooms() {
-        return this._allRooms;
+        return this._rooms;
     }
 
     /**
      * Get an array of all living creeps.
      */
     get creeps() {
-        return this._allCreeps;
+        return this._creeps;
     }
 
     /**
@@ -53,35 +52,23 @@ class Empire {
     }
 
     /**
-     * Get an object with all creeps assigned to be working in the specified room.
-     * 
-     * @param {string} roomName - The name of the room to retrieve.
-     */
-    getCreeps(roomName) {
-        if (this._creeps[roomName]) {
-            return this._creeps[roomName];
-        }
-        return {};
-    }
-
-    /**
      * This method is responsible for arranging all important game objects in easy to access collections.
      */
     prepare() {
         for (let roomName in Game.rooms) {
             this._rooms[roomName] = new RoomReal(Game.rooms[roomName]);
-            this._allRooms.push(this._rooms[roomName]);
         }
 
         for (let roomName in Memory.rooms) {
             if (!this._rooms[roomName]) {
-                this._allRooms.push(new RoomBase(roomName));
+                this._rooms[roomName] = new RoomBase(roomName);
             }
         }
 
         // Loop through all creeps in memory and sort them to quick access buckets.
         for (let creepName in Memory.creeps) {
             let creep = Game.creeps[creepName];
+            
             if (!creep) {
                 // The creep must have died.
                 delete Memory.creeps[creepName];
@@ -89,7 +76,7 @@ class Empire {
             }
 
             let smartCreep = CreepMaker.wrap(creep);
-            this._allCreeps.push(smartCreep);
+            this._creeps.all[smartCreep.name] = smartCreep;
 
             smartCreep.HomeRoom = this.getRoom(creep.memory.rooms.home);
             smartCreep.WorkRoom = this.getRoom(creep.memory.rooms.work);
@@ -132,7 +119,9 @@ class Empire {
         let richest = null;
         let richestAmount = 0;
 
-        for (let room of this.rooms) {
+        for (let roomName in this.rooms) {
+            var room = this.rooms[roomName];
+            
             if (!room.isVisible || !room.isMine || !room.storage || !room.terminal) {
                 // Room can not take part in the energy balancing game.
                 continue;
@@ -180,7 +169,30 @@ class Empire {
             "spawnTime": body.length * 3
         }
 
-        return Game.spawns[spawnName].createCreep(body, null, memory);
+        return Game.spawns[spawnName].createCreep(body, this.generateName(), memory);
+    }
+
+    generateName() {
+        let isVowel = false;
+        let charArray = C.VOWELS;
+        let name = charArray[Math.round(Math.random()*(charArray.length-1))].toUpperCase();
+
+        let nameComplete = false;
+        while (!nameComplete) {
+            if (isVowel) {
+                charArray = C.VOWELS;
+            }
+            else {
+                charArray = C.CONSONANTS;
+            }
+            isVowel = !isVowel;
+
+            name += charArray[Math.round(Math.random()*(charArray.length-1))];
+
+            nameComplete = name.length > C.CREEP_NAME_LENGTH && !this.creeps.all[name];
+        }
+
+        return name;
     }
 
     print(input) {
@@ -195,5 +207,7 @@ class Empire {
         return;
     }
 }
+
+global.test = new Empire();
 
 module.exports = Empire;

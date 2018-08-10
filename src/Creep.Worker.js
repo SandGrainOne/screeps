@@ -19,13 +19,10 @@ class CreepWorker extends CreepBase {
 
         this._baseStrength = this._creep.getActiveBodyparts(WORK);
 
-        this._capacity = this._creep.getActiveBodyparts(CARRY) * 50;
+        this._capacity = this._creep.carryCapacity;
 
-        this._startEnergy = this._creep.carry.energy;
-        this._startLoad =_.sum(this._creep.carry);
-
-        this._energy = this._startEnergy;
-        this._minerals = this._startLoad - this._startEnergy;
+        this._energy = this._creep.carry.energy;
+        this._minerals = _.sum(this._creep.carry) - this._creep.carry.energy;
 
         this._performedWork = {};
     }

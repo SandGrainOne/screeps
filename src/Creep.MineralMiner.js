@@ -53,10 +53,10 @@ class CreepMineralMiner extends CreepWorker {
 
         if (this.load >= this.capacity) {
             if (this.room.containers.length > 0) {
-                let containers = this.pos.findInRange(this.room.containers, 1);
-                if (containers.length > 0) {
+                let container = this.getFirstInRange(this.room.containers, 1);
+                if (container) {
                     for (let resourceType in this.carry) {
-                        if (this.transfer(containers[0], resourceType) === OK) {
+                        if (this.transfer(container, resourceType) === OK) {
                             break;
                         }
                     }

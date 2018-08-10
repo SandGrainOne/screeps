@@ -134,7 +134,7 @@ class CreepBase {
         }
 
         this.say("❔");
-
+        
         return false;
     }
 
@@ -159,9 +159,9 @@ class CreepBase {
         }
         else {
             if (this.room.spawns.length > 0) {
-                let spawns = this.pos.findInRange(this.room.spawns, 1);
-                if (spawns.length > 0) {
-                    spawns[0].recycleCreep(this._creep);
+                let spawn = this.getFirstInRange(this.room.spawns, 1);
+                if (spawn) {
+                    spawn.recycleCreep(this._creep);
                 }
                 else {
                     let spawn = this.pos.findClosestByRange(this.room.spawns);
@@ -178,7 +178,7 @@ class CreepBase {
     }
 
     /**
-     * Perform a retreat if there is an enemy creep or tower attacking the creep.
+     * Perform retreat related logic.
      * 
      * @returns {Boolean} true if the retreat was required and the creep is on the move
      */
@@ -245,9 +245,9 @@ class CreepBase {
             moveTarget = new RoomPosition(coords.x, coords.y, this.room.name);
         }
         else {
-            let exitDir = this._creep.room.findExitTo(roomName);
-            moveTarget = this.pos.findClosestByRange(exitDir);
+            moveTarget = new RoomPosition(24, 24, roomName);
         }
+
 
         if (move) {
             return this.moveTo(moveTarget);
@@ -271,24 +271,39 @@ class CreepBase {
         }
 
         let res = this._creep.moveTo(target, ops);
+        
+        if (res === OK) {
+            this._moving = true;
+        }
+        
         return res;
     }
 
-    getFirstInRange(objects, range) {
-        if (!Array.isArray(objects)) {
+    /**
+     * Get the first room object in the array of objects that is within the given range.
+     * 
+     * @param {RoomObject[]} roomObjects - The array of room objects to seach through.
+     * @param {int} range - The maximum range between creep and room object.
+     * 
+     * @returns {RoomObject} - The first room object without the given range if found. Otherwise null.
+     */
+    getFirstInRange(roomObjects, range) {
+        if (!Array.isArray(roomObjects)) {
             return null;
         }
 
-        if (objects.length === 1) {
-            return objects[0];
+        if (roomObjects.length === 1) {
+            if (this.pos.getRangeTo(roomObjects[0]) <= range) {
+                return roomObjects[0];
+            }
+            return null;
         }
 
-        for (let obj of objects) {
+        for (let obj of roomObjects) {
             if (this.pos.getRangeTo(obj) <= range) {
                 return obj;
             }
         }
-
         return null;
     }
 

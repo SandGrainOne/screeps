@@ -47,18 +47,18 @@ class CreepUpgrader extends CreepWorker {
         
         if (this.atWork && this.energy < this.capacity) {
             if (this.room.containers.length > 0) {
-                let containers = this.pos.findInRange(this.room.containers, 1);
-                if (containers.length > 0) {
-                    this.withdraw(containers[0], RESOURCE_ENERGY);
+                let container = this.getFirstInRange(this.room.containers, 1);
+                if (container) {
+                    this.withdraw(container, RESOURCE_ENERGY);
                 }
             }
         }
         
         if (this.atWork && this.energy < this.capacity) {
             if (this.room.sources.length > 0) {
-                let sources = this.pos.findInRange(this.room.sources, 1);
-                if (sources[0] && this.pos.isNearTo(sources[0])) {
-                    this.harvest(sources[0]);
+                let source = this.getFirstInRange(this.room.sources, 1);
+                if (source) {
+                    this.harvest(source);
                 }
             }
         }

@@ -3,7 +3,7 @@
 /**
  * Ensure that the state of the live hive is up to date with the code version.
  */
-let constants = {
+const constants = {
     "USERNAME": "SandGrainOne",
 
     "JOB_REFUELER": "refueler",
@@ -44,46 +44,16 @@ let constants = {
 
     "EXIT": {
         // Recommended exit locations when going from one room to another.
-        // Keep it to a minimum of entries,  to cases where creeps otherwise would do massive detours.
-        // Better to improve path finding in other ways.
-        "E79N86": {
-            "E79N85": { x: 49, y: 37 }
-        },
-        "E77N85": {
-            "E77N89": { x: 19, y: 0 },
-            "E77N88": { x: 19, y: 0 },
-            "E75N87": { x: 19, y: 0 }
-        },
-        "E77N86": {
-            "E77N89": { x: 31, y: 0 },
-            "E77N88": { x: 31, y: 0 },
-            "E75N87": { x: 31, y: 0 }
-        },
-        "E77N87": {
-            "E75N87": { x: 0, y: 36 }
-        },
-        "E78N89": {
-            "E77N88": { x: 0, y: 39 }
-        },
-        "E77N88": {
-            "E78N89": { x: 39, y: 0 }
-        },
-        "E77N89": {
-            "E77N88": { x: 31, y: 49 }
-        },
-        "E76N85": {
-            "E77N85": { x: 49, y: 31 }
-        },
+        // Keep it to a minimum of entries, to cases where creeps otherwise would
+        // do massive detours or get stuck on the border.
         "E75N87": {
             "E76N87": { x: 49, y: 26 }
-        },
-        "E75N89": {
-            "E76N89": { x: 49, y: 29 }
-        },
-        "E76N89": {
-            "E75N89": { x: 0, y: 29 }
         }
-    }
+    },
+    
+    "CREEP_NAME_LENGTH": 4,
+    "VOWELS": ['a', 'e', 'i', 'o', 'u'],
+    "CONSONANTS": ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'qu', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z', 'tt', 'ch', 'sh']
 }
 
 module.exports = constants;

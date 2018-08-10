@@ -7,7 +7,6 @@ let CreepBase = require('Creep.Base');
 let wrappers = {
     "miner": require('Creep.Miner'),
     "hauler": require('Creep.Hauler'),
-    "broker": require('Creep.Broker'),
     "linker": require('Creep.Linker'),
     "healer": require('Creep.Healer'),
     "chemist": require('Creep.Chemist'),

@@ -41,24 +41,20 @@ class CreepHauler extends CreepWorker {
         }
 
         if (this.load < this.capacity) {
-            let drops = this.pos.findInRange(this.room.drops, 1);
-            if (drops.length > 0) {
-                for (let drop of drops) {
-                    if (this.pickup(drop) === OK) {
-                        break;
-                    }
-                }
+            let drop = this.getFirstInRange(this.room.drops, 1);
+            if (drop) {
+                this.pickup(drop);
             }
         }
 
         // Taking from a container should only be done in the work room.
         if (this.atWork && this.load < this.capacity) {
             if (this.room.containers.length > 0) {
-                let containers = this.pos.findInRange(this.room.containers, 1);
-                if (containers.length > 0) {
+                let container = this.getFirstInRange(this.room.containers, 1);
+                if (container) {
                     // TODO: Object.keys(containers[0].store).length === 1)
-                    for (let resourceType in containers[0].store) {
-                        if (this.withdraw(containers[0], resourceType) === OK) {
+                    for (let resourceType in container.store) {
+                        if (this.withdraw(container, resourceType) === OK) {
                             break;
                         }
                     }
@@ -75,21 +71,22 @@ class CreepHauler extends CreepWorker {
         // Delivering to a container or link should only be done by a remote hauler back at home.
         if (this.isRemoting && this.isHome && this.load > 0) {
             if (this.room.containers.length > 0) {
-                let containers = this.pos.findInRange(this.room.containers, 1);
-                if (containers.length > 0) {
+                let container = this.getFirstInRange(this.room.containers, 1);
+                if (container) {
                     for (let resourceType in this.carry) {
-                        if (this.transfer(containers[0], resourceType) === OK) {
+                        if (this.transfer(container, resourceType) === OK) {
                             break;
                         }
                     }
                 }
             }
             if (this.energy > 0 && this.room.Links.Inputs.length > 0) {
+                // There might be more than one link in range. 
                 let links = this.pos.findInRange(this.room.Links.Inputs, 1);
                 if (links.length > 0) {
                     for (let link of links) {
-                        if (this.transfer(link, RESOURCE_ENERGY) === OK ) {
-                            break;
+                        if (link.energy < link.energyCapacity) {
+                            this.transfer(link, RESOURCE_ENERGY);
                         }
                     }
                 }
@@ -107,9 +104,9 @@ class CreepHauler extends CreepWorker {
             }
 
             if (this.room.extensions.length > 0) {
-                let extensions = this.pos.findInRange(this.room.extensions, 1);
-                if (extensions.length > 0) {
-                    this.transfer(extensions[0], RESOURCE_ENERGY);
+                let extension = this.getFirstInRange(this.room.extensions, 1);
+                if (extension) {
+                    this.transfer(extension, RESOURCE_ENERGY);
                 }
             }
         }
@@ -153,7 +150,7 @@ class CreepHauler extends CreepWorker {
             if (!moveTarget) {
                 if (this.room.containers.length > 0) {
                     for (let container of this.room.containers) {
-                        if (_.sum(container.store) > 500) {
+                        if (_.sum(container.store) > 400) {
                             if (this.room.reserve(container.id, this.job, this.name)) {
                                 this._mem.work.target = container.id;
                                 moveTarget = container;
@@ -240,16 +237,23 @@ class CreepHauler extends CreepWorker {
         }
         return;
 
+        let distance = 0;
+        if (room.isMine) {
+            for (let container of room.containers) {
+                distance += room.storage.pos.getRangeTo(container);
+            }
+            if (room.terminal) {
+                distance += room.storage.pos.getRangeTo(room.terminal);
+            }
+        }
+        else {
+            // Assume that the average distance from a container to the room border is 25 tiles.
+            distance = room.containers.length * 25;
+        }
+
         // TODO: Use the number of containers and the size of sources instead of distance?
         // TODO: One container might not be used all the time (Minerals)
 
-        let distance = 0;
-        for (let container of room.containers) {
-            distance += room.storage.pos.getRangeTo(container);
-        }
-        if (room.terminal) {
-            distance += room.storage.pos.getRangeTo(room.terminal);
-        }
         
         //console.log(room.name + " distance: " + distance);
 
