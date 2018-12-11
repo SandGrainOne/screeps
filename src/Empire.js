@@ -1,6 +1,7 @@
 'use strict';
 
 let CreepMaker = require('./CreepMaker');
+let SquadMaker = require('./SquadMaker');
 
 let RoomBase = require('./Room.Base');
 let RoomReal = require('./Room.Real');
@@ -25,6 +26,8 @@ class Empire {
         this._creeps.all = {};
 
         this._roomsToBeAnalyzed = [];
+
+        this._squads = new Map();
     }
 
     /**
@@ -32,6 +35,13 @@ class Empire {
      */
     get rooms () {
         return this._rooms;
+    }
+
+    /**
+     * Get an iterable collection of squads.
+     */
+    get squads () {
+        return this._squads.values();
     }
 
     /**

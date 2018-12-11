@@ -39,6 +39,14 @@ let code = {
             }
             this._setVersion('1.1');
         }
+
+        // Adding the squads memory space
+        if (this._getVersion() === '1.1') {
+            if (_.isUndefined(Memory.squads)) {
+                Memory.squads = {};
+            }
+            this._setVersion('1.2');
+        }
     }
 };
 

@@ -493,6 +493,10 @@ module.exports.loop = function () {
         }
     }
 
+    for (let squad of empire.squads) {
+        console.log(squad.name);
+    }
+
     for (let creepName in empire.creeps.all) {
         empire.creeps.all[creepName].act();
     }
