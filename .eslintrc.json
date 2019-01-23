@@ -12,6 +12,7 @@
     "rules":{
         "semi": ["error", "always"],
         "indent": ["error", 4, { "SwitchCase": 1 }],
-        "brace-style": ["error", "stroustrup"]
+        "brace-style": ["error", "stroustrup"],
+        "no-trailing-spaces": ["error", { "ignoreComments": true }]
     }
 }

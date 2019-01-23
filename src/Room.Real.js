@@ -2,7 +2,6 @@
 
 let C = require('./constants');
 
-let CreepMaker = require('./CreepMaker');
 let RoomBase = require('./Room.Base');
 
 let Links = require('./Links');
@@ -67,7 +66,7 @@ class RoomReal extends RoomBase {
      * Gets the room storage if it exists.
      */
     get storage () {
-        if (_.isUndefined(this._room.storage)) {
+        if (_.isUndefined(this._room.storage) || !this._room.storage.my) {
             return null;
         }
         return this._room.storage;
@@ -77,7 +76,7 @@ class RoomReal extends RoomBase {
      * Gets the room terminal if it exists.
      */
     get terminal () {
-        if (_.isUndefined(this._room.terminal)) {
+        if (_.isUndefined(this._room.terminal) || !this._room.terminal.my) {
             return null;
         }
         return this._room.terminal;
@@ -297,6 +296,17 @@ class RoomReal extends RoomBase {
     }
 
     /**
+     * Gets an array with all flags in the room. Empty if there are no flags.
+     */
+    get flags () {
+        if (!_.isUndefined(this._cache.flags)) {
+            return this._cache.flags;
+        }
+        this._cache.flags = this._room.find(FIND_FLAGS);
+        return this._cache.flags;
+    }
+
+    /**
      * Attempt to reserve a game object or something with a unique id to prevent other
      * creeps, towers, etc from targeting the same thing. A reservation will time out and 
      * be released after 2 ticks. This means a reservation must be renewed.
@@ -361,79 +371,49 @@ class RoomReal extends RoomBase {
         }
 
         for (let structure of this._room.find(FIND_STRUCTURES)) {
-            if (structure.structureType === STRUCTURE_CONTAINER) {
-                this.remember(structure.id, STRUCTURE_CONTAINER);
-
-                if (structure.hits < structure.hitsMax) {
-                    this.remember(structure.id, 'repair');
-                }
+            switch (structure.structureType) {
+                case STRUCTURE_CONTAINER:
+                    this.remember(structure.id, STRUCTURE_CONTAINER);
+                    break;
+                case STRUCTURE_EXTRACTOR:
+                    this.remember(structure.id, STRUCTURE_EXTRACTOR);
+                    break;
+                case STRUCTURE_KEEPER_LAIR:
+                    this.remember(structure.id, STRUCTURE_KEEPER_LAIR);
+                    break;
+                case STRUCTURE_RAMPART:
+                    this.remember(structure.id, STRUCTURE_RAMPART);
+                    break;
+                case STRUCTURE_TOWER:
+                    this.remember(structure.id, STRUCTURE_TOWER);
+                    break;
+                case STRUCTURE_NUKER:
+                    this.remember(structure.id, STRUCTURE_NUKER);
+                    break;
+                case STRUCTURE_SPAWN:
+                    this.remember(structure.id, STRUCTURE_SPAWN);
+                    // Adding spawns to the extensions collection for the purpose of refueling
+                    this.remember(structure.id, STRUCTURE_EXTENSION);
+                    break;
+                case STRUCTURE_EXTENSION:
+                    this.remember(structure.id, STRUCTURE_EXTENSION);
+                    break;
+                case STRUCTURE_OBSERVER:
+                    this.remember(structure.id, STRUCTURE_OBSERVER);
+                    break;
+                case STRUCTURE_LINK:
+                    links.push(structure);
+                    break;
+                case STRUCTURE_LAB:
+                    labs.push(structure);
+                    break;
             }
 
-            if (structure.structureType === STRUCTURE_ROAD) {
-                // Allow roads to decay a little bit. This is so that a builder would need to spend a
-                // litle bit more time and energy repairing before moving on. This to reduce travel time.
-                if (structure.hits < structure.hitsMax - 1000) {
-                    this.remember(structure.id, 'repair');
-                }
-            }
-
-            if (structure.structureType === STRUCTURE_WALL) {
-                if (this.isMine && structure.hits < 3000000) {
-                    this.remember(structure.id, 'repair');
-                }
-            }
-
-            if (structure.structureType === STRUCTURE_EXTRACTOR) {
-                this.remember(structure.id, STRUCTURE_EXTRACTOR);
-            }
-
-            if (structure.structureType === STRUCTURE_KEEPER_LAIR) {
-                this.remember(structure.id, STRUCTURE_KEEPER_LAIR);
-            }
-
-            if (structure.structureType === STRUCTURE_RAMPART) {
-                this.remember(structure.id, STRUCTURE_RAMPART);
-                // TODO: Create a way to determine a good wall size
-                if (this.isMine && structure.hits < 3000000) {
-                    this.remember(structure.id, 'repair');
-                }
-            }
-
-            if (structure.structureType === STRUCTURE_TOWER) {
-                this.remember(structure.id, STRUCTURE_TOWER);
-            }
-
-            if (structure.structureType === STRUCTURE_NUKER) {
-                this.remember(structure.id, STRUCTURE_NUKER);
-            }
-
-            if (structure.structureType === STRUCTURE_SPAWN) {
-                this.remember(structure.id, STRUCTURE_SPAWN);
-                // Adding all spawns to the extensions collection for the purpose of refueling
-                this.remember(structure.id, STRUCTURE_EXTENSION);
-            }
-
-            if (structure.structureType === STRUCTURE_EXTENSION) {
-                this.remember(structure.id, STRUCTURE_EXTENSION);
-            }
-
-            if (structure.structureType === STRUCTURE_OBSERVER) {
-                this.remember(structure.id, STRUCTURE_OBSERVER);
-            }
-
-            if (structure.structureType === STRUCTURE_LINK) {
-                links.push(structure);
-            }
-
-            if (structure.structureType === STRUCTURE_LAB) {
-                labs.push(structure);
-            }
+            this.checkRepairs(structure);
         }
 
         this.links.populate(this, links);
         this.labs.populate(this, labs);
-
-        // this.makeJobs();
 
         if (_.isUndefined(this._mem.tickClaimed) && this.isMine) {
             this._mem.tickClaimed = Game.time;
@@ -443,6 +423,41 @@ class RoomReal extends RoomBase {
         }
 
         this.tickAnalyzed = Game.time;
+    }
+
+    checkRepairs (structure) {
+        let hitsMax = 0;
+        let wallSize = 3000000;
+
+        switch (structure.structureType) {
+            case STRUCTURE_WALL:
+                if (this.isMine) {
+                    hitsMax = wallSize;
+                }
+                break;
+            case STRUCTURE_RAMPART:
+                if (structure.my) {
+                    hitsMax = wallSize;
+                }
+                break;
+            case STRUCTURE_ROAD:
+                // Allow roads to decay a little bit. This is so that a builder would need to spend a
+                // litle bit more time and energy repairing before moving on. This to reduce travel time.
+                hitsMax = structure.hitsMax - 1000;
+                break;
+            case STRUCTURE_CONTAINER:
+                hitsMax = structure.hitsMax;
+                break;
+            default:
+                if (structure.my) {
+                    hitsMax = structure.hitsMax;
+                }
+                break;
+        }
+
+        if (structure.hits < hitsMax) {
+            this.remember(structure.id, 'repair');
+        }
     }
 
     createJobs () {
@@ -470,10 +485,6 @@ class RoomReal extends RoomBase {
                 this._mem.jobs.settlers = 1;
             }
         }
-    }
-
-    makeJobs () {
-        CreepMaker.defineJobs(this);
     }
 
     prepare () {

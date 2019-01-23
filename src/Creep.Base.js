@@ -31,6 +31,15 @@ class CreepBase {
     }
 
     /**
+     * Gets the the squad the creep is a part of
+     * 
+     * @returns {string} - Name of squad
+     */
+    get squad () {
+        return Empire.squads.get(this._mem.squad);
+    }
+
+    /**
      * Gets the room where there creep currently reside.
      */
     get room () {

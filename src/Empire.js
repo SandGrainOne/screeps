@@ -41,7 +41,7 @@ class Empire {
      * Get an iterable collection of squads.
      */
     get squads () {
-        return this._squads.values();
+        return this._squads;
     }
 
     /**
@@ -88,6 +88,16 @@ class Empire {
             }
         }
 
+        for (let squadName in Memory.squads) {
+            let squad = SquadMaker.create(squadName, Memory.squads[squadName].type);
+            if (!squad.isRetired) {
+                this.squads.set(squadName, squad);
+            }
+            else {
+                delete Memory.squads[squadName];
+            }
+        }
+
         // Loop through all creeps in memory and sort them to quick access buckets.
         for (let creepName in Memory.creeps) {
             let creep = Game.creeps[creepName];
@@ -101,12 +111,16 @@ class Empire {
             let smartCreep = CreepMaker.wrap(creep);
             this._creeps.all[smartCreep.name] = smartCreep;
 
-            // TODO: Remove these. The creeps should do this themselves.
-            smartCreep.WorkRoom = this.rooms.get(creep.memory.rooms.work);
-
             if (smartCreep.isRetired) {
-                // Don't count creeps that are retired.
+                // Don't count creeps that are retired. They should be replaced.
                 continue;
+            }
+
+            if (smartCreep.squad) {
+                let squad = this.squads.get(smartCreep.squad);
+                if (squad) {
+                    squad.addCreep(smartCreep.job, smartCreep.name);
+                }
             }
 
             let job = smartCreep.job;
@@ -151,7 +165,7 @@ class Empire {
                 let room = this.rooms.get(roomNames[index]);
                 index = index + 1;
 
-                if (room.isMine && room.isVisible && !_.isNull(room.observer)) {
+                if (room.isVisible && room.isMine && !_.isNull(room.observer)) {
                     if (room.observer.observeRoom(roomToObserve) === OK) {
                         break;
                     }

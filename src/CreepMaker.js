@@ -21,6 +21,9 @@ let wrappers = {
     'mineralminer': require('./Creep.MineralMiner')
 };
 
+/**
+ * The CreepMaker class is a static helper class for creating creeps and for wrapping creeps during tick preparation.
+ */
 class CreepMaker {
     /**
      * Add a layer of job specific logic to the given creep.

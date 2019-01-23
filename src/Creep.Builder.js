@@ -175,9 +175,7 @@ class CreepBuilder extends CreepWorker {
         if (Game.time % 3 === 0) {
             if (this.room.constructionSites.length > 0) {
                 for (let site of this.room.constructionSites) {
-                    if (this.room.reserve(site.id, this.job, this.name)) {
-                        return site;
-                    }
+                    return site;
                 }
             }
         }

@@ -25,6 +25,42 @@ module.exports.loop = function () {
 
         let rule = null;
 
+        if (room.name === 'E74N82') {
+            rule = {
+                'spawnName': 'Tananger',
+                'homeRoom': 'E74N81',
+                'jobs': {
+                    // 'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
+                    // 'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWCCMMMMMM' },
+                    'attacker': { 'count': 1, 'body': 'AAAMMM' },
+                    // 'builder': { 'count': 5, 'body': 'WCMM' },
+                    // 'upgrader': { 'count': 5, 'body': 'WCMM' },
+                    'hauler': { 'count': 2, 'body': 'WWCCMMMM' },
+                    'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' }
+                    // 'linker': { 'count': room.jobs.linkers, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
+                    // 'refueler': { 'count': room.jobs.refuelers, 'body': 'CCCCCCCCCCCCMMMMMM' }
+                }
+            };
+        }
+
+        if (room.name === 'E74N81') {
+            rule = {
+                'spawnName': 'Tananger',
+                'homeRoom': room.name,
+                'jobs': {
+                    // 'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
+                    // 'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWCCMMMMMM' },
+                    // 'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
+                    'builder': { 'count': 2, 'body': 'WWCCMM' },
+                    'upgrader': { 'count': 2, 'body': 'WWWCMM' },
+                    'hauler': { 'count': 2, 'body': 'CCCMMM' },
+                    'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' },
+                    'linker': { 'count': room.jobs.linkers, 'body': 'CCCCCCM' },
+                    'refueler': { 'count': room.jobs.refuelers, 'body': 'CCCMMM' }
+                }
+            };
+        }
+
         if (room.name === 'E71N87') {
             rule = {
                 'spawnName': 'Otta',
@@ -273,9 +309,10 @@ module.exports.loop = function () {
                 'spawnName': 'Moss',
                 'homeRoom': 'E77N85',
                 'jobs': {
+                    'builder': { 'count': 1, 'body': 'WWCCCCCCCCMMMMMMMMMM' },
                     'settler': { 'count': room.jobs.settlers, 'body': 'LLMM' },
                     'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
-                    'hauler': { 'count': 3, 'body': 'WCCCCCCCCCCCCCCMMMMMMMMMMMMMMMM' },
+                    'hauler': { 'count': 2, 'body': 'WCCCCCCCCCCCCCCMMMMMMMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' }
                 }
             };
@@ -417,7 +454,7 @@ module.exports.loop = function () {
                 'jobs': {
                     'settler': { 'count': room.jobs.settlers, 'body': 'LLMM' },
                     'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
-                    'hauler': { 'count': 3, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMM' },
+                    'hauler': { 'count': 2, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' }
                 }
             };
