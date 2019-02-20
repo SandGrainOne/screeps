@@ -7,7 +7,8 @@
         "screeps/screeps": true
     },
     "globals": {
-        "Empire": true
+        "Empire": true,
+        "brain": true
     },
     "rules":{
         "semi": ["error", "always"],

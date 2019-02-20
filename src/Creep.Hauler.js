@@ -178,6 +178,13 @@ class CreepHauler extends CreepWorker {
                     this.transfer(extension, RESOURCE_ENERGY);
                 }
             }
+
+            if (this.room.towers.length > 0) {
+                let tower = this.getFirstInRange(this.room.towers, 1);
+                if (tower) {
+                    this.transfer(tower, RESOURCE_ENERGY);
+                }
+            }
         }
 
         if (this.load <= 0) {
@@ -273,6 +280,15 @@ class CreepHauler extends CreepWorker {
                     let extension = this.pos.findClosestByRange(this.room.extensions);
                     if (extension) {
                         moveTarget = extension;
+                    }
+                }
+            }
+
+            if (!moveTarget) {
+                if (this.energy > 0 && this.room.towers.length > 0) {
+                    let tower = this.pos.findClosestByRange(this.room.towers);
+                    if (tower) {
+                        moveTarget = tower;
                     }
                 }
             }

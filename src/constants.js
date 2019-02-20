@@ -52,7 +52,7 @@ const constants = {
         }
     },
 
-    'CREEP_NAME_LENGTH': 4,
+    'CREEP_NAME_LENGTH': 5,
     'VOWELS': ['a', 'e', 'i', 'o', 'u'],
     'CONSONANTS': ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'qu', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z', 'tt', 'ch', 'sh']
 };

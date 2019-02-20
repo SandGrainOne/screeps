@@ -122,7 +122,7 @@ class Labs {
             return;
         }
 
-        if (this.compoundOne.mineralAmount <= 0 || this.compoundTwo.mineralAmount <= 0) {
+        if (!this.compoundOne || !this.compoundTwo || this.compoundOne.mineralAmount <= 0 || this.compoundTwo.mineralAmount <= 0) {
             return;
         }
 

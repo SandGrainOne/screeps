@@ -12,7 +12,7 @@ class SquadBase {
     constructor (name) {
         this._name = name;
 
-        if (!_.isUndefined(Memory.squads[this._name])) {
+        if (_.isUndefined(Memory.squads[this._name])) {
             Memory.squads[this._name] = {};
         }
         this._mem = Memory.squads[this._name];
@@ -31,6 +31,10 @@ class SquadBase {
 
         this._cache = {};
         this._cache.creeps = {};
+    }
+
+    get name () {
+        return this._name;
     }
 
     /**
@@ -88,6 +92,9 @@ class SquadBase {
         this._cache.creeps[creepJob].push(creepName);
     }
 
+    /**
+     * Perform squad related logic.
+     */
     run () {
         this.isRetired = true;
     }
