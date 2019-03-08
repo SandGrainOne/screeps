@@ -41,9 +41,23 @@ module.exports.loop = function () {
             };
         }
 
+        if (room.name === 'E75N83') {
+            rule = {
+                'spawnName': 'IcichoStad',
+                'homeRoom': 'E76N83',
+                'jobs': {
+                    'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
+                    'settler': { 'count': room.jobs.settlers, 'body': 'LLMM' },
+                    // 'builder': { 'count': 1, 'body': 'WCCMMM' },
+                    'hauler': { 'count': 2, 'body': 'WCCCCCCCCCCCCCCMMMMMMMMMMMMMMMM' },
+                    'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' }
+                }
+            };
+        }
+
         if (room.name === 'E76N83') {
             rule = {
-                'spawnName': 'Molde',
+                'spawnName': 'Jessheim',
                 'homeRoom': room.name,
                 'jobs': {
                     // 'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
@@ -64,9 +78,10 @@ module.exports.loop = function () {
                 'spawnName': 'Hoksund',
                 'homeRoom': 'E74N81',
                 'jobs': {
+                    'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
                     'settler': { 'count': room.jobs.settlers, 'body': 'LLMM' },
-                    'builder': { 'count': 1, 'body': 'WCCMMM' },
-                    'hauler': { 'count': 2, 'body': 'WCCCCCCCCCMMMMM' },
+                    // 'builder': { 'count': 1, 'body': 'WCCMMM' },
+                    'hauler': { 'count': 2, 'body': 'WCCCCCCCCCCCCCCMMMMMMMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' }
                 }
             };
@@ -337,7 +352,7 @@ module.exports.loop = function () {
                 'spawnName': 'Moss',
                 'homeRoom': 'E77N85',
                 'jobs': {
-                    'builder': { 'count': 1, 'body': 'WWCCCCCCCCMMMMMMMMMM' },
+                    'builder': { 'count': 1, 'body': 'WWCCCMMMMM' },
                     'settler': { 'count': room.jobs.settlers, 'body': 'LLMM' },
                     'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
                     'hauler': { 'count': 2, 'body': 'WCCCCCCCCCCCCCCMMMMMMMMMMMMMMMM' },

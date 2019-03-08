@@ -271,6 +271,15 @@ class CreepBase {
                 // Forget current path.
                 options.reusePath = 1;
             }
+            else if (this._mem.stuckCounter > 1) {
+                if (this._mem._move && this._mem._move.path) {
+                    let path = Room.deserializePath(this._mem._move.path);
+                    let creeps = this._creep.room.lookForAt(LOOK_CREEPS, path[0].x, path[0].y);
+                    if (creeps.length > 0 && Game.creeps[creeps[0].name]) {
+                        creeps[0].move(creeps[0].pos.getDirectionTo(this.pos));
+                    }
+                }
+            }
         }
         else {
             delete this._mem.stuckCounter;

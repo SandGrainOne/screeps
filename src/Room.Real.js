@@ -296,13 +296,19 @@ class RoomReal extends RoomBase {
     }
 
     /**
-     * Gets an array with all flags in the room. Empty if there are no flags.
+     * Gets an object with all flags in the room grouped by the primary color.
      */
     get flags () {
         if (!_.isUndefined(this._cache.flags)) {
             return this._cache.flags;
         }
-        this._cache.flags = this._room.find(FIND_FLAGS);
+        let flagsArray = this._room.find(FIND_FLAGS);
+        if (flagsArray.length > 0) {
+            this._cache.flags = _.groupBy(flagsArray, 'color');
+        }
+        else {
+            this._cache.flags = {};
+        }
         return this._cache.flags;
     }
 
@@ -426,6 +432,16 @@ class RoomReal extends RoomBase {
     }
 
     checkRepairs (structure) {
+        let greyFlags = this.flags[COLOR_GREY];
+
+        if (_.isArray(greyFlags)) {
+            for (let greyFlag of greyFlags) {
+                if (structure.pos.isEqualTo(greyFlag)) {
+                    return;
+                }
+            }
+        }
+
         let hitsMax = 0;
         let wallSize = 3000000;
 
@@ -442,7 +458,7 @@ class RoomReal extends RoomBase {
                 break;
             case STRUCTURE_ROAD:
                 // Allow roads to decay a little bit. This is so that a builder would need to spend a
-                // litle bit more time and energy repairing before moving on. This to reduce travel time.
+                // little bit more time and energy repairing before moving on. This to reduce travel time.
                 hitsMax = structure.hitsMax - 1000;
                 break;
             case STRUCTURE_CONTAINER:
