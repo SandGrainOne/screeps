@@ -368,6 +368,8 @@ class RoomReal extends RoomBase {
         let labs = [];
         let links = [];
 
+        this.clearFlags();
+
         for (let source of this._room.find(FIND_SOURCES)) {
             this.remember(source.id, 'source');
         }
@@ -473,6 +475,19 @@ class RoomReal extends RoomBase {
 
         if (structure.hits < hitsMax) {
             this.remember(structure.id, 'repair');
+        }
+    }
+
+    clearFlags () {
+        let greyFlags = this.flags[COLOR_GREY];
+
+        if (_.isArray(greyFlags)) {
+            for (let greyFlag of greyFlags) {
+                let foundStructures = greyFlag.pos.lookFor(LOOK_STRUCTURES);
+                if (foundStructures.length === 0) {
+                    greyFlag.remove();
+                }
+            }
         }
     }
 
