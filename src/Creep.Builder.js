@@ -117,13 +117,13 @@ class CreepBuilder extends CreepWorker {
         if (this.energy >= this.capacity) {
             this.task = 'work';
 
-            if (this.target === null && this.atWork) {
+            if (this.target === null) {
                 this.target = this.findTarget();
             }
         }
 
         if (this.task === 'work') {
-            if (!this.atWork) {
+            if (!this.atWork && this.target === null) {
                 moveTarget = this.moveToRoom(this._mem.rooms.work, false);
             }
             else {
@@ -172,17 +172,22 @@ class CreepBuilder extends CreepWorker {
     }
 
     findTarget () {
+        let room = this.atWork ? this.room : this.workRoom;
+        if (!room.isVisible) {
+            return null;
+        }
+
         if (Game.time % 3 === 0) {
-            if (this.room.constructionSites.length > 0) {
-                for (let site of this.room.constructionSites) {
+            if (room.constructionSites.length > 0) {
+                for (let site of room.constructionSites) {
                     return site;
                 }
             }
         }
 
-        if (this.room.repairs.length > 0) {
-            for (let repairs of this.room.repairs) {
-                if (this.room.reserve(repairs.id, this.job, this.name)) {
+        if (room.repairs.length > 0) {
+            for (let repairs of room.repairs) {
+                if (room.reserve(repairs.id, this.job, this.name)) {
                     return repairs;
                 }
             }

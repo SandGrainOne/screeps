@@ -30,7 +30,14 @@ class CreepSettler extends CreepWorker {
         }
 
         if (!this.atWork) {
-            this.moveToRoom(this._mem.rooms.work);
+            let room = this.atWork ? this.room : this.workRoom;
+
+            if (room.isVisible && room.controller) {
+                this.moveTo(room.controller);
+            }
+            else {
+                this.moveToRoom(this._mem.rooms.work);
+            }
         }
         else {
             if (this.room.controller && !this.pos.isNearTo(this.room.controller)) {

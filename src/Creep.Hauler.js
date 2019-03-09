@@ -218,22 +218,25 @@ class CreepHauler extends CreepWorker {
                 }
             }
 
-            if (!moveTarget && !this.atWork) {
-                moveTarget = this.moveToRoom(this._mem.rooms.work, false);
-            }
-
             if (!moveTarget) {
-                if (this.room.containers.length > 0) {
-                    for (let container of this.room.containers) {
-                        if (_.sum(container.store) > 400) {
-                            if (this.room.reserve(container.id, this.job, this.name)) {
-                                this._mem.work.target = container.id;
-                                moveTarget = container;
-                                break;
+                let room = this.atWork ? this.room : this.workRoom;
+                if (room.isVisible) {
+                    if (room.containers.length > 0) {
+                        for (let container of room.containers) {
+                            if (_.sum(container.store) > 400) {
+                                if (room.reserve(container.id, this.job, this.name)) {
+                                    this._mem.work.target = container.id;
+                                    moveTarget = container;
+                                    break;
+                                }
                             }
                         }
                     }
                 }
+            }
+
+            if (!moveTarget && !this.atWork) {
+                moveTarget = this.moveToRoom(this._mem.rooms.work, false);
             }
 
             if (!moveTarget && !this.isRemoting && this.isHome && this.load < this.capacity) {

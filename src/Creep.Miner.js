@@ -8,19 +8,24 @@ let CreepWorker = require('./Creep.Worker');
  */
 class CreepMiner extends CreepWorker {
     get ResourceNode () {
+        let room = this.atWork ? this.room : this.workRoom;
+        if (!room.isVisible) {
+            return null;
+        }
+
         if (this._mem.resourceid) {
             let source = Game.getObjectById(this._mem.resourceid);
             if (source && (source.energy > 0 || (source.ticksToRegeneration || 300) < 50)) {
-                if (this.isRetired || this.room.reserve(source.id, this.job, this.name)) {
+                if (this.isRetired || room.reserve(source.id, this.job, this.name)) {
                     return source;
                 }
             }
         }
 
-        if (this.room.sources.length > 0) {
-            for (let source of this.room.sources) {
+        if (room.sources.length > 0) {
+            for (let source of room.sources) {
                 if (source && (source.energy > 0 || (source.ticksToRegeneration || 300) < 50)) {
-                    if (this.room.reserve(source.id, this.job, this.name)) {
+                    if (room.reserve(source.id, this.job, this.name)) {
                         this._mem.resourceid = source.id;
                         return source;
                     }
@@ -132,7 +137,13 @@ class CreepMiner extends CreepWorker {
 
         if (this.load < this.capacity) {
             if (!moveTarget && !this.atWork) {
-                moveTarget = this.moveToRoom(this._mem.rooms.work, false);
+                let resourceNode = this.ResourceNode;
+                if (resourceNode) {
+                    moveTarget = resourceNode;
+                }
+                else {
+                    moveTarget = this.moveToRoom(this._mem.rooms.work, false);
+                }
             }
 
             if (!moveTarget) {

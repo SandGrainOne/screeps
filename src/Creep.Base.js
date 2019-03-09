@@ -269,7 +269,7 @@ class CreepBase {
                 // The thing blocking the path is probably a creep.
                 options.ignoreCreeps = false;
                 // Forget current path.
-                options.reusePath = 1;
+                options.reusePath = 0;
             }
             else if (this._mem.stuckCounter > 1) {
                 if (this._mem._move && this._mem._move.path) {

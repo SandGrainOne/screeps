@@ -14,7 +14,13 @@ class CreepAttacker extends CreepSoldier {
      */
     work () {
         if (!this.atWork) {
-            this.moveToRoom(this._mem.rooms.work);
+            let flagAttack = this.findAttackFlag();
+            if (flagAttack) {
+                this.moveTo(flagAttack);
+            }
+            else {
+                this.moveToRoom(this._mem.rooms.work);
+            }
             return true;
         }
 
@@ -47,14 +53,25 @@ class CreepAttacker extends CreepSoldier {
             return true;
         }
 
-        // Attack ?
-        let flagAttack = this.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_RED });
-
+        let flagAttack = this.findAttackFlag();
         if (flagAttack && !this.pos.isNearTo(flagAttack)) {
             this.moveTo(flagAttack);
         }
 
         return true;
+    }
+
+    findAttackFlag () {
+        let room = this.atWork ? this.room : this.workRoom;
+        if (!room.isVisible) {
+            return null;
+        }
+
+        let redFlags = room.flags[COLOR_RED];
+        if (_.isArray(redFlags) && redFlags.length > 0) {
+            return redFlags[0];
+        }
+        return null;
     }
 }
 

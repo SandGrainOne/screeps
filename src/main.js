@@ -104,6 +104,20 @@ module.exports.loop = function () {
             };
         }
 
+        if (room.name === 'E71N88') {
+            rule = {
+                'spawnName': 'Eiker',
+                'homeRoom': 'E71N87',
+                'jobs': {
+                    'settler': { 'count': room.jobs.settlers, 'body': 'LLMM' },
+                    'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
+                    'builder': { 'count': 2, 'body': 'WWCCCMMMMM' },
+                    'hauler': { 'count': 2, 'body': 'WCCCCCCCCCCCCCCCMMMMMMMM' },
+                    'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMM' }
+                }
+            };
+        }
+
         if (room.name === 'E71N87') {
             rule = {
                 'spawnName': 'Otta',
