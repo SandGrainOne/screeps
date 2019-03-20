@@ -2,10 +2,18 @@
 
 let C = require('./constants');
 
-global.brain = {
+global.os = {};
+
+os.createSquad = function (name, type) {
+    Memory.squads[name] = {
+        'type': type,
+        'isRetired': false,
+        'isWaiting': true,
+        'isActive': false
+    };
 };
 
-brain.generateName = function () {
+os.generateName = function () {
     let isVowel = false;
     let charArray = C.VOWELS;
     let name = charArray[Math.round(Math.random() * (charArray.length - 1))].toUpperCase();
@@ -26,11 +34,11 @@ brain.generateName = function () {
     return name;
 };
 
-brain.generateCreepName = function () {
+os.generateCreepName = function () {
     let name = 'notaname';
     let nameComplete = false;
     do {
-        name = brain.generateName();
+        name = os.generateName();
         nameComplete = !Empire.creeps.all[name];
     }
     while (!nameComplete);

@@ -338,7 +338,7 @@ class CreepHauler extends CreepWorker {
         // TODO: Use the number of containers and the size of sources instead of distance?
         // TODO: One container might not be used all the time (Minerals)
 
-        // console.log(room.name + ' distance: ' + distance);
+        // os.log.info(room.name + ' distance: ' + distance);
 
         // let job = {};
         // job.number = 0;

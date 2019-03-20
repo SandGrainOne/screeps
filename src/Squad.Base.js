@@ -5,11 +5,11 @@
  */
 class SquadBase {
     /**
-     * Initializes a new instance of the SquadBase class with the specified name.
+     * Initializes the SquadBase instance with the specified name.
      * 
      * @param {string} name - The name of the squad
      */
-    constructor (name) {
+    init (name) {
         this._name = name;
 
         if (_.isUndefined(Memory.squads[this._name])) {
@@ -28,9 +28,6 @@ class SquadBase {
         if (_.isUndefined(this._mem.isActive)) {
             this._mem.isActive = false;
         }
-
-        this._cache = {};
-        this._cache.creeps = {};
     }
 
     get name () {
@@ -77,19 +74,6 @@ class SquadBase {
      */
     set isActive (value) {
         this._mem.isActive = value;
-    }
-
-    /**
-     * Add a creep to the squad. Mostly used during tick preparation.
-     * 
-     * @param {string} creepJob - The type of job performed by the creep
-     * @param {string} creepName - The name of the Creep being added
-     */
-    addCreep (creepJob, creepName) {
-        if (!_.isArray(this._cache.creeps[creepJob])) {
-            this._cache.creeps[creepJob] = [];
-        }
-        this._cache.creeps[creepJob].push(creepName);
     }
 
     /**

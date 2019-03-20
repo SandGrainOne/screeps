@@ -51,6 +51,13 @@ class RoomBase {
     }
 
     /**
+     * Gets a value indicating whether the room is owned or not.
+     */
+    get isMine () {
+        return false;
+    }
+
+    /**
      * Gets the state of the room.
      */
     get state () {

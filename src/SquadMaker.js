@@ -24,7 +24,7 @@ class SquadMaker {
         }
 
         if (!squad) {
-            console.log('Squad ' + squadName + ' is of an unknown type: ' + squadType);
+            os.log.warning('Squad ' + squadName + ' is of an unknown type: ' + squadType);
             squad = new SquadBase(squadName);
         }
 

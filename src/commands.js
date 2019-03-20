@@ -1,5 +1,6 @@
 'use strict';
 
+Empire.createCreep('settler', null, 'Larvik', 'TTTTTTTTTTTTTTTTTTTM', 'E79N85', 'E81N84');
 Empire.createCreep('settler', null, 'Elverum', 'LLMM', 'E79N85', 'E79N84');
 Empire.createCreep('chemist', null, 'Askim', 'CCCCMM', 'E78N85', 'E78N85');
 Empire.createCreep('attacker', null, 'Askim', 'TTTTTTTTTTMMMMMMMMMMAMAMAMAMAMAMAMAMAMAM', 'E77N85', 'E75N85');

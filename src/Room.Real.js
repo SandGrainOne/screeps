@@ -445,7 +445,7 @@ class RoomReal extends RoomBase {
         }
 
         let hitsMax = 0;
-        let wallSize = 3000000;
+        let wallSize = 3100000;
 
         switch (structure.structureType) {
             case STRUCTURE_WALL:
@@ -459,7 +459,7 @@ class RoomReal extends RoomBase {
                 }
                 break;
             case STRUCTURE_ROAD:
-                // Allow roads to decay a little bit. This is so that a builder would need to spend a
+                // Allow roads to decay a little bit. This is so that builders would need to spend a
                 // little bit more time and energy repairing before moving on. This to reduce travel time.
                 hitsMax = structure.hitsMax - 1000;
                 break;

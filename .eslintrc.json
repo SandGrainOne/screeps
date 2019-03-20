@@ -8,7 +8,7 @@
     },
     "globals": {
         "Empire": true,
-        "brain": true
+        "os": true
     },
     "rules":{
         "semi": ["error", "always"],

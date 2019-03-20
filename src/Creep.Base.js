@@ -215,7 +215,8 @@ class CreepBase {
             let coords = C.EXIT[this.room.name][roomName];
             moveTarget = new RoomPosition(coords.x, coords.y, this.room.name);
         }
-        else {
+
+        if (moveTarget === null) {
             moveTarget = new RoomPosition(24, 24, roomName);
         }
 
@@ -266,9 +267,7 @@ class CreepBase {
         if (this.pos.x === previousPos[0] && this.pos.y === previousPos[1]) {
             this._mem.stuckCounter = (this._mem.stuckCounter || 0) + 1;
             if (this._mem.stuckCounter > 3) {
-                // The thing blocking the path is probably a creep.
                 options.ignoreCreeps = false;
-                // Forget current path.
                 options.reusePath = 0;
             }
             else if (this._mem.stuckCounter > 1) {

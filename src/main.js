@@ -1,12 +1,13 @@
 'use strict';
 
-require('./brain');
+require('./os');
+require('./os.logger');
 
 let code = require('./code');
 let Empire = require('./Empire');
 
 const load = _.round(Game.cpu.getUsed());
-console.log('Script reloaded. Tick:', Game.time, ', Load: ' + load, ', Bucket: ' + Game.cpu.bucket);
+os.log.warning('Script reloaded. CPU used: ' + load + ', Bucket: ' + Game.cpu.bucket);
 
 // Ensure that the empire memory and state is up to date with what the code expects.
 code.update();
@@ -29,6 +30,20 @@ module.exports.loop = function () {
         room.createJobs();
 
         let rule = null;
+
+        if (room.name === 'E69N81') {
+            rule = {
+                'spawnName': 'Ogidosgrad',
+                'homeRoom': room.name,
+                'jobs': {
+                    'builder': { 'count': 2, 'body': 'WWCCCMMMMM' },
+                    'upgrader': { 'count': 6, 'body': 'WWCCCMMMMM' },
+                    'hauler': { 'count': 4, 'body': 'CCCCCMMMMM' },
+                    'miner': { 'count': room.jobs.miners, 'body': 'WWWWWCCMMMM' },
+                    'refueler': { 'count': room.jobs.refuelers, 'body': 'CCCCCMMMMM' }
+                }
+            };
+        }
 
         if (room.name === 'E76N84') {
             rule = {
@@ -111,7 +126,7 @@ module.exports.loop = function () {
                 'jobs': {
                     'settler': { 'count': room.jobs.settlers, 'body': 'LLMM' },
                     'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
-                    'builder': { 'count': 2, 'body': 'WWCCCMMMMM' },
+                    'builder': { 'count': 1, 'body': 'WWCCCMMMMM' },
                     'hauler': { 'count': 2, 'body': 'WCCCCCCCCCCCCCCCMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMM' }
                 }
@@ -534,6 +549,16 @@ module.exports.loop = function () {
             };
         }
 
+        if (room.name === 'E81N84x') {
+            rule = {
+                'spawnName': 'Larvik',
+                'homeRoom': 'E79N85',
+                'jobs': {
+                    'settler': { 'count': 1, 'body': 'TTTTTTTTTTTTTTTTTTTM' }
+                }
+            };
+        }
+
         if (room.name === 'E79N84') {
             rule = {
                 'spawnName': 'Elverum',
@@ -585,10 +610,6 @@ module.exports.loop = function () {
         if (room.isMine) {
             room.performSpawning();
         }
-    }
-
-    for (let squad of empire.squads.values()) {
-        squad.run();
     }
 
     for (let creepName in empire.creeps.all) {

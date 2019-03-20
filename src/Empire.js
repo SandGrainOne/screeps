@@ -1,7 +1,6 @@
 'use strict';
 
 let CreepMaker = require('./CreepMaker');
-let SquadMaker = require('./SquadMaker');
 
 let RoomBase = require('./Room.Base');
 let RoomReal = require('./Room.Real');
@@ -26,8 +25,6 @@ class Empire {
         this._creeps.all = {};
 
         this._roomsToBeAnalyzed = [];
-
-        this._squads = new Map();
     }
 
     /**
@@ -35,13 +32,6 @@ class Empire {
      */
     get rooms () {
         return this._rooms;
-    }
-
-    /**
-     * Get an iterable collection of squads.
-     */
-    get squads () {
-        return this._squads;
     }
 
     /**
@@ -88,16 +78,6 @@ class Empire {
             }
         }
 
-        for (let squadName in Memory.squads) {
-            let squad = SquadMaker.create(squadName, Memory.squads[squadName].type);
-            if (!squad.isRetired) {
-                this.squads.set(squadName, squad);
-            }
-            else {
-                delete Memory.squads[squadName];
-            }
-        }
-
         // Loop through all creeps in memory and sort them to quick access buckets.
         for (let creepName in Memory.creeps) {
             let creep = Game.creeps[creepName];
@@ -114,13 +94,6 @@ class Empire {
             if (smartCreep.isRetired) {
                 // Don't count creeps that are retired. They should be replaced.
                 continue;
-            }
-
-            if (smartCreep.squad) {
-                let squad = this.squads.get(smartCreep.squad);
-                if (squad) {
-                    squad.addCreep(smartCreep.job, smartCreep.name);
-                }
             }
 
             let job = smartCreep.job;
@@ -210,10 +183,10 @@ class Empire {
         }
 
         if (richestAmount - poorestAmount > 100000) {
-            // this.print(richest.name + '.terminal.store.energy: ' + richest.terminal.store.energy);
-            // this.print(poorest.name + '.terminal.storeCapacity - _.sum(' + poorest.name + '.terminal.store): ' + (poorest.terminal.storeCapacity - _.sum(poorest.terminal.store)));
+            // os.log.info(richest.name + '.terminal.store.energy: ' + richest.terminal.store.energy);
+            // os.log.info(poorest.name + '.terminal.storeCapacity - _.sum(' + poorest.name + '.terminal.store): ' + (poorest.terminal.storeCapacity - _.sum(poorest.terminal.store)));
             if (richest.terminal.store.energy > 30000 && poorest.terminal.store.energy < 100000 && poorest.terminal.storeCapacity - _.sum(poorest.terminal.store) > 20000) {
-                this.print('Transfering 10000 energy from ' + richest.name + '(' + richestAmount + ') to ' + poorest.name + '(' + poorestAmount + ')');
+                os.log.info('Transfering 10000 energy from ' + richest.name + '(' + richestAmount + ') to ' + poorest.name + '(' + poorestAmount + ')');
                 richest.terminal.send(RESOURCE_ENERGY, 10000, poorest.name);
             }
         }
@@ -239,25 +212,15 @@ class Empire {
         return CreepMaker.createCreep(job, task, spawnName, bodyCode, homeRoom, workRoom);
     }
 
-    print (input) {
-        if (_.isObject(input)) {
-            input = JSON.stringify(input);
-        }
-
-        input = '<font style="color:#999999">' + input + '</font>'; // e6de99 - "yellow"
-
-        console.log(input);
-    }
-
     checkRoomMemory () {
         for (let room of this.rooms.values()) {
             if (!_.isUndefined(room._mem.resources)) {
-                console.log('Room: ' + room.name);
+                os.log.info('Room: ' + room.name);
                 return;
             }
         }
 
-        console.log('Found no issues');
+        os.log.info('Found no issues');
     }
 
     findSpawn (roomName) {
@@ -272,7 +235,7 @@ class Empire {
                 }
             }
 
-            console.log('Distance from ' + spawnName + ' to ' + roomName + ': ' + distance);
+            os.log.info('Distance from ' + spawnName + ' to ' + roomName + ': ' + distance);
         }
     }
 
