@@ -85,6 +85,17 @@ class RoomBase {
         return this._mem.jobs;
     }
 
+    * ownedRooms () {
+        if (_.isUndefined(this._mem.ownedRooms)) {
+            return [];
+        }
+
+        for (const roomDistance of this._mem.ownedRooms) {
+            const roomName = roomDistance.name;
+            yield Empire.getRoom(roomName);
+        }
+    }
+
     getJobsFor (jobName) {
         if (!this._mem.jobs || !this._mem.jobs[jobName + 's']) {
             return 0;
@@ -93,7 +104,6 @@ class RoomBase {
     }
 
     createJobs () {
-
     }
 }
 

@@ -49,7 +49,7 @@ class CreepMaker {
     /**
      * Trigger the spawning of a new creep.
      */
-    static createCreep (job, task, spawnName, bodyCode, homeRoom, workRoom) {
+    static createCreep (job, spawnName, bodyCode, homeRoom, workRoom) {
         if (!Game.spawns[spawnName]) {
             os.log.error('No spawn with the name "' + spawnName + '".');
             return ERR_BUSY;
@@ -59,7 +59,7 @@ class CreepMaker {
         let memory = {
             'job': job,
             'work': {
-                'task': task
+                'task': null
             },
             'rooms': {
                 'home': homeRoom,

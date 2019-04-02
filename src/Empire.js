@@ -24,6 +24,7 @@ class Empire {
         this._creeps = {};
         this._creeps.all = {};
 
+        this._roomsOwned = [];
         this._roomsToBeAnalyzed = [];
     }
 
@@ -32,6 +33,13 @@ class Empire {
      */
     get rooms () {
         return this._rooms;
+    }
+
+    /**
+     * Get a Map with all known rooms.
+     */
+    get roomsOwned () {
+        return this._roomsOwned;
     }
 
     /**
@@ -59,6 +67,10 @@ class Empire {
             let room = new RoomReal(Game.rooms[roomName]);
 
             this.rooms.set(roomName, room);
+
+            if (room.isMine) {
+                this._roomsOwned.push(room.name);
+            }
 
             if (Game.time - room.tickAnalyzed > 20) {
                 if (this._roomsToBeAnalyzed.length > 0) {
@@ -208,14 +220,15 @@ class Empire {
         } while (count > 0);
     }
 
-    createCreep (job, task, spawnName, bodyCode, homeRoom, workRoom) {
-        return CreepMaker.createCreep(job, task, spawnName, bodyCode, homeRoom, workRoom);
+    createCreep (job, spawnName, bodyCode, homeRoom, workRoom) {
+        return CreepMaker.createCreep(job, spawnName, bodyCode, homeRoom, workRoom);
     }
 
     checkRoomMemory () {
         for (let room of this.rooms.values()) {
-            if (!_.isUndefined(room._mem.resources)) {
+            if (!_.isUndefined(room._mem.neighbours)) {
                 os.log.info('Room: ' + room.name);
+                delete room._mem.neighbours;
                 return;
             }
         }
@@ -248,6 +261,13 @@ class Empire {
         });
 
         return uuid;
+    }
+
+    testOwnedRooms (roomName) {
+        let room = this.getRoom(roomName);
+        for (const neighbour of room.ownedRooms()) {
+            os.log.info('Neighbour: ' + neighbour.name);
+        }
     }
 }
 

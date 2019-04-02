@@ -430,6 +430,28 @@ class RoomReal extends RoomBase {
             delete this._mem.tickClaimed;
         }
 
+        let roomDistances = [];
+
+        for (let roomName of Empire.roomsOwned) {
+            if (this.name === roomName) {
+                // Don't count self
+                continue;
+            }
+
+            let distance = Game.map.getRoomLinearDistance(this.name, roomName);
+            if (distance < 5) {
+                distance = Game.map.findRoute(this.name, roomName).length;
+            }
+            let roomDistance = {
+                'name': roomName,
+                'distance': distance
+            };
+            roomDistances.push(roomDistance);
+        }
+
+        roomDistances.sort((a, b) => a.distance - b.distance);
+        this._mem.ownedRooms = roomDistances;
+
         this.tickAnalyzed = Game.time;
     }
 
@@ -445,7 +467,7 @@ class RoomReal extends RoomBase {
         }
 
         let hitsMax = 0;
-        let wallSize = 3100000;
+        let wallSize = 3300000;
 
         switch (structure.structureType) {
             case STRUCTURE_WALL:
@@ -586,33 +608,6 @@ class RoomReal extends RoomBase {
         }
         else {
             this._spawn.normal.push(rule);
-        }
-    }
-
-    performSpawning () {
-        if (this._spawn.high.length <= 0 && this._spawn.normal.length <= 0) {
-            return;
-        }
-
-        for (let spawn of this.spawns) {
-            if (spawn.spawning) {
-                continue;
-            }
-
-            let rule = null;
-            if (this._spawn.high.length > 0) {
-                rule = this._spawn.high.shift();
-            }
-
-            if (!rule && this._spawn.normal.length > 0) {
-                rule = this._spawn.normal.shift();
-            }
-
-            if (!rule) {
-                return;
-            }
-
-            Empire.createCreep(rule.job, null, spawn.name, rule.body, this.name, rule.workRoom);
         }
     }
 
