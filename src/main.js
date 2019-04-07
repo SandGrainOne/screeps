@@ -54,7 +54,7 @@ module.exports.loop = function () {
                 'homeRoom': 'E76N83',
                 'jobs': {
                     // 'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWCCMMMMMM' },
-                    'builder': { 'count': 1, 'body': 'WCCCCCCMMMMMM' },
+                    'builder': { 'count': 1, 'body': 'WCCCCMMMMM' },
                     'hauler': { 'count': 3, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWWCCCMMMMM' },
                     'patroler': { 'count': 1, 'body': 'MMMMMMMMMMMMMMMMMMMMMMMMRRRRRRRRRRRRRRRRRRRRMHHHHH' }
@@ -69,7 +69,6 @@ module.exports.loop = function () {
                 'jobs': {
                     'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
                     'settler': { 'count': room.jobs.settlers, 'body': 'LLMM' },
-                    // 'builder': { 'count': 1, 'body': 'WCCMMM' },
                     'hauler': { 'count': 2, 'body': 'WCCCCCCCCCCCCCCMMMMMMMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' }
                 }
@@ -100,7 +99,6 @@ module.exports.loop = function () {
                 'jobs': {
                     'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
                     'settler': { 'count': room.jobs.settlers, 'body': 'LLMM' },
-                    // 'builder': { 'count': 1, 'body': 'WCCMMM' },
                     'hauler': { 'count': 2, 'body': 'WCCCCCCCCCCCCCCMMMMMMMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' }
                 }
@@ -319,7 +317,7 @@ module.exports.loop = function () {
                 'jobs': {
                     'settler': { 'count': room.jobs.settlers, 'body': 'LLMM' },
                     'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
-                    'hauler': { 'count': 1, 'body': 'CCCCCCCCCCMMMMMMMMMM' },
+                    'hauler': { 'count': 1, 'body': 'WCCCCCCCCCMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' }
                 }
             };
@@ -332,7 +330,7 @@ module.exports.loop = function () {
                 'jobs': {
                     'settler': { 'count': room.jobs.settlers, 'body': 'LLMM' },
                     'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
-                    'hauler': { 'count': 1, 'body': 'CCCCCCCCCCMMMMMMMMMM' },
+                    'hauler': { 'count': 1, 'body': 'WCCCCCCCCCMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' }
                 }
             };
@@ -482,8 +480,8 @@ module.exports.loop = function () {
                 'spawnName': 'Huske',
                 'homeRoom': room.name,
                 'jobs': {
-                    // 'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
-                    // 'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWCCCMMMMMMMMM' },
+                    'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
+                    'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWCCCMMMMMMMMM' },
                     'linker': { 'count': room.jobs.linkers, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
                     'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
                     'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
@@ -499,8 +497,8 @@ module.exports.loop = function () {
                 'spawnName': 'Bergen',
                 'homeRoom': room.name,
                 'jobs': {
-                    // 'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
-                    // 'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWCCCMMMMMMMMM' },
+                    'chemist': { 'count': 1, 'body': 'CCCCCCCCMMMM' },
+                    'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWCCCMMMMMMMMM' },
                     'linker': { 'count': room.jobs.linkers, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
                     'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
                     'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
@@ -570,7 +568,7 @@ module.exports.loop = function () {
                 'homeRoom': 'E79N85',
                 'jobs': {
                     'settler': { 'count': room.jobs.settlers, 'body': 'LLMM' },
-                    'attacker': { 'count': 2, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
+                    'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
                     'hauler': { 'count': 3, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' }
                 }
@@ -595,9 +593,9 @@ module.exports.loop = function () {
         }
 
         if (rule) {
-            let spawn = Game.spawns[rule.spawnName];
+            let spawn = empire.findSpawn(rule.homeRoom); // Game.spawns[rule.spawnName];
 
-            if (!_.isUndefined(spawn) && !spawn.spawning) {
+            if (!_.isNull(spawn) && !spawn.spawning) {
                 let roomPop = empire.creeps[room.name];
 
                 if (_.isUndefined(roomPop)) {

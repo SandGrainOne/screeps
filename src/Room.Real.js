@@ -467,7 +467,7 @@ class RoomReal extends RoomBase {
         }
 
         let hitsMax = 0;
-        let wallSize = 3300000;
+        let wallSize = 3500000;
 
         switch (structure.structureType) {
             case STRUCTURE_WALL:

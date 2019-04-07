@@ -41,7 +41,7 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.room.name === 'E77N88') {
-            reaction = { compoundOne: RESOURCE_HYDROGEN, compoundTwo: RESOURCE_OXYGEN };
+            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_GHODIUM_ALKALIDE };
         }
 
         if (this.room.name === 'E77N85') {

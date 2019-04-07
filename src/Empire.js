@@ -237,6 +237,24 @@ class Empire {
     }
 
     findSpawn (roomName) {
+        let room = this.getRoom(roomName);
+        if (room.isVisible) {
+            if (room.isMine) {
+                for (const spawn of room.spawns) {
+                    if (!spawn.spawning) {
+                        return spawn;
+                    }
+                }
+            }
+            else {
+                os.log.warning('Cannot spawn creeps in room: ' + roomName);
+            }
+        }
+
+        return null;
+    }
+
+    findSpawnPrint (roomName) {
         for (let spawnName in Game.spawns) {
             let spawn = Game.spawns[spawnName];
 

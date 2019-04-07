@@ -95,19 +95,17 @@ class CreepHauler extends CreepWorker {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work () {
-        // If possible, perform road repairs on the move.
         if (this.strength > 0 && this.energy > 0) {
-            let foundStructures = this.pos.lookFor(LOOK_STRUCTURES);
-            if (foundStructures.length > 0) {
-                for (let structure of foundStructures) {
-                    if (structure.structureType === STRUCTURE_ROAD) {
-                        if (structure.hits < structure.hitsMax) {
-                            if (this.repair(structure) === OK) {
-                                break;
-                            }
-                        }
-                    }
-                }
+            let structure = this.getFirstInRange(this.room.repairs, 3);
+            if (structure) {
+                this.repair(structure);
+            }
+        }
+
+        if (this.strength > 0 && this.energy > 0) {
+            let constructionSite = this.getFirstInRange(this.room.constructionSites, 3);
+            if (constructionSite) {
+                this.build(constructionSite);
             }
         }
 

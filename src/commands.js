@@ -9,3 +9,5 @@ Empire.createCreep('attacker', 'Namsos', 'AAAAAAAAAAMMMMMMMMMMAMAMAMAMAMAMAMAMAM
 Empire.createCreep('builder', 'Larvik', 'WWCCCCMMM', 'E79N85', 'E79N84');
 Empire.createCreep('patroler', 'Kirkenes', 'MMMMARRHHM', 'E77N85', 'E76N85');
 Empire.createCreep('patroler', 'Kirkenes', 'MMMMMMMMMMMMMMMMMMMMMMMMRRRRRRRRRRRRRRRRRRRRMHHHHH', 'E77N85', 'E76N85');
+
+Game.market.deal('5ca8b46be08e4d61b0bfcb55', 1000, 'E78N85');
