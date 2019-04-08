@@ -84,15 +84,25 @@ class CreepChemist extends CreepWorker {
         }
 
         if (emptyCreep) {
-            if (this.pos.isNearTo(this.room.terminal)) {
+            let deliveryTarget = this.room.terminal;
+
+            if (this.carry[RESOURCE_POWER]) {
+                if (this.room.powerSpawn) {
+                    if (this.room.powerSpawn.power < this.room.powerSpawn.powerCapacity * 0.5) {
+                        deliveryTarget = this.room.powerSpawn;
+                    }
+                }
+            }
+
+            if (this.pos.isNearTo(deliveryTarget)) {
                 for (let resourceType in this.carry) {
-                    if (this.transfer(this.room.terminal, resourceType) === OK) {
+                    if (this.transfer(deliveryTarget, resourceType) === OK) {
                         break;
                     }
                 }
             }
             else {
-                this.moveTo(this.room.terminal);
+                this.moveTo(deliveryTarget);
             }
             return true;
         }
@@ -182,6 +192,18 @@ class CreepChemist extends CreepWorker {
                     }
                     else {
                         this.moveTo(this.room.storage);
+                    }
+                }
+            }
+            if (this.room.terminal.store.power) {
+                if (this.room.powerSpawn) {
+                    if (this.room.powerSpawn.power < this.room.powerSpawn.powerCapacity * 0.5) {
+                        if (this.pos.isNearTo(this.room.terminal)) {
+                            this.withdraw(this.room.terminal, RESOURCE_POWER);
+                        }
+                        else {
+                            this.moveTo(this.room.terminal);
+                        }
                     }
                 }
             }

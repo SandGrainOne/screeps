@@ -263,6 +263,20 @@ class RoomReal extends RoomBase {
     }
 
     /**
+     * Gets the room power spawn if it exists.
+     * 
+     * @returns {StructurePowerSpawn} The power spawn of the room or null.
+     */
+    get powerSpawn () {
+        if (!_.isUndefined(this._cache.powerSpawn)) {
+            return this._cache.powerSpawn;
+        }
+        let powerSpawns = this.recall(STRUCTURE_POWER_SPAWN);
+        this._cache.powerSpawn = powerSpawns.length > 0 ? powerSpawns[0] : null;
+        return this._cache.powerSpawn;
+    }
+
+    /**
      * Gets an array with all keeper lairs in the room. Empty if there are no keeper lairs.
      */
     get keeperLairs () {
@@ -348,6 +362,8 @@ class RoomReal extends RoomBase {
         // Let the towers do their thing
         this.defend();
 
+        this.processPower();
+
         // Run linking logic so that energy is teleported to the storage and controller.
         this.links.run();
 
@@ -408,6 +424,9 @@ class RoomReal extends RoomBase {
                     break;
                 case STRUCTURE_OBSERVER:
                     this.remember(structure.id, STRUCTURE_OBSERVER);
+                    break;
+                case STRUCTURE_POWER_SPAWN:
+                    this.remember(structure.id, STRUCTURE_POWER_SPAWN);
                     break;
                 case STRUCTURE_LINK:
                     links.push(structure);
@@ -566,6 +585,14 @@ class RoomReal extends RoomBase {
             this._mem.reservations[key].ttl = this._mem.reservations[key].ttl - 1;
             if (this._mem.reservations[key].ttl === 0) {
                 delete this._mem.reservations[key];
+            }
+        }
+    }
+
+    processPower () {
+        if (this.powerSpawn) {
+            if (this.powerSpawn.energy > 0 && this.powerSpawn.energy > POWER_SPAWN_ENERGY_RATIO) {
+                this.powerSpawn.processPower();
             }
         }
     }

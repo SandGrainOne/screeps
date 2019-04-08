@@ -46,6 +46,12 @@ class CreepRefueler extends CreepWorker {
             }
         }
 
+        if (this.energy > 0 && this.room.powerSpawn !== null) {
+            if (this.pos.isNearTo(this.room.powerSpawn)) {
+                this.transfer(this.room.powerSpawn, RESOURCE_ENERGY);
+            }
+        }
+
         if (this.energy > 0 && this.room.nuker !== null) {
             if (this.pos.isNearTo(this.room.nuker)) {
                 this.transfer(this.room.nuker, RESOURCE_ENERGY);
@@ -98,6 +104,12 @@ class CreepRefueler extends CreepWorker {
             if (!moveTarget && this.room.nuker !== null) {
                 if (this.room.nuker.energy < this.room.nuker.energyCapacity) {
                     moveTarget = this.room.nuker;
+                }
+            }
+
+            if (!moveTarget && this.room.powerSpawn !== null) {
+                if (this.room.powerSpawn.energy < this.room.powerSpawn.energyCapacity) {
+                    moveTarget = this.room.powerSpawn;
                 }
             }
         }
