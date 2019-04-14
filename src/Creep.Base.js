@@ -14,6 +14,9 @@ class CreepBase {
     constructor (creep) {
         this._creep = creep;
         this._mem = creep.memory;
+
+        // Tick cache
+        this._cache = {};
     }
 
     /**

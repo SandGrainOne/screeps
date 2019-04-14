@@ -341,7 +341,7 @@ class CreepWorker extends CreepBase {
             }
         }
 
-        let restCapacity = this._capacity - this._minerals - this._energy;
+        let restCapacity = this._capacity - Math.max(this.load, _.sum(this._creep.carry));
         let amountTransfered = Math.min(amountStored, restCapacity);
 
         if (amountTransfered <= 0) {

@@ -122,7 +122,8 @@ class CreepHauler extends CreepWorker {
                 let container = this.getFirstInRange(this.room.containers, 1);
                 if (container) {
                     for (let resourceType in container.store) {
-                        if (this.withdraw(container, resourceType) === OK) {
+                        let result = this.withdraw(container, resourceType);
+                        if (result === OK) {
                             break;
                         }
                     }
@@ -189,7 +190,8 @@ class CreepHauler extends CreepWorker {
             this.isWorking = true;
         }
 
-        if (this.load >= this.capacity) {
+        // In case the creep has used som energy for repairs we offset the capacity by one.
+        if (this.load >= this.capacity - 1) {
             this.isWorking = false;
         }
 

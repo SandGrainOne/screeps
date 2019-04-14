@@ -24,6 +24,11 @@ declare var FIND_HOSTILE_CONSTRUCTION_SITES: number;
 declare var FIND_MY_SPAWNS: number;
 declare var FIND_HOSTILE_SPAWNS: number;
 declare var FIND_MINERALS: number;
+declare var FIND_NUKES: number;
+declare var FIND_TOMBSTONES: number;
+declare var FIND_POWER_CREEPS: number;
+declare var FIND_MY_POWER_CREEPS: number;
+declare var FIND_HOSTILE_POWER_CREEPS: number;
 declare var TOP: number;
 declare var TOP_RIGHT: number;
 declare var RIGHT: number;
@@ -570,6 +575,8 @@ declare var LOOK_FLAGS: string;
 declare var LOOK_CONSTRUCTION_SITES: string;
 declare var LOOK_NUKES: string;
 declare var LOOK_TERRAIN: string;
+declare var LOOK_TOMBSTONES: string;
+declare var LOOK_POWER_CREEPS: string;
 /**
  * A site of a structure which is currently under construction.
  */
@@ -2076,11 +2083,6 @@ declare class StructurePowerSpawn extends OwnedStructure {
      * The total amount of power this structure can contain.
      */
     powerCapacity: number;
-    /**
-     * Create a power creep. Currently in development
-     * @param name The name of the power creep.
-     */
-    createPowerCreep(name: string): number;
     /**
      * Register power resource units into your account. Registered power allows to develop power creeps skills. Consumes 1 power resource unit and 50 energy resource units.
      */

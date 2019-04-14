@@ -192,6 +192,17 @@ class RoomReal extends RoomBase {
     }
 
     /**
+     * Gets an array of all ramparts in the room. Empty if there are no ramparts.
+     */
+    get ramparts () {
+        if (!_.isUndefined(this._cache.ramparts)) {
+            return this._cache.ramparts;
+        }
+        this._cache.ramparts = this.recall(STRUCTURE_RAMPART);
+        return this._cache.ramparts;
+    }
+
+    /**
      * Gets an array with all construction sites in the room. Empty if there
      * are no construction sites.
      */

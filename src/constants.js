@@ -42,6 +42,7 @@ const constants = {
     'UPGRADE_COST': UPGRADE_CONTROLLER_POWER,
     'HARVEST_ENERGY_GAIN': HARVEST_POWER,
     'HARVEST_MINERAL_GAIN': HARVEST_MINERAL_POWER,
+    'DISMANTLE_ENERGY_GAIN': 0.25,
 
     'EXIT': {
         // Recommended exit locations when going from one room to another.

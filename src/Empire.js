@@ -220,20 +220,14 @@ class Empire {
         } while (count > 0);
     }
 
-    createCreep (job, spawnName, bodyCode, homeRoom, workRoom) {
-        return CreepMaker.createCreep(job, spawnName, bodyCode, homeRoom, workRoom);
-    }
+    createCreep (job, bodyCode, homeRoom, workRoom) {
+        let spawn = this.findSpawn(homeRoom);
 
-    checkRoomMemory () {
-        for (let room of this.rooms.values()) {
-            if (!_.isUndefined(room._mem.neighbours)) {
-                os.log.info('Room: ' + room.name);
-                delete room._mem.neighbours;
-                return;
-            }
+        if (_.isNull(spawn)) {
+            return ERR_BUSY;
         }
 
-        os.log.info('Found no issues');
+        return CreepMaker.createCreep(job, spawn.name, bodyCode, homeRoom, workRoom);
     }
 
     findSpawn (roomName) {
@@ -246,46 +240,19 @@ class Empire {
                     }
                 }
             }
-            else {
-                os.log.warning('Cannot spawn creeps in room: ' + roomName);
-            }
         }
-
         return null;
     }
 
-    findSpawnPrint (roomName) {
-        for (let spawnName in Game.spawns) {
-            let spawn = Game.spawns[spawnName];
-
-            let distance = 0;
-            if (spawn.room.name !== roomName) {
-                distance = Game.map.getRoomLinearDistance(spawn.room.name, roomName);
-                if (distance < 5) {
-                    distance = Game.map.findRoute(spawn.room.name, roomName).length;
-                }
+    checkRoomMemory () {
+        for (let room of this.rooms.values()) {
+            if (!_.isUndefined(room._mem.neighbours)) {
+                os.log.info('Room: ' + room.name);
+                delete room._mem.neighbours;
+                return;
             }
-
-            os.log.info('Distance from ' + spawnName + ' to ' + roomName + ': ' + distance);
         }
-    }
-
-    createId () {
-        var dt = new Date().getTime();
-        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            var r = (dt + Math.random() * 16) % 16 | 0;
-            dt = Math.floor(dt / 16);
-            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-        });
-
-        return uuid;
-    }
-
-    testOwnedRooms (roomName) {
-        let room = this.getRoom(roomName);
-        for (const neighbour of room.ownedRooms()) {
-            os.log.info('Neighbour: ' + neighbour.name);
-        }
+        os.log.info('Found no issues');
     }
 }
 

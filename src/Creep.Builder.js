@@ -18,9 +18,6 @@ class CreepBuilder extends CreepWorker {
         if (this.task === null) {
             this.task = 'charge';
         }
-
-        // Tick cache
-        this._cache = {};
     }
 
     /**
