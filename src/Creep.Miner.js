@@ -125,8 +125,15 @@ class CreepMiner extends CreepWorker {
                 }
             }
 
+            if (this.room.spawns.length > 0) {
+                let spawn = this.getFirstInRange(this.room.spawns, 1, (x) => x.energy < x.energyCapacity);
+                if (spawn) {
+                    this.transfer(spawn, RESOURCE_ENERGY);
+                }
+            }
+
             if (this.room.extensions.length > 0) {
-                let extension = this.getFirstInRange(this.room.extensions, 1);
+                let extension = this.getFirstInRange(this.room.extensions, 1, (x) => x.energy < x.energyCapacity);
                 if (extension) {
                     this.transfer(extension, RESOURCE_ENERGY);
                 }
@@ -211,15 +218,18 @@ class CreepMiner extends CreepWorker {
                 moveTarget = this.moveToRoom(this._mem.rooms.home, false);
             }
 
-            if (!moveTarget) {
+            if (this.isHome && this.energy > 0) {
                 // This should only happen early on before there is a storage in the room.
-                // The this.extensions array only holds extensions and spawns with available space.
-                if (this.energy > 0 && this.room.extensions.length > 0) {
-                    let extension = this.pos.findClosestByRange(this.room.extensions);
-                    if (extension) {
-                        if (!this.pos.isNearTo(extension)) {
-                            moveTarget = extension;
-                        }
+                if (!moveTarget && this.room.spawns.length > 0) {
+                    let spawn = this.getClosestByRange(this.room.spawns, (x) => x.energy < x.energyCapacity);
+                    if (!_.isNull(spawn)) {
+                        moveTarget = spawn;
+                    }
+                }
+                if (!moveTarget && this.room.extensions.length > 0) {
+                    let extension = this.getClosestByRange(this.room.extensions, (x) => x.energy < x.energyCapacity);
+                    if (!_.isNull(extension)) {
+                        moveTarget = extension;
                     }
                 }
             }

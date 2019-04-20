@@ -273,6 +273,12 @@ class CreepWorker extends CreepBase {
                     targetSpace = target.powerCapacity - target.power;
                 }
             }
+            else if (resourceType === RESOURCE_GHODIUM) {
+                if (target.ghodiumCapacity) {
+                    // Nuker
+                    targetSpace = target.ghodiumCapacity - target.ghodium;
+                }
+            }
             else {
                 if (target.mineralCapacity) {
                     // Labs (mineral)
@@ -285,7 +291,6 @@ class CreepWorker extends CreepBase {
 
         let carriedAmount = this.carry[resourceType];
         let amountTransfered = Math.min(targetSpace, carriedAmount);
-
         if (amountTransfered <= 0) {
             return ERR_NOT_ENOUGH_RESOURCES;
         }

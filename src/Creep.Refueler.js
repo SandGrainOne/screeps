@@ -31,17 +31,22 @@ class CreepRefueler extends CreepWorker {
         }
 
         if (this.energy > 0 && this.room.towers.length > 0) {
-            // Towers are sorted. The one with less remaining energy first.
-            let tower = this.room.towers[0];
-            if (this.pos.isNearTo(tower)) {
+            let tower = this.getFirstInRange(this.room.towers, 1, (x) => x.energy < x.energyCapacity - 200);
+            if (tower !== null) {
                 this.transfer(tower, RESOURCE_ENERGY);
             }
         }
 
+        if (this.energy > 0 && this.room.spawns.length > 0) {
+            let spawn = this.getFirstInRange(this.room.spawns, 1, (x) => x.energy < x.energyCapacity);
+            if (spawn !== null) {
+                this.transfer(spawn, RESOURCE_ENERGY);
+            }
+        }
+
         if (this.energy > 0 && this.room.extensions.length > 0) {
-            // The extensions array only contains extensions and spawns with space for energy.
-            let extension = this.getFirstInRange(this.room.extensions, 1);
-            if (extension) {
+            let extension = this.getFirstInRange(this.room.extensions, 1, (x) => x.energy < x.energyCapacity);
+            if (extension !== null) {
                 this.transfer(extension, RESOURCE_ENERGY);
             }
         }
@@ -72,18 +77,16 @@ class CreepRefueler extends CreepWorker {
             // Prioritise towers if the room is invaded.
             if (this.room.state !== C.ROOM_STATE_NORMAL) {
                 if (this.room.towers.length > 0) {
-                    for (let tower of this.room.towers) {
-                        if (tower.energy < tower.energyCapacity - 200) {
-                            moveTarget = tower;
-                            break;
-                        }
-                    }
+                    moveTarget = this.getClosestByRange(this.room.towers, (x) => x.energy < x.energyCapacity - 200);
                 }
             }
 
+            if (!moveTarget && this.room.spawns.length > 0) {
+                moveTarget = this.getClosestByRange(this.room.spawns, (x) => x.energy < x.energyCapacity);
+            }
+
             if (!moveTarget && this.room.extensions.length > 0) {
-                // All structures in the extensions array have room for energy. Pick the closest.
-                moveTarget = this.pos.findClosestByRange(this.room.extensions);
+                moveTarget = this.getClosestByRange(this.room.extensions, (x) => x.energy < x.energyCapacity);
             }
 
             if (!moveTarget && this.room.terminal) {
@@ -93,12 +96,7 @@ class CreepRefueler extends CreepWorker {
             }
 
             if (!moveTarget && this.room.towers.length > 0) {
-                for (let tower of this.room.towers) {
-                    if (tower.energy < tower.energyCapacity - 200) {
-                        moveTarget = tower;
-                        break;
-                    }
-                }
+                moveTarget = this.getClosestByRange(this.room.towers, (x) => x.energy < x.energyCapacity - 200);
             }
 
             if (!moveTarget && this.room.nuker !== null) {
@@ -130,30 +128,6 @@ class CreepRefueler extends CreepWorker {
      * @param room - An instance of a visible smart room.
      */
     static defineJob (room) {
-        // // Refuelers operate in owned rooms with a storage.
-        // if (!room.isMine || !room.storage) {
-        //     return;
-        // }
-
-        // return;
-
-        // // Might add work parts for road repairs?
-        // let workParts = 0;
-
-        // let factor = room.extensions[0].energyCapacity / CARRY_CAPACITY;
-        // let carryParts = 1;
-
-        // // Make it an even number of parts before adding move.
-        // carryParts = carryParts + (workParts + carryParts) % 2;
-
-        // // Should have 1 move part for every two other parts.
-        // let moveParts = Math.max((workParts + carryParts) / 2, 2);
-
-        // let job = {};
-        // job.number = 2;
-        // job.body = Array(workParts).fill(WORK).concat(Array(carryParts).fill(CARRY)).concat(Array(moveParts).fill(MOVE));
-
-        // return job;
     }
 }
 

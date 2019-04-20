@@ -20,6 +20,23 @@ class Links {
         this._cache = {};
     }
 
+    get all () {
+        if (this._cache.all !== undefined) {
+            return this._cache.all;
+        }
+        this._cache.all = [];
+        if (this.storage !== null) {
+            this._cache.all.push(this.storage);
+        }
+        if (this.controller !== null) {
+            this._cache.all.push(this.controller);
+        }
+        if (this.inputs.length > 0) {
+            this._cache.all.concat(this.inputs);
+        }
+        return this._cache.all;
+    }
+
     /**
      * Gets the room link near the room storage if such a link exist. Otherwise null.
      */
@@ -27,7 +44,6 @@ class Links {
         if (this._cache.storage !== undefined) {
             return this._cache.storage;
         }
-
         this._cache.storage = null;
         if (this._mem.storage) {
             let link = Game.getObjectById(this._mem.storage);
@@ -35,7 +51,6 @@ class Links {
                 this._cache.storage = link;
             }
         }
-
         return this._cache.storage;
     }
 
@@ -46,7 +61,6 @@ class Links {
         if (this._cache.controller !== undefined) {
             return this._cache.controller;
         }
-
         this._cache.controller = null;
         if (this._mem.controller) {
             let link = Game.getObjectById(this._mem.controller);
@@ -54,7 +68,6 @@ class Links {
                 this._cache.controller = link;
             }
         }
-
         return this._cache.controller;
     }
 
@@ -65,7 +78,6 @@ class Links {
         if (this._cache.inputs !== undefined) {
             return this._cache.inputs;
         }
-
         this._cache.inputs = [];
         if (this._mem.inputs && this._mem.inputs.length > 0) {
             for (let id of this._mem.inputs) {
@@ -75,7 +87,6 @@ class Links {
                 }
             }
         }
-
         return this._cache.inputs;
     }
 

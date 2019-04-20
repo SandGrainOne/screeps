@@ -19,6 +19,23 @@ class Labs {
         this._cache = {};
     }
 
+    get all () {
+        if (this._cache.all !== undefined) {
+            return this._cache.all;
+        }
+        this._cache.all = [];
+        if (this.compoundOne !== null) {
+            this._cache.all.push(this.compoundOne);
+        }
+        if (this.compoundTwo !== null) {
+            this._cache.all.push(this.compoundTwo);
+        }
+        if (this.producers.length > 0) {
+            this._cache.all.concat(this.producers);
+        }
+        return this._cache.all;
+    }
+
     /**
      * Gets the lab assigned to be the first reaction source.
      */

@@ -63,8 +63,8 @@ class CreepDismantler extends CreepWorker {
 
         if (this.task === 'delivering') {
             if (this.room.containers.length > 0) {
-                let container = this.getFirstInRange(this.room.containers, 3);
-                if (!_.isNull(container)) {
+                let container = this.getFirstInRange(this.room.containers, 3, (x) => _.sum(x.store) < x.storeCapacity - 250);
+                if (container !== null) {
                     if (container.hits < container.hitsMax) {
                         this.repair(container);
                     }
@@ -96,8 +96,8 @@ class CreepDismantler extends CreepWorker {
 
         if (this.task === 'delivering') {
             if (this.room.containers.length > 0) {
-                let container = this.pos.findClosestByRange(this.room.containers);
-                if (!this.pos.isNearTo(container)) {
+                let container = this.getClosestByRange(this.room.containers, (x) => _.sum(x.store) < x.storeCapacity - 250);
+                if (container != null && !this.pos.isNearTo(container)) {
                     this.moveTo(container);
                 }
             }
@@ -121,17 +121,20 @@ class CreepDismantler extends CreepWorker {
         }
 
         if (this.room.isMine) {
-            // Do not dismantle random structures in owned roomes.
-            return null;
-        }
-
-        if (this.room.controller && this.room.controller.reservation && this.room.controller.reservation.username === C.USERNAME) {
-            // Do not dismantle random structures in reserved rooms.
+            // Do not dismantle random structures in owned rooms.
             return null;
         }
 
         if (this.room.ramparts.length > 0) {
-            return this.pos.findClosestByRange(this.room.ramparts);
+            return this.getClosestByRange(this.room.ramparts);
+        }
+
+        if (this.room.towers.length > 0) {
+            return this.getClosestByRange(this.room.towers, (x) => x.energy === 0);
+        }
+
+        if (this.room.walls.length > 0) {
+            return this.getClosestByRange(this.room.walls);
         }
 
         return null;

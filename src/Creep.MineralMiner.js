@@ -118,19 +118,6 @@ class CreepMineralMiner extends CreepWorker {
             if (!moveTarget && !this.isHome) {
                 moveTarget = this.moveToRoom(this._mem.rooms.home, false);
             }
-
-            if (!moveTarget) {
-                // This should only happen early on before there is a storage in the room.
-                // The this.extensions array only holds extensions and spawns with available space.
-                if (this.energy > 0 && this.room.extensions.length > 0) {
-                    let extension = this.pos.findClosestByRange(this.room.extensions);
-                    if (extension) {
-                        if (!this.pos.isNearTo(extension)) {
-                            moveTarget = extension;
-                        }
-                    }
-                }
-            }
         }
 
         if (moveTarget) {

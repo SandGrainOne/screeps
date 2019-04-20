@@ -17,6 +17,7 @@ let wrappers = {
     'defender': require('./Creep.Defender'),
     'attacker': require('./Creep.Attacker'),
     'patroler': require('./Creep.Patroler'),
+    'scavenger': require('./Creep.Scavenger'),
     'dismantler': require('./Creep.Dismantler'),
     'mineralminer': require('./Creep.MineralMiner')
 };

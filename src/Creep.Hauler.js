@@ -132,7 +132,7 @@ class CreepHauler extends CreepWorker {
         }
 
         if (!this.isRemoting && this.isHome && this.load < this.capacity) {
-            if (this.room.terminal && (this.room.terminal.store.energy > C.TERMINAL_THRESHOLD_ENERGY || this.room.terminal.store.energy > this.room.storage.store.energy)) {
+            if (this.room.terminal !== null && (this.room.terminal.store.energy > C.TERMINAL_THRESHOLD_ENERGY || this.room.terminal.store.energy > this.room.storage.store.energy)) {
                 this.withdraw(this.room.terminal, RESOURCE_ENERGY);
             }
         }
@@ -171,8 +171,15 @@ class CreepHauler extends CreepWorker {
                 }
             }
 
+            if (this.room.spawns.length > 0) {
+                let spawn = this.getFirstInRange(this.room.spawns, 1, (x) => x.energy < x.energyCapacity);
+                if (spawn) {
+                    this.transfer(spawn, RESOURCE_ENERGY);
+                }
+            }
+
             if (this.room.extensions.length > 0) {
-                let extension = this.getFirstInRange(this.room.extensions, 1);
+                let extension = this.getFirstInRange(this.room.extensions, 1, (x) => x.energy < x.energyCapacity);
                 if (extension) {
                     this.transfer(extension, RESOURCE_ENERGY);
                 }
@@ -240,7 +247,7 @@ class CreepHauler extends CreepWorker {
             }
 
             if (!moveTarget && !this.isRemoting && this.isHome && this.load < this.capacity) {
-                if (this.room.terminal) {
+                if (this.room.terminal !== null) {
                     this._mem.work.target = this.room.terminal.id;
                     moveTarget = this.room.terminal;
                 }
@@ -279,8 +286,15 @@ class CreepHauler extends CreepWorker {
             if (!moveTarget) {
                 // This should only happen early on before there is a temporary or real storage.
                 // The this.extensions array only holds extensions and spawns with available space.
+                if (this.energy > 0 && this.room.spawns.length > 0) {
+                    let spawn = this.getClosestByRange(this.room.spawns, (x) => x.energy < x.energyCapacity);
+                    if (spawn) {
+                        moveTarget = spawn;
+                    }
+                }
+
                 if (this.energy > 0 && this.room.extensions.length > 0) {
-                    let extension = this.pos.findClosestByRange(this.room.extensions);
+                    let extension = this.getClosestByRange(this.room.extensions, (x) => x.energy < x.energyCapacity);
                     if (extension) {
                         moveTarget = extension;
                     }

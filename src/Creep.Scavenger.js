@@ -1,7 +1,5 @@
 'use strict';
 
-let C = require('./constants');
-
 let CreepWorker = require('./Creep.Worker');
 
 /**
@@ -10,60 +8,32 @@ let CreepWorker = require('./Creep.Worker');
  */
 class CreepScavenger extends CreepWorker {
     /**
-     * Perform resource collection logic.
+     * Gets the creep job target. 
      */
-    collecting () {
-        // Perform random repairs or construction work.
-        this.working();
-
-        // Drops can be picked up by any hauler on the move in any room
-        if (this.room.drops.length > 0) {
-            let drop = this.getFirstInRange(this.room.drops, 1);
-            if (!_.isNull(drop)) {
-                this.pickup(drop);
+    get target () {
+        if (_.isUndefined(this._cache.target)) {
+            if (!_.isUndefined(this._mem.work.target)) {
+                this._cache.target = Game.getObjectById(this._mem.work.target);
+            }
+            else {
+                this._cache.target = null;
             }
         }
-
-        let room = this.workRoom;
-
-        if (!this.atWork && !room.isVisible) {
-            Empire.observe(room.name, 10);
-            this.moveTo(new RoomPosition(25, 25, room.name), { 'range': 20 });
-            return;
-        }
-
-        if (room.containers.length > 0) {
-            let container = this.getFirstInRange(room.containers, 1);
-            if (!_.isNull(container)) {
-                for (let resourceType in container.store) {
-                    if (this.withdraw(container, resourceType) === OK) {
-                        break;
-                    }
-                }
-            }
-        }
-
-        let target = Game.getObjectById(this._mem.collectingTarget);
-        if (_.isNull(target)) {
-            delete this._mem.collectingTarget;
-        }
-
-        if (this.room.drops.length > 0) {
-            for (let drop of this.room.drops) {
-                if (this.room.reserve(drop.id, this.job, this.name)) {
-                    this._mem.collectingTarget = drop.id;
-                    break;
-                }
-            }
-        }
+        return this._cache.target;
     }
 
     /**
-     * Perform resource delivery logic.
+     * Sets the creep job target. 
      */
-    delivering () {
-        // Perform random repairs or construction work.
-        this.working();
+    set target (obj) {
+        if (!_.isNull(obj)) {
+            this._cache.target = obj;
+            this._mem.work.target = obj.id;
+        }
+        else {
+            this._cache.target = null;
+            delete this._mem.work.target;
+        }
     }
 
     /**
@@ -72,32 +42,19 @@ class CreepScavenger extends CreepWorker {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work () {
-        // If possible, perform road repairs on the move.
-        if (this.strength > 0 && this.energy > 0) {
-            let foundStructures = this.pos.lookFor(LOOK_STRUCTURES);
-            if (foundStructures.length > 0) {
-                for (let structure of foundStructures) {
-                    if (structure.structureType === STRUCTURE_ROAD) {
-                        if (structure.hits < structure.hitsMax) {
-                            if (this.repair(structure) === OK) {
-                                break;
-                            }
-                        }
+        if (this.isRemoting && this.atWork && this.load < this.capacity) {
+            if (_.isNull(this.target)) {
+                this.target = this.findTarget();
+            }
+
+            if (!_.isNull(this.target)) {
+                if (this.pos.isNearTo(this.target)) {
+                    let resourceType = this.selectResourceType(this.target);
+                    let result = this.withdraw(this.target, resourceType);
+                    if (result === ERR_NOT_ENOUGH_RESOURCES) {
+                        this.target = null;
                     }
                 }
-            }
-        }
-
-        if (this.load < this.capacity) {
-            let drop = this.getFirstInRange(this.room.drops, 1);
-            if (drop) {
-                this.pickup(drop);
-            }
-        }
-
-        if (!this.isRemoting && this.isHome && this.load < this.capacity) {
-            if (this.room.terminal && (this.room.terminal.store.energy > C.TERMINAL_THRESHOLD_ENERGY || this.room.terminal.store.energy > this.room.storage.store.energy)) {
-                this.withdraw(this.room.terminal, RESOURCE_ENERGY);
             }
         }
 
@@ -113,138 +70,133 @@ class CreepScavenger extends CreepWorker {
                 }
             }
             if (this.energy > 0 && this.room.links.inputs.length > 0) {
-                let links = this.pos.findInRange(this.room.links.inputs, 1);
-                if (links.length > 0) {
-                    for (let link of links) {
-                        if (link.energy < link.energyCapacity) {
-                            this.transfer(link, RESOURCE_ENERGY);
-                        }
+                let link = this.getFirstInRange(this.room.links.inputs, 1);
+                if (link) {
+                    if (link.energy < link.energyCapacity) {
+                        this.transfer(link, RESOURCE_ENERGY);
                     }
                 }
             }
-        }
-
-        if (this.isHome) {
-            let storage = this.room.storage;
-            if (storage && this.pos.isNearTo(storage)) {
-                for (let resourceType in this.carry) {
-                    if (this.transfer(storage, resourceType) === OK) {
-                        break;
-                    }
-                }
-            }
-
-            if (this.room.extensions.length > 0) {
-                let extension = this.getFirstInRange(this.room.extensions, 1);
-                if (extension) {
-                    this.transfer(extension, RESOURCE_ENERGY);
-                }
-            }
-        }
-
-        if (this.load <= 0) {
-            this.isWorking = true;
         }
 
         if (this.load >= this.capacity) {
-            this.isWorking = false;
+            this.task = 'delivering';
         }
 
-        let moveTarget = null;
+        if (this.load <= 0) {
+            this.task = 'collecting';
+        }
 
-        if (this.isWorking) {
-            let target = Game.getObjectById(this._mem.work.target);
-            if (target === null) {
-                delete this._mem.work.target;
-            }
-
-            if (!moveTarget) {
-                // A scavenger should seek out drops only in the room they have been ordered to work in.
-                if (this.atWork) {
-                    if (this.room.drops.length > 0) {
-                        for (let drop of this.room.drops) {
-                            if (this.room.reserve(drop.id, this.job, this.name)) {
-                                this._mem.target = drop.id;
-                                moveTarget = drop;
-                                break;
-                            }
-                        }
-                    }
+        if (this.task === 'collecting') {
+            if (!_.isNull(this.target)) {
+                if (!this.pos.isNearTo(this.target)) {
+                    this.moveTo(this.target);
                 }
             }
-
-            if (!moveTarget && !this.atWork) {
-                moveTarget = this.moveToRoom(this._mem.rooms.work, false);
+            else if (!this.atWork) {
+                this.moveToRoom(this._mem.rooms.work);
             }
+        }
 
-            if (!moveTarget) {
+        if (this.task === 'delivering') {
+            if (!this.isHome) {
+                this.moveToRoom(this._mem.rooms.home);
+            }
+            else {
+                let moveTarget = null;
+                let rangeToTarget = Infinity;
                 if (this.room.containers.length > 0) {
-                    for (let container of this.room.containers) {
-                        if (_.sum(container.store) > 400) {
-                            if (this.room.reserve(container.id, this.job, this.name)) {
-                                this._mem.work.target = container.id;
-                                moveTarget = container;
-                                break;
-                            }
-                        }
+                    moveTarget = this.pos.findClosestByRange(this.room.containers);
+                    rangeToTarget = this.pos.getRangeTo(moveTarget);
+                }
+                if (this.energy > 0 && this.energy === this.load && this.room.links.inputs.length > 0) {
+                    let link = this.pos.findClosestByRange(this.room.links.inputs);
+                    let rangeToLink = this.pos.getRangeTo(link);
+                    if (rangeToLink <= rangeToTarget) {
+                        moveTarget = link;
+                        rangeToTarget = rangeToLink;
                     }
                 }
+                this.moveTo(moveTarget);
             }
-
-            if (!moveTarget && !this.isRemoting && this.isHome && this.load < this.capacity) {
-                if (this.room.terminal) {
-                    this._mem.work.target = this.room.terminal.id;
-                    moveTarget = this.room.terminal;
-                }
-            }
-        }
-        else {
-            if (!moveTarget && !this.isHome) {
-                moveTarget = this.moveToRoom(this._mem.rooms.home, false);
-            }
-
-            if (!moveTarget) {
-                let range = 50;
-
-                // Ensure the creep only carry energy. No need to seek out a link otherwise.
-                if (this.isRemoting && this.energy > 0 && this.energy === this.load && this.room.links.inputs.length > 0) {
-                    for (let link of this.room.links.inputs) {
-                        if (link.energy >= link.energyCapacity) {
-                            continue;
-                        }
-                        let rangeToLink = this.pos.getRangeTo(link);
-                        if (range > rangeToLink) {
-                            range = rangeToLink;
-                            moveTarget = link;
-                        }
-                    }
-                }
-
-                if (this.room.storage) {
-                    let rangeToStorage = this.pos.getRangeTo(this.room.storage);
-                    if (range > 4 || range >= rangeToStorage) {
-                        moveTarget = this.room.storage;
-                    }
-                }
-            }
-
-            if (!moveTarget) {
-                // This should only happen early on before there is a temporary or real storage.
-                // The this.extensions array only holds extensions and spawns with available space.
-                if (this.energy > 0 && this.room.extensions.length > 0) {
-                    let extension = this.pos.findClosestByRange(this.room.extensions);
-                    if (extension) {
-                        moveTarget = extension;
-                    }
-                }
-            }
-        }
-
-        if (moveTarget) {
-            this.moveTo(moveTarget);
         }
 
         return true;
+    }
+
+    findTarget () {
+        if (!this.atWork || this.isMine) {
+            return null;
+        }
+
+        if (this.room.towers.length > 0) {
+            let tower = this.getClosestByRange(this.room.towers, (x) => x.energy > 0);
+            if (!_.isNull(tower)) {
+                return tower;
+            }
+        }
+
+        if (this.room.spawns.length > 0) {
+            let spawn = this.getClosestByRange(this.room.spawns, (x) => x.energy > 0);
+            if (!_.isNull(spawn)) {
+                return spawn;
+            }
+        }
+
+        if (this.room.extensions.length > 0) {
+            let extension = this.getClosestByRange(this.room.extensions, (x) => x.energy > 0);
+            if (!_.isNull(extension)) {
+                return extension;
+            }
+        }
+
+        if (!_.isNull(this.room.storage) && _.sum(this.room.storage.store) > 0) {
+            return this.room.storage;
+        }
+
+        if (!_.isNull(this.room.terminal) && _.sum(this.room.terminal.store) > 0) {
+            return this.room.terminal;
+        }
+
+        if (!_.isNull(this.room.powerSpawn) && this.room.powerSpawn.energy > 0) {
+            return this.room.powerSpawn;
+        }
+
+        if (this.room.labs.all.length > 0) {
+            let lab = this.getClosestByRange(this.room.labs.all, (x) => x.energy > 0 || x.mineralAmount > 0);
+            if (!_.isNull(lab)) {
+                return lab;
+            }
+        }
+
+        if (this.room.links.all.length > 0) {
+            let link = this.getClosestByRange(this.room.links.all, (x) => x.energy > 0);
+            if (!_.isNull(link)) {
+                return link;
+            }
+        }
+
+        return null;
+    }
+
+    selectResourceType (target) {
+        if (target.store !== undefined) {
+            // Containers, Storage, Terminal, etc
+            for (let resourceType in target.store) {
+                if (target.store[resourceType] > 0) {
+                    return resourceType;
+                }
+            }
+        }
+        else if (target.power !== undefined) {
+            if (target.power > 0) {
+                return RESOURCE_POWER;
+            }
+        }
+        else if (target.mineralType !== undefined && target.mineralType !== null) {
+            return target.mineralType;
+        }
+        return RESOURCE_ENERGY;
     }
 
     /**

@@ -60,14 +60,14 @@ class CreepBase {
      * Gets the current task
      */
     get task () {
-        return _.isUndefined(this._mem.work) ? null : this._mem.work.task;
+        return this._mem.work === undefined ? null : this._mem.work.task;
     }
 
     /**
      * Sets the current task
      */
     set task (value) {
-        if (_.isUndefined(this._mem.work)) {
+        if (this._mem.work === undefined) {
             this._mem.work = {};
         }
         this._mem.work.task = value;
@@ -127,7 +127,7 @@ class CreepBase {
     act () {
         let task = this.getTask();
 
-        if (!_.isNull(task)) {
+        if (task !== null) {
             if (typeof this[task] !== 'function') {
                 throw new Error('This creep wrapper does not have any task with the name ' + task);
             }
@@ -293,28 +293,69 @@ class CreepBase {
     }
 
     /**
+     * Get the closest room object in the array of objects.
+     * 
+     * @param {RoomObject[]} roomObjects - The array of room objects to search through.
+     * @param {any} filter - (optional) A function that the object must match.
+     * 
+     * @returns {RoomObject} - The closest room object in the array. 
+     */
+    getClosestByRange (roomObjects, filter) {
+        if (!Array.isArray(roomObjects) || roomObjects.length === 0) {
+            return null;
+        }
+
+        if (roomObjects.length === 1) {
+            if (this.pos.roomName === roomObjects[0].pos.roomName) {
+                if (filter === undefined || filter(roomObjects[0])) {
+                    return roomObjects[0];
+                }
+            }
+            return null;
+        }
+
+        let currentRange = Infinity;
+        let closest = null;
+        for (let i = 0; i < roomObjects.length; i++) {
+            let range = this.pos.getRangeTo(roomObjects[i]);
+            if (currentRange > range) {
+                if (filter === undefined || filter(roomObjects[i])) {
+                    currentRange = range;
+                    closest = roomObjects[i];
+                }
+            }
+        }
+        return closest;
+    }
+
+    /**
      * Get the first room object in the array of objects that is within the given range.
      * 
-     * @param {RoomObject[]} roomObjects - The array of room objects to seach through.
-     * @param {int} range - The maximum range between creep and room object.
+     * @param {RoomObject[]} roomObjects - The array of room objects to search through.
+     * @param {number} range - The maximum range between creep and room object.
+     * @param {any} filter - (optional) A function that the object must match.
      * 
      * @returns {RoomObject} - The first room object without the given range if found. Otherwise null.
      */
-    getFirstInRange (roomObjects, range) {
-        if (!Array.isArray(roomObjects)) {
+    getFirstInRange (roomObjects, range, filter) {
+        if (!Array.isArray(roomObjects) || roomObjects.length === 0) {
             return null;
         }
 
         if (roomObjects.length === 1) {
             if (this.pos.getRangeTo(roomObjects[0]) <= range) {
-                return roomObjects[0];
+                if (filter === undefined || filter(roomObjects[0])) {
+                    return roomObjects[0];
+                }
             }
             return null;
         }
 
-        for (let obj of roomObjects) {
-            if (this.pos.getRangeTo(obj) <= range) {
-                return obj;
+        for (let i = 0; i < roomObjects.length; i++) {
+            if (this.pos.getRangeTo(roomObjects[i]) <= range) {
+                if (_.isUndefined(filter) || filter(roomObjects[i])) {
+                    return roomObjects[i];
+                }
             }
         }
         return null;

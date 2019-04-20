@@ -66,7 +66,7 @@ class RoomReal extends RoomBase {
      * Gets the room storage if it exists.
      */
     get storage () {
-        if (_.isUndefined(this._room.storage) || !this._room.storage.my) {
+        if (_.isUndefined(this._room.storage)) {
             return null;
         }
         return this._room.storage;
@@ -76,7 +76,7 @@ class RoomReal extends RoomBase {
      * Gets the room terminal if it exists.
      */
     get terminal () {
-        if (_.isUndefined(this._room.terminal) || !this._room.terminal.my) {
+        if (_.isUndefined(this._room.terminal)) {
             return null;
         }
         return this._room.terminal;
@@ -89,7 +89,7 @@ class RoomReal extends RoomBase {
         if (!_.isUndefined(this._cache.sources)) {
             return this._cache.sources;
         }
-        this._cache.sources = this.recall('source');
+        this._cache.sources = this._room.find(FIND_SOURCES);
         return this._cache.sources;
     }
 
@@ -100,7 +100,7 @@ class RoomReal extends RoomBase {
         if (!_.isUndefined(this._cache.minerals)) {
             return this._cache.minerals;
         }
-        let minerals = this.recall('minerals');
+        let minerals = this._room.find(FIND_MINERALS);
         this._cache.minerals = minerals.length > 0 ? minerals[0] : null;
         return this._cache.minerals;
     }
@@ -192,13 +192,32 @@ class RoomReal extends RoomBase {
     }
 
     /**
-     * Gets an array of all ramparts in the room. Empty if there are no ramparts.
+     * Gets an array with all walls in the room. Empty if there are no walls.
+     * 
+     * @returns {StructureWall[]} All walls in the room.
+     */
+    get walls () {
+        if (!_.isUndefined(this._cache.walls)) {
+            return this._cache.walls;
+        }
+        this._cache.walls = this._room.find(FIND_STRUCTURES, {
+            filter: (s) => s.structureType === STRUCTURE_WALL
+        });
+        return this._cache.walls;
+    }
+
+    /**
+     * Gets an array with all ramparts in the room. Empty if there are no ramparts.
+     * 
+     * @returns {StructureRampart[]} All ramparts in the room.
      */
     get ramparts () {
         if (!_.isUndefined(this._cache.ramparts)) {
             return this._cache.ramparts;
         }
-        this._cache.ramparts = this.recall(STRUCTURE_RAMPART);
+        this._cache.ramparts = this._room.find(FIND_STRUCTURES, {
+            filter: (s) => s.structureType === STRUCTURE_RAMPART
+        });
         return this._cache.ramparts;
     }
 
@@ -216,6 +235,8 @@ class RoomReal extends RoomBase {
 
     /**
      * Gets an array with all spawns in the room. Empty if there are no spawns.
+     * 
+     * @returns {StructureSpawn[]} All spawns in the room.
      */
     get spawns () {
         if (!_.isUndefined(this._cache.spawns)) {
@@ -226,19 +247,17 @@ class RoomReal extends RoomBase {
     }
 
     /**
-     * Gets an array with extensions and spawns that have room for energy.
-     * Empty if there are no such structure. This should only be used by creeps doing refueling.
+     * Gets an array with all extensions in the room. Empty if there are no extensions.
+     * 
+     * @returns {StructureExtension[]} All extensions in the room.
      */
     get extensions () {
         if (!_.isUndefined(this._cache.extensions)) {
             return this._cache.extensions;
         }
-        this._cache.extensions = [];
-        for (let extension of this.recall(STRUCTURE_EXTENSION)) {
-            if (extension.energy < extension.energyCapacity) {
-                this._cache.extensions.push(extension);
-            }
-        }
+        this._cache.extensions = this._room.find(FIND_STRUCTURES, {
+            filter: (s) => s.structureType === STRUCTURE_EXTENSION
+        });
         return this._cache.extensions;
     }
 
@@ -397,14 +416,6 @@ class RoomReal extends RoomBase {
 
         this.clearFlags();
 
-        for (let source of this._room.find(FIND_SOURCES)) {
-            this.remember(source.id, 'source');
-        }
-
-        for (let minerals of this._room.find(FIND_MINERALS)) {
-            this.remember(minerals.id, 'minerals');
-        }
-
         for (let structure of this._room.find(FIND_STRUCTURES)) {
             switch (structure.structureType) {
                 case STRUCTURE_CONTAINER:
@@ -416,9 +427,6 @@ class RoomReal extends RoomBase {
                 case STRUCTURE_KEEPER_LAIR:
                     this.remember(structure.id, STRUCTURE_KEEPER_LAIR);
                     break;
-                case STRUCTURE_RAMPART:
-                    this.remember(structure.id, STRUCTURE_RAMPART);
-                    break;
                 case STRUCTURE_TOWER:
                     this.remember(structure.id, STRUCTURE_TOWER);
                     break;
@@ -427,11 +435,6 @@ class RoomReal extends RoomBase {
                     break;
                 case STRUCTURE_SPAWN:
                     this.remember(structure.id, STRUCTURE_SPAWN);
-                    // Adding spawns to the extensions collection for the purpose of refueling
-                    this.remember(structure.id, STRUCTURE_EXTENSION);
-                    break;
-                case STRUCTURE_EXTENSION:
-                    this.remember(structure.id, STRUCTURE_EXTENSION);
                     break;
                 case STRUCTURE_OBSERVER:
                     this.remember(structure.id, STRUCTURE_OBSERVER);
@@ -497,7 +500,7 @@ class RoomReal extends RoomBase {
         }
 
         let hitsMax = 0;
-        let wallSize = 3500000;
+        let wallSize = 3600000;
 
         switch (structure.structureType) {
             case STRUCTURE_WALL:
@@ -611,28 +614,29 @@ class RoomReal extends RoomBase {
     defend () {
         let hostiles = this._room.find(FIND_HOSTILE_CREEPS);
 
+        let damagedCreeps = this._room.find(FIND_MY_CREEPS, {
+            filter: (creep) => creep.hits < creep.hitsMax
+        });
+
         if (this.towers.length === 0) {
             return;
         }
 
         for (let tower of this.towers) {
-            let hostileCreep = tower.pos.findClosestByRange(hostiles);
-
-            if (hostileCreep !== null && hostileCreep.pos.y < 49) {
-                tower.attack(hostileCreep);
-                continue;
-            }
-
-            let damagedCreeps = tower.room.find(FIND_MY_CREEPS, {
-                filter: (creep) => {
-                    return creep.hits < creep.hitsMax;
+            if (hostiles.length > 0) {
+                if (hostiles[0] !== null) { //  && hostiles[0].pos.y < 49
+                    tower.attack(hostiles[0]);
+                    continue;
                 }
-            });
+            }
 
             if (damagedCreeps.length > 0) {
-                tower.heal(damagedCreeps[0]);
+                let damagedCreep = damagedCreeps.pop();
+                tower.heal(damagedCreep);
                 continue;
             }
+
+            break;
         }
     }
 

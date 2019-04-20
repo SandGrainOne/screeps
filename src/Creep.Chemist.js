@@ -18,7 +18,7 @@ class CreepChemist extends CreepWorker {
             return true;
         }
 
-        if (!this.room.terminal || !this.room.labs.compoundOne || !this.room.labs.compoundTwo || this.room.labs.producers.length <= 0) {
+        if (this.room.terminal === null || this.room.labs.compoundOne === null || this.room.labs.compoundTwo === null || this.room.labs.producers.length <= 0) {
             return false;
         }
 
@@ -45,7 +45,7 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.room.name === 'E77N85') {
-            reaction = { compoundOne: RESOURCE_KEANIUM, compoundTwo: RESOURCE_ZYNTHIUM };
+            reaction = { compoundOne: RESOURCE_LEMERGIUM, compoundTwo: RESOURCE_UTRIUM };
         }
 
         if (this.room.name === 'E78N85') {
@@ -53,11 +53,11 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.room.name === 'E78N88') {
-            reaction = { compoundOne: RESOURCE_GHODIUM_HYDRIDE, compoundTwo: RESOURCE_HYDROXIDE };
+            reaction = { compoundOne: RESOURCE_GHODIUM_OXIDE, compoundTwo: RESOURCE_HYDROXIDE };
         }
 
         if (this.room.name === 'E79N85') {
-            reaction = { compoundOne: RESOURCE_LEMERGIUM, compoundTwo: RESOURCE_UTRIUM };
+            reaction = { compoundOne: RESOURCE_KEANIUM, compoundTwo: RESOURCE_ZYNTHIUM };
         }
 
         if (this.room.name === 'E79N86') {
@@ -87,9 +87,17 @@ class CreepChemist extends CreepWorker {
             let deliveryTarget = this.room.terminal;
 
             if (this.carry[RESOURCE_POWER]) {
-                if (this.room.powerSpawn) {
+                if (this.room.powerSpawn !== null) {
                     if (this.room.powerSpawn.power < this.room.powerSpawn.powerCapacity * 0.5) {
                         deliveryTarget = this.room.powerSpawn;
+                    }
+                }
+            }
+
+            if (this.carry[RESOURCE_GHODIUM]) {
+                if (this.room.nuker !== null) {
+                    if (this.room.nuker.ghodium < this.room.nuker.ghodiumCapacity) {
+                        deliveryTarget = this.room.nuker;
                     }
                 }
             }
@@ -195,11 +203,23 @@ class CreepChemist extends CreepWorker {
                     }
                 }
             }
-            if (this.room.terminal.store.power) {
-                if (this.room.powerSpawn) {
+            if (this.room.terminal.store[RESOURCE_POWER] !== undefined) {
+                if (this.room.powerSpawn !== null) {
                     if (this.room.powerSpawn.power < this.room.powerSpawn.powerCapacity * 0.5) {
                         if (this.pos.isNearTo(this.room.terminal)) {
                             this.withdraw(this.room.terminal, RESOURCE_POWER);
+                        }
+                        else {
+                            this.moveTo(this.room.terminal);
+                        }
+                    }
+                }
+            }
+            if (this.room.terminal.store[RESOURCE_GHODIUM] !== undefined) {
+                if (this.room.nuker !== null) {
+                    if (this.room.nuker.ghodium < this.room.nuker.ghodiumCapacity) {
+                        if (this.pos.isNearTo(this.room.terminal)) {
+                            this.withdraw(this.room.terminal, RESOURCE_GHODIUM);
                         }
                         else {
                             this.moveTo(this.room.terminal);
