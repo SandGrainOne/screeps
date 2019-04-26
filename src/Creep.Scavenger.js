@@ -11,8 +11,8 @@ class CreepScavenger extends CreepWorker {
      * Gets the creep job target. 
      */
     get target () {
-        if (_.isUndefined(this._cache.target)) {
-            if (!_.isUndefined(this._mem.work.target)) {
+        if (this._cache.target === undefined) {
+            if (this._mem.work.target !== undefined) {
                 this._cache.target = Game.getObjectById(this._mem.work.target);
             }
             else {
@@ -26,7 +26,7 @@ class CreepScavenger extends CreepWorker {
      * Sets the creep job target. 
      */
     set target (obj) {
-        if (!_.isNull(obj)) {
+        if (obj !== null) {
             this._cache.target = obj;
             this._mem.work.target = obj.id;
         }
@@ -43,11 +43,11 @@ class CreepScavenger extends CreepWorker {
      */
     work () {
         if (this.isRemoting && this.atWork && this.load < this.capacity) {
-            if (_.isNull(this.target)) {
+            if (this.target === null) {
                 this.target = this.findTarget();
             }
 
-            if (!_.isNull(this.target)) {
+            if (this.target !== null) {
                 if (this.pos.isNearTo(this.target)) {
                     let resourceType = this.selectResourceType(this.target);
                     let result = this.withdraw(this.target, resourceType);
@@ -61,7 +61,7 @@ class CreepScavenger extends CreepWorker {
         if (this.isRemoting && this.isHome && this.load > 0) {
             if (this.room.containers.length > 0) {
                 let container = this.getFirstInRange(this.room.containers, 1);
-                if (container) {
+                if (container !== null) {
                     for (let resourceType in this.carry) {
                         if (this.transfer(container, resourceType) === OK) {
                             break;
@@ -71,7 +71,7 @@ class CreepScavenger extends CreepWorker {
             }
             if (this.energy > 0 && this.room.links.inputs.length > 0) {
                 let link = this.getFirstInRange(this.room.links.inputs, 1);
-                if (link) {
+                if (link !== null) {
                     if (link.energy < link.energyCapacity) {
                         this.transfer(link, RESOURCE_ENERGY);
                     }
@@ -88,7 +88,7 @@ class CreepScavenger extends CreepWorker {
         }
 
         if (this.task === 'collecting') {
-            if (!_.isNull(this.target)) {
+            if (this.target !== null) {
                 if (!this.pos.isNearTo(this.target)) {
                     this.moveTo(this.target);
                 }
@@ -131,47 +131,47 @@ class CreepScavenger extends CreepWorker {
 
         if (this.room.towers.length > 0) {
             let tower = this.getClosestByRange(this.room.towers, (x) => x.energy > 0);
-            if (!_.isNull(tower)) {
+            if (tower !== null) {
                 return tower;
             }
         }
 
         if (this.room.spawns.length > 0) {
             let spawn = this.getClosestByRange(this.room.spawns, (x) => x.energy > 0);
-            if (!_.isNull(spawn)) {
+            if (spawn !== null) {
                 return spawn;
             }
         }
 
         if (this.room.extensions.length > 0) {
             let extension = this.getClosestByRange(this.room.extensions, (x) => x.energy > 0);
-            if (!_.isNull(extension)) {
+            if (extension !== null) {
                 return extension;
             }
         }
 
-        if (!_.isNull(this.room.storage) && _.sum(this.room.storage.store) > 0) {
+        if (this.room.storage !== null && _.sum(this.room.storage.store) > 0) {
             return this.room.storage;
         }
 
-        if (!_.isNull(this.room.terminal) && _.sum(this.room.terminal.store) > 0) {
+        if (this.room.terminal !== null && _.sum(this.room.terminal.store) > 0) {
             return this.room.terminal;
         }
 
-        if (!_.isNull(this.room.powerSpawn) && this.room.powerSpawn.energy > 0) {
+        if (this.room.powerSpawn !== null && this.room.powerSpawn.energy > 0) {
             return this.room.powerSpawn;
         }
 
         if (this.room.labs.all.length > 0) {
             let lab = this.getClosestByRange(this.room.labs.all, (x) => x.energy > 0 || x.mineralAmount > 0);
-            if (!_.isNull(lab)) {
+            if (lab !== null) {
                 return lab;
             }
         }
 
         if (this.room.links.all.length > 0) {
             let link = this.getClosestByRange(this.room.links.all, (x) => x.energy > 0);
-            if (!_.isNull(link)) {
+            if (link !== null) {
                 return link;
             }
         }

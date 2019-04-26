@@ -131,26 +131,25 @@ class Empire {
     }
 
     observe (roomName, ticks) {
-        if (_.isUndefined(this._mem.observations)) {
+        if (this._mem.observations === undefined) {
             this._mem.observations = {};
         }
         this._mem.observations[roomName] = ticks;
     }
 
     tickObservations () {
-        if (_.isUndefined(this._mem.observations)) {
+        if (this._mem.observations === undefined) {
             return;
         }
 
         let index = 0;
-        let roomNames = Array.from(this.rooms.keys());
 
         for (let roomToObserve in this._mem.observations) {
-            while (index < roomNames.length) {
-                let room = this.rooms.get(roomNames[index]);
+            while (index < this.roomsOwned.length) {
+                let room = this.roomsOwned[index];
                 index = index + 1;
 
-                if (room.isVisible && room.isMine && !_.isNull(room.observer)) {
+                if (room.observer !== null) {
                     if (room.observer.observeRoom(roomToObserve) === OK) {
                         break;
                     }

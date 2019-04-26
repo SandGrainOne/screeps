@@ -24,14 +24,14 @@ class CreepUpgrader extends CreepWorker {
 
         if (this.isHome && this.energy < this.capacity) {
             let storage = this.room.storage;
-            if (storage && storage.store.energy > 0 && this.pos.isNearTo(storage)) {
+            if (storage !== null && storage.store.energy > 0 && this.pos.isNearTo(storage)) {
                 this.withdraw(storage, RESOURCE_ENERGY);
             }
         }
 
         if (this.atWork && this.energy < this.capacity) {
             let link = this.room.links.controller;
-            if (link && link.energy > 0 && this.pos.isNearTo(link)) {
+            if (link !== null && link.energy > 0 && this.pos.isNearTo(link)) {
                 this.withdraw(link, RESOURCE_ENERGY);
             }
         }
@@ -39,7 +39,7 @@ class CreepUpgrader extends CreepWorker {
         if (this.atWork && this.energy < this.capacity) {
             if (this.room.containers.length > 0) {
                 let container = this.getFirstInRange(this.room.containers, 1);
-                if (container) {
+                if (container !== null) {
                     this.withdraw(container, RESOURCE_ENERGY);
                 }
             }
@@ -48,7 +48,7 @@ class CreepUpgrader extends CreepWorker {
         if (this.atWork && this.energy < this.capacity) {
             if (this.room.sources.length > 0) {
                 let source = this.getFirstInRange(this.room.sources, 1);
-                if (source) {
+                if (source !== null) {
                     this.harvest(source);
                 }
             }
@@ -64,57 +64,45 @@ class CreepUpgrader extends CreepWorker {
 
         let moveTarget = null;
 
-        if (this.isWorking) {
-            if (!this.atWork) {
-                this.moveToRoom(this._mem.rooms.work);
+        if (!this.atWork) {
+            moveTarget = this.moveToRoom(this._mem.rooms.work, false);
+        }
+        else if (this.isWorking) {
+            if (this.room.isMine) {
+                let rangeToController = this.pos.getRangeTo(this.room.controller);
+                if (rangeToController > 3) {
+                    moveTarget = this.room.controller;
+                }
             }
             else {
-                if (this.room.isMine) {
-                    let rangeToController = this.pos.getRangeTo(this.room.controller);
-                    if (rangeToController > 3) {
-                        moveTarget = this.room.controller;
-                    }
-                }
-                else {
-                    return false;
-                }
+                return false;
             }
         }
         else {
-            if (!this.isHome) {
-                this.moveToRoom(this._mem.rooms.home);
+            if (moveTarget === null && this.room.links.controller !== null && !this.pos.isNearTo(this.room.links.controller)) {
+                moveTarget = this.room.links.controller;
             }
-            else {
-                if (this.atWork && this.room.links.controller && this.pos.isNearTo(this.room.links.controller)) {
-                    moveTarget = this.room.links.controller;
-                }
-                else if (this.room.storage && this.pos.isNearTo(this.room.storage)) {
-                    moveTarget = this.room.storage;
-                }
 
-                if (!moveTarget && this.atWork) {
-                    let link = this.room.links.controller;
-                    if (link && link.energy > 0 && !this.pos.isNearTo(link)) {
-                        moveTarget = link;
-                    }
-                }
-                if (!moveTarget) {
-                    let storage = this.room.storage;
-                    if (storage && storage.store.energy > 0 && !this.pos.isNearTo(storage)) {
-                        moveTarget = storage;
-                    }
-                }
-                if (!moveTarget && this.atWork) {
-                    let source = this.pos.findClosestByPath(this.room.sources);
+            if (moveTarget === null && this.room.storage !== null && this.room.storage.store.energy > 1000 && !this.pos.isNearTo(this.room.storage)) {
+                moveTarget = this.room.storage;
+            }
 
-                    if (source && !this.pos.isNearTo(source)) {
-                        moveTarget = source;
-                    }
+            if (moveTarget === null) {
+                let container = this.getClosestByRange(this.room.containers, (x) => x.store.energy > 400);
+                if (container !== null && !this.pos.isNearTo(container)) {
+                    moveTarget = container;
+                }
+            }
+
+            if (moveTarget === null) {
+                let source = this.getClosestByRange(this.room.sources);
+                if (source !== null && !this.pos.isNearTo(source)) {
+                    moveTarget = source;
                 }
             }
         }
 
-        if (moveTarget) {
+        if (moveTarget !== null) {
             this.moveTo(moveTarget);
         }
 

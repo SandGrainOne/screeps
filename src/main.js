@@ -31,6 +31,20 @@ module.exports.loop = function () {
 
         let rule = null;
 
+        if (room.name === 'E67N84') {
+            rule = {
+                'homeRoom': 'E71N87',
+                'jobs': {
+                    'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
+                    'upgrader': { 'count': 2, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
+                    'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
+                    'hauler': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' },
+                    'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' },
+                    'refueler': { 'count': room.jobs.refuelers, 'body': 'CCCCCCCCCCCCMMMMMM' }
+                }
+            };
+        }
+
         if (room.name === 'E68N81') {
             rule = {
                 'homeRoom': 'E69N81',
@@ -59,16 +73,30 @@ module.exports.loop = function () {
             };
         }
 
+        if (room.name === 'E78N83') {
+            rule = {
+                'homeRoom': 'E76N83',
+                'jobs': {
+                    'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
+                    'upgrader': { 'count': 2, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
+                    'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
+                    'hauler': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' },
+                    'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' },
+                    'refueler': { 'count': room.jobs.refuelers, 'body': 'CCCCCCCCCCCCMMMMMM' }
+                }
+            };
+        }
+
         if (room.name === 'E77N83') {
             rule = {
                 'homeRoom': 'E76N83',
                 'jobs': {
-                    'scavenger': { 'count': 1, 'body': 'CCCCCCCCCCMMMMMMMMMM' },
+                    'scavenger': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' },
                     'dismantler': { 'count': 2, 'body': 'WWWWWWWWWWWWWWWWWWWWCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' },
                     'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
                     'settler': { 'count': room.jobs.settlers, 'body': 'LLMM' },
                     'builder': { 'count': 1, 'body': 'WWCCCMMMMM' },
-                    'hauler': { 'count': 2, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMM' },
+                    'hauler': { 'count': 3, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' }
                 }
             };
@@ -108,7 +136,7 @@ module.exports.loop = function () {
                     'linker': { 'count': room.jobs.linkers, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
                     'upgrader': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
                     'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
-                    'hauler': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' },
+                    'hauler': { 'count': 2, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' },
                     'refueler': { 'count': room.jobs.refuelers, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' }
                 }
@@ -119,13 +147,25 @@ module.exports.loop = function () {
             rule = {
                 'homeRoom': 'E74N81',
                 'jobs': {
-                    'hauler': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMM' },
+                    'hauler': { 'count': 1, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' },
                     'dismantler': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWWWWWWCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' }
                 }
             };
         }
 
         if (room.name === 'E74N82') {
+            rule = {
+                'homeRoom': 'E74N81',
+                'jobs': {
+                    'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
+                    'settler': { 'count': room.jobs.settlers, 'body': 'LLMM' },
+                    'hauler': { 'count': 2, 'body': 'WCCCCCCCCCCCCCCMMMMMMMMMMMMMMMM' },
+                    'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' }
+                }
+            };
+        }
+
+        if (room.name === 'E75N81') {
             rule = {
                 'homeRoom': 'E74N81',
                 'jobs': {
@@ -153,11 +193,12 @@ module.exports.loop = function () {
             };
         }
 
-        if (room.name === 'E69N88') {
+        if (room.name === 'E69N87') {
             rule = {
                 'homeRoom': 'E71N87',
                 'jobs': {
-                    'scavenger': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' }
+                    'hauler': { 'count': 1, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' },
+                    'dismantler': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWWWWWWCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' }
                 }
             };
         }
@@ -166,7 +207,8 @@ module.exports.loop = function () {
             rule = {
                 'homeRoom': 'E71N87',
                 'jobs': {
-                    'hauler': { 'count': 1, 'body': 'WCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMM' },
+                    'scavenger': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' },
+                    'hauler': { 'count': 1, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' },
                     'dismantler': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWWWWWWCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' }
                 }
             };
@@ -206,9 +248,23 @@ module.exports.loop = function () {
             rule = {
                 'homeRoom': 'E73N87',
                 'jobs': {
-                    'scavenger': { 'count': 1, 'body': 'CCCCCCCCCCMMMMMMMMMM' },
-                    'hauler': { 'count': 2, 'body': 'WCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMM' },
+                    'scavenger': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' },
+                    'hauler': { 'count': 2, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' },
                     'dismantler': { 'count': 2, 'body': 'WWWWWWWWWWWWWWWWWWWWCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' }
+                }
+            };
+        }
+
+        if (room.name === 'E73N85') {
+            rule = {
+                'homeRoom': 'E73N87',
+                'jobs': {
+                    'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
+                    'upgrader': { 'count': 2, 'body': 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
+                    'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
+                    'hauler': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' },
+                    'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' },
+                    'refueler': { 'count': room.jobs.refuelers, 'body': 'CCCCCCCCCCCCMMMMMM' }
                 }
             };
         }
@@ -283,9 +339,9 @@ module.exports.loop = function () {
             rule = {
                 'homeRoom': 'E75N89',
                 'jobs': {
-                    'scavenger': { 'count': 1, 'body': 'CCCCCCCCCCMMMMMMMMMM' },
-                    'hauler': { 'count': 1, 'body': 'WCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMM' },
-                    'dismantler': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWWWWWWCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' }
+                    'scavenger': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' },
+                    'hauler': { 'count': 2, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' },
+                    'dismantler': { 'count': 2, 'body': 'WWWWWWWWWWWWWWWWWWWWCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' }
                 }
             };
         }
@@ -463,6 +519,18 @@ module.exports.loop = function () {
             };
         }
 
+        if (room.name === 'E78N89') {
+            rule = {
+                'homeRoom': 'E77N88',
+                'jobs': {
+                    'settler': { 'count': room.jobs.settlers, 'body': 'LLMM' },
+                    'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
+                    'hauler': { 'count': 1, 'body': 'WCCCCCCCCCCCCCCCCCMMMMMMMMM' },
+                    'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' }
+                }
+            };
+        }
+
         if (room.name === 'E76N88') {
             rule = {
                 'homeRoom': 'E77N88',
@@ -495,16 +563,6 @@ module.exports.loop = function () {
                     'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
                     'hauler': { 'count': 2, 'body': 'WCCCCCCCCCCCCCCCCCMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' }
-                }
-            };
-        }
-
-        if (room.name === 'E79N89') {
-            rule = {
-                'homeRoom': 'E77N88',
-                'jobs': {
-                    'hauler': { 'count': 1, 'body': 'WCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMM' },
-                    'dismantler': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWWWWWWCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' }
                 }
             };
         }

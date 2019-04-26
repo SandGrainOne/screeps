@@ -143,9 +143,9 @@ class CreepMiner extends CreepWorker {
         let moveTarget = null;
 
         if (this.load < this.capacity) {
-            if (!moveTarget && !this.atWork) {
+            if (moveTarget === null && !this.atWork) {
                 let resourceNode = this.ResourceNode;
-                if (resourceNode) {
+                if (resourceNode !== null) {
                     moveTarget = resourceNode;
                 }
                 else {
@@ -153,9 +153,9 @@ class CreepMiner extends CreepWorker {
                 }
             }
 
-            if (!moveTarget) {
+            if (moveTarget === null) {
                 let resourceNode = this.ResourceNode;
-                if (resourceNode) {
+                if (resourceNode !== null) {
                     if (!this.pos.isNearTo(resourceNode)) {
                         moveTarget = resourceNode;
                     }
@@ -176,7 +176,7 @@ class CreepMiner extends CreepWorker {
             }
         }
         else {
-            if (!moveTarget) {
+            if (moveTarget === null) {
                 let range = 50;
                 // Ensure the creep only carry energy. No need to seek out a link otherwise.
                 if (this.energy > 0 && this.energy === this.load && this.room.links.inputs.length > 0) {

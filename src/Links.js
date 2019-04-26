@@ -32,7 +32,7 @@ class Links {
             this._cache.all.push(this.controller);
         }
         if (this.inputs.length > 0) {
-            this._cache.all.concat(this.inputs);
+            this._cache.all = this._cache.all.concat(this.inputs);
         }
         return this._cache.all;
     }

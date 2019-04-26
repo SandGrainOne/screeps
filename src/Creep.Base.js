@@ -125,6 +125,11 @@ class CreepBase {
      * @returns {Boolean} true if the creep successfully has performed an action.
      */
     act () {
+        // Temporary solution for spawning help for rooms of lower RCL.
+        if (this.isRemoting && this.atWork && this.workRoom.isMine) {
+            this._mem.rooms.home = this._mem.rooms.work;
+        }
+
         let task = this.getTask();
 
         if (task !== null) {

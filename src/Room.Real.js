@@ -35,7 +35,7 @@ class RoomReal extends RoomBase {
      * Gets the tick number where the room was analyzed.
      */
     get tickAnalyzed () {
-        return _.isUndefined(this._mem.tickAnalyzed) ? 0 : this._mem.tickAnalyzed;
+        return this._mem.tickAnalyzed === undefined ? 0 : this._mem.tickAnalyzed;
     }
 
     /**
@@ -49,7 +49,7 @@ class RoomReal extends RoomBase {
      * Gets the room controller if it exists.
      */
     get controller () {
-        if (_.isUndefined(this._room.controller)) {
+        if (this._room.controller === undefined) {
             return null;
         }
         return this._room.controller;
@@ -59,14 +59,14 @@ class RoomReal extends RoomBase {
      * Gets a value indicating whether the room is owned by current user.
      */
     get isMine () {
-        return !_.isNull(this.controller) && this.controller.my;
+        return this.controller !== null && this.controller.my;
     }
 
     /**
      * Gets the room storage if it exists.
      */
     get storage () {
-        if (_.isUndefined(this._room.storage)) {
+        if (this._room.storage === undefined) {
             return null;
         }
         return this._room.storage;
@@ -76,7 +76,7 @@ class RoomReal extends RoomBase {
      * Gets the room terminal if it exists.
      */
     get terminal () {
-        if (_.isUndefined(this._room.terminal)) {
+        if (this._room.terminal === undefined) {
             return null;
         }
         return this._room.terminal;
@@ -86,7 +86,7 @@ class RoomReal extends RoomBase {
      * Gets an array with all sources in the room.
      */
     get sources () {
-        if (!_.isUndefined(this._cache.sources)) {
+        if (this._cache.sources !== undefined) {
             return this._cache.sources;
         }
         this._cache.sources = this._room.find(FIND_SOURCES);
@@ -97,7 +97,7 @@ class RoomReal extends RoomBase {
      * Gets the room mineral node if it exists.
      */
     get minerals () {
-        if (!_.isUndefined(this._cache.minerals)) {
+        if (this._cache.minerals !== undefined) {
             return this._cache.minerals;
         }
         let minerals = this._room.find(FIND_MINERALS);
@@ -106,10 +106,23 @@ class RoomReal extends RoomBase {
     }
 
     /**
+     * Gets an array with tombstones holding resources.
+     */
+    get tombstones () {
+        if (this._cache.tombstones !== undefined) {
+            return this._cache.tombstones;
+        }
+        this._cache.tombstones = this._room.find(FIND_TOMBSTONES, {
+            filter: (t) => _.sum(t.store) > 0
+        });
+        return this._cache.tombstones;
+    }
+
+    /**
      * Gets an array with all drops in the room.
      */
     get drops () {
-        if (!_.isUndefined(this._cache.drops)) {
+        if (this._cache.drops !== undefined) {
             return this._cache.drops;
         }
         // TODO: Sort or prioritise the drops in some way?
@@ -123,7 +136,7 @@ class RoomReal extends RoomBase {
      * containers with the most resources.
      */
     get containers () {
-        if (!_.isUndefined(this._cache.containers)) {
+        if (this._cache.containers !== undefined) {
             return this._cache.containers;
         }
         this._cache.containers = this.recall(STRUCTURE_CONTAINER);
@@ -134,25 +147,10 @@ class RoomReal extends RoomBase {
     }
 
     /**
-     * Gets the linking system in the room and easy access to individual links.
-     */
-    get links () {
-        if (!_.isUndefined(this._cache.links)) {
-            return this._cache.links;
-        }
-        // Ensure that the linking system has some memory reserved from the room
-        if (_.isUndefined(this._mem.links)) {
-            this._mem.links = {};
-        }
-        this._cache.links = new Links(this._mem.links);
-        return this._cache.links;
-    }
-
-    /**
      * Gets the room extractor if it exists. Otherwise null.
      */
     get extractor () {
-        if (!_.isUndefined(this._cache.extractor)) {
+        if (this._cache.extractor !== undefined) {
             return this._cache.extractor;
         }
         let extractors = this.recall(STRUCTURE_EXTRACTOR);
@@ -161,14 +159,29 @@ class RoomReal extends RoomBase {
     }
 
     /**
+     * Gets the linking system in the room and easy access to individual links.
+     */
+    get links () {
+        if (this._cache.links !== undefined) {
+            return this._cache.links;
+        }
+        // Ensure that the linking system has some memory reserved from the room
+        if (this._mem.links === undefined) {
+            this._mem.links = {};
+        }
+        this._cache.links = new Links(this._mem.links);
+        return this._cache.links;
+    }
+
+    /**
      * Gets the laboratory unit in the room and easy access to individual labs.
      */
     get labs () {
-        if (!_.isUndefined(this._cache.labs)) {
+        if (this._cache.labs !== undefined) {
             return this._cache.labs;
         }
         // Ensure that the laboratory unit has some memory reserved from the room.
-        if (_.isUndefined(this._mem.labs)) {
+        if (this._mem.labs === undefined) {
             this._mem.labs = {};
         }
         this._cache.labs = new Labs(this._mem.labs);
@@ -181,7 +194,7 @@ class RoomReal extends RoomBase {
      * refuelers to prioritise towers with the least resources.
      */
     get towers () {
-        if (!_.isUndefined(this._cache.towers)) {
+        if (this._cache.towers !== undefined) {
             return this._cache.towers;
         }
         this._cache.towers = this.recall(STRUCTURE_TOWER);
@@ -197,7 +210,7 @@ class RoomReal extends RoomBase {
      * @returns {StructureWall[]} All walls in the room.
      */
     get walls () {
-        if (!_.isUndefined(this._cache.walls)) {
+        if (this._cache.walls !== undefined) {
             return this._cache.walls;
         }
         this._cache.walls = this._room.find(FIND_STRUCTURES, {
@@ -212,7 +225,7 @@ class RoomReal extends RoomBase {
      * @returns {StructureRampart[]} All ramparts in the room.
      */
     get ramparts () {
-        if (!_.isUndefined(this._cache.ramparts)) {
+        if (this._cache.ramparts !== undefined) {
             return this._cache.ramparts;
         }
         this._cache.ramparts = this._room.find(FIND_STRUCTURES, {
@@ -226,7 +239,7 @@ class RoomReal extends RoomBase {
      * are no construction sites.
      */
     get constructionSites () {
-        if (!_.isUndefined(this._cache.constructionSites)) {
+        if (this._cache.constructionSites !== undefined) {
             return this._cache.constructionSites;
         }
         this._cache.constructionSites = this._room.find(FIND_CONSTRUCTION_SITES);
@@ -239,7 +252,7 @@ class RoomReal extends RoomBase {
      * @returns {StructureSpawn[]} All spawns in the room.
      */
     get spawns () {
-        if (!_.isUndefined(this._cache.spawns)) {
+        if (this._cache.spawns !== undefined) {
             return this._cache.spawns;
         }
         this._cache.spawns = this.recall(STRUCTURE_SPAWN);
@@ -252,7 +265,7 @@ class RoomReal extends RoomBase {
      * @returns {StructureExtension[]} All extensions in the room.
      */
     get extensions () {
-        if (!_.isUndefined(this._cache.extensions)) {
+        if (this._cache.extensions !== undefined) {
             return this._cache.extensions;
         }
         this._cache.extensions = this._room.find(FIND_STRUCTURES, {
@@ -262,17 +275,10 @@ class RoomReal extends RoomBase {
     }
 
     /**
-     * Gets the total energy capacity of all spawns and extensions in the room.
-     */
-    get energyCapacityAvailable () {
-        return this._room.energyCapacityAvailable;
-    }
-
-    /**
      * Gets the nuker structure in the room is it exists. Otherwise null.
      */
     get nuker () {
-        if (!_.isUndefined(this._cache.nuker)) {
+        if (this._cache.nuker !== undefined) {
             return this._cache.nuker;
         }
         let nukers = this.recall(STRUCTURE_NUKER);
@@ -284,7 +290,7 @@ class RoomReal extends RoomBase {
      * Gets the room observer if it exists.
      */
     get observer () {
-        if (!_.isUndefined(this._cache.observer)) {
+        if (this._cache.observer !== undefined) {
             return this._cache.observer;
         }
         let observers = this.recall(STRUCTURE_OBSERVER);
@@ -298,7 +304,7 @@ class RoomReal extends RoomBase {
      * @returns {StructurePowerSpawn} The power spawn of the room or null.
      */
     get powerSpawn () {
-        if (!_.isUndefined(this._cache.powerSpawn)) {
+        if (this._cache.powerSpawn !== undefined) {
             return this._cache.powerSpawn;
         }
         let powerSpawns = this.recall(STRUCTURE_POWER_SPAWN);
@@ -310,7 +316,7 @@ class RoomReal extends RoomBase {
      * Gets an array with all keeper lairs in the room. Empty if there are no keeper lairs.
      */
     get keeperLairs () {
-        if (!_.isUndefined(this._cache.keeperLairs)) {
+        if (this._cache.keeperLairs !== undefined) {
             return this._cache.keeperLairs;
         }
         this._cache.keeperLairs = this.recall(STRUCTURE_KEEPER_LAIR);
@@ -324,7 +330,7 @@ class RoomReal extends RoomBase {
      * Gets an array of structures that need repairs. Empty if there are no such structures.
      */
     get repairs () {
-        if (!_.isUndefined(this._cache.repairs)) {
+        if (this._cache.repairs !== undefined) {
             return this._cache.repairs;
         }
         this._cache.repairs = [];
@@ -343,7 +349,7 @@ class RoomReal extends RoomBase {
      * Gets an object with all flags in the room grouped by the primary color.
      */
     get flags () {
-        if (!_.isUndefined(this._cache.flags)) {
+        if (this._cache.flags !== undefined) {
             return this._cache.flags;
         }
         let flagsArray = this._room.find(FIND_FLAGS);
@@ -357,6 +363,13 @@ class RoomReal extends RoomBase {
     }
 
     /**
+     * Gets the total energy capacity of all spawns and extensions in the room.
+     */
+    get energyCapacityAvailable () {
+        return this._room.energyCapacityAvailable;
+    }
+
+    /**
      * Attempt to reserve a game object or something with a unique id to prevent other
      * creeps, towers, etc from targeting the same thing. A reservation will time out and 
      * be released after 2 ticks. This means a reservation must be renewed.
@@ -366,12 +379,12 @@ class RoomReal extends RoomBase {
      * @param {string} creepName - The name of the creep making the reservation.
      */
     reserve (id, type, creepName) {
-        if (_.isUndefined(this._mem.reservations)) {
+        if (this._mem.reservations === undefined) {
             this._mem.reservations = {};
         }
 
         let key = type + '_' + id;
-        if (_.isUndefined(this._mem.reservations[key])) {
+        if (this._mem.reservations[key] === undefined) {
             this._mem.reservations[key] = { creepName: creepName, ttl: 2 };
             return true;
         }
@@ -456,10 +469,10 @@ class RoomReal extends RoomBase {
         this.links.populate(this, links);
         this.labs.populate(this, labs);
 
-        if (_.isUndefined(this._mem.tickClaimed) && this.isMine) {
+        if (this._mem.tickClaimed === undefined && this.isMine) {
             this._mem.tickClaimed = Game.time;
         }
-        if (!_.isUndefined(this._mem.tickClaimed) && !this.isMine) {
+        if (this._mem.tickClaimed !== undefined && !this.isMine) {
             delete this._mem.tickClaimed;
         }
 
@@ -491,7 +504,7 @@ class RoomReal extends RoomBase {
     checkRepairs (structure) {
         let greyFlags = this.flags[COLOR_GREY];
 
-        if (_.isArray(greyFlags)) {
+        if (greyFlags !== undefined) {
             for (let greyFlag of greyFlags) {
                 if (structure.pos.isEqualTo(greyFlag)) {
                     return;
@@ -536,7 +549,7 @@ class RoomReal extends RoomBase {
     clearFlags () {
         let greyFlags = this.flags[COLOR_GREY];
 
-        if (_.isArray(greyFlags)) {
+        if (greyFlags !== undefined) {
             for (let greyFlag of greyFlags) {
                 let foundStructures = greyFlag.pos.lookFor(LOOK_STRUCTURES);
                 if (foundStructures.length === 0) {
@@ -561,7 +574,7 @@ class RoomReal extends RoomBase {
         }
 
         this._mem.jobs.linkers = 0;
-        if (!_.isNull(this.storage) && !_.isNull(this.links.storage)) {
+        if (this.storage !== null && this.links.storage !== null) {
             this._mem.jobs.linkers = 1;
         }
 
@@ -584,13 +597,13 @@ class RoomReal extends RoomBase {
     }
 
     tickReservations () {
-        if (_.isUndefined(this._mem.reservations)) {
+        if (this._mem.reservations === undefined) {
             return;
         }
 
         let keys = Object.keys(this._mem.reservations);
 
-        if (keys.length <= 0) {
+        if (keys.length === 0) {
             delete this._mem.reservations;
             return;
         }
@@ -664,16 +677,16 @@ class RoomReal extends RoomBase {
     }
 
     recall (type) {
-        if (_.isUndefined(this._mem.ids)) {
+        if (this._mem.ids === undefined) {
             return [];
         }
-        if (_.isUndefined(this._mem.ids[type])) {
+        if (this._mem.ids[type] === undefined) {
             return [];
         }
         let gameObjects = [];
         for (let id of this._mem.ids[type]) {
             let gameObject = Game.getObjectById(id);
-            if (!_.isNull(gameObject)) {
+            if (gameObject !== null) {
                 gameObjects.push(gameObject);
             }
         }

@@ -31,7 +31,7 @@ class Labs {
             this._cache.all.push(this.compoundTwo);
         }
         if (this.producers.length > 0) {
-            this._cache.all.concat(this.producers);
+            this._cache.all = this._cache.all.concat(this.producers);
         }
         return this._cache.all;
     }

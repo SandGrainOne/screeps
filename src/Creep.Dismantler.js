@@ -13,8 +13,8 @@ class CreepDismantler extends CreepWorker {
      * Gets the creep job target. 
      */
     get target () {
-        if (_.isUndefined(this._cache.target)) {
-            if (!_.isUndefined(this._mem.work.target)) {
+        if (this._cache.target === undefined) {
+            if (this._mem.work.target !== undefined) {
                 this._cache.target = Game.getObjectById(this._mem.work.target);
             }
             else {
@@ -49,57 +49,23 @@ class CreepDismantler extends CreepWorker {
             return true;
         }
 
-        if (this.task === 'collecting') {
-            if (_.isNull(this.target)) {
-                this.target = this.findTarget();
-            }
-
-            if (!_.isNull(this.target)) {
-                if (this.pos.isNearTo(this.target)) {
-                    this.dismantle(this.target);
-                }
-            }
+        if (this.target === null) {
+            this.target = this.findTarget();
         }
 
-        if (this.task === 'delivering') {
-            if (this.room.containers.length > 0) {
-                let container = this.getFirstInRange(this.room.containers, 3, (x) => _.sum(x.store) < x.storeCapacity - 250);
-                if (container !== null) {
-                    if (container.hits < container.hitsMax) {
-                        this.repair(container);
-                    }
-                    else if (this.pos.isNearTo(container)) {
-                        this.transfer(container, RESOURCE_ENERGY);
-                    }
-                }
-            }
-            else {
-                this.drop(RESOURCE_ENERGY);
+        if (this.target !== null) {
+            if (this.pos.isNearTo(this.target)) {
+                this.dismantle(this.target);
             }
         }
 
         if (this.load >= this.capacity) {
-            this.task = 'delivering';
+            this.drop(RESOURCE_ENERGY);
         }
 
-        if (this.load <= 0) {
-            this.task = 'collecting';
-        }
-
-        if (this.task === 'collecting') {
-            if (!_.isNull(this.target)) {
-                if (!this.pos.isNearTo(this.target)) {
-                    this.moveTo(this.target);
-                }
-            }
-        }
-
-        if (this.task === 'delivering') {
-            if (this.room.containers.length > 0) {
-                let container = this.getClosestByRange(this.room.containers, (x) => _.sum(x.store) < x.storeCapacity - 250);
-                if (container != null && !this.pos.isNearTo(container)) {
-                    this.moveTo(container);
-                }
+        if (this.target !== null) {
+            if (!this.pos.isNearTo(this.target)) {
+                this.moveTo(this.target);
             }
         }
 
@@ -131,6 +97,22 @@ class CreepDismantler extends CreepWorker {
 
         if (this.room.towers.length > 0) {
             return this.getClosestByRange(this.room.towers, (x) => x.energy === 0);
+        }
+
+        if (this.room.spawns.length > 0) {
+            return this.getClosestByRange(this.room.spawns, (x) => x.energy === 0);
+        }
+
+        if (this.room.extensions.length > 0) {
+            return this.getClosestByRange(this.room.extensions, (x) => x.energy === 0);
+        }
+
+        if (this.room.links.all.length > 0) {
+            return this.getClosestByRange(this.room.links.all, (x) => x.energy === 0);
+        }
+
+        if (this.room.labs.all.length > 0) {
+            return this.getClosestByRange(this.room.labs.all, (x) => x.energy === 0 && x.mineralAmount === 0);
         }
 
         if (this.room.walls.length > 0) {
