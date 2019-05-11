@@ -16,14 +16,14 @@ class RoomBase {
         this._name = name;
         this._visible = false;
 
-        if (!_.isUndefined(Memory.rooms[name])) {
+        if (Memory.rooms[name] !== undefined) {
             this._mem = Memory.rooms[name];
         }
         else {
             this._mem = {};
         }
 
-        if (_.isUndefined(this._mem.jobs)) {
+        if (this._mem.jobs === undefined) {
             this._mem.jobs = {
                 settlers: 0,
                 builders: 0,
@@ -85,6 +85,18 @@ class RoomBase {
         return this._mem.jobs;
     }
 
+    /**
+     * Perform all room specific logic.
+     */
+    run () {
+    }
+
+    /**
+     * Create a list of jobs that needs to be occupied by creeps.
+     */
+    createJobs () {
+    }
+
     * ownedRooms () {
         if (_.isUndefined(this._mem.ownedRooms)) {
             return [];
@@ -94,16 +106,6 @@ class RoomBase {
             const roomName = roomDistance.name;
             yield Empire.getRoom(roomName);
         }
-    }
-
-    getJobsFor (jobName) {
-        if (!this._mem.jobs || !this._mem.jobs[jobName + 's']) {
-            return 0;
-        }
-        return this._mem.jobs[jobName + 's'];
-    }
-
-    createJobs () {
     }
 }
 

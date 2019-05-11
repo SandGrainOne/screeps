@@ -79,7 +79,7 @@ class CreepUpgrader extends CreepWorker {
             }
         }
         else {
-            if (moveTarget === null && this.room.links.controller !== null && !this.pos.isNearTo(this.room.links.controller)) {
+            if (moveTarget === null && this.room.links.controller !== null && this.room.links.controller.energy > 200 && !this.pos.isNearTo(this.room.links.controller)) {
                 moveTarget = this.room.links.controller;
             }
 

@@ -77,7 +77,7 @@ class CreepDismantler extends CreepWorker {
             return null;
         }
 
-        if (this.room.flags[COLOR_GREY]) {
+        if (this.room.flags[COLOR_GREY] !== undefined) {
             for (const flag of this.room.flags[COLOR_GREY]) {
                 let structures = flag.pos.lookFor(LOOK_STRUCTURES);
                 if (structures.length > 0) {
@@ -113,6 +113,30 @@ class CreepDismantler extends CreepWorker {
 
         if (this.room.labs.all.length > 0) {
             return this.getClosestByRange(this.room.labs.all, (x) => x.energy === 0 && x.mineralAmount === 0);
+        }
+
+        if (this.room.storage !== null && _.sum(this.room.storage.store) === 0) {
+            return this.room.storage;
+        }
+
+        if (this.room.terminal !== null && _.sum(this.room.terminal.store) === 0) {
+            return this.room.terminal;
+        }
+
+        if (this.room.extractor !== null) {
+            return this.room.extractor;
+        }
+
+        if (this.room.observer !== null) {
+            return this.room.observer;
+        }
+
+        if (this.room.powerSpawn !== null && this.room.powerSpawn.energy === 0 && this.room.powerSpawn.power === 0) {
+            return this.room.powerSpawn;
+        }
+
+        if (this.room.nuker !== null && this.room.nuker.energy === 0 && this.room.nuker.ghodium === 0) {
+            return this.room.nuker;
         }
 
         if (this.room.walls.length > 0) {

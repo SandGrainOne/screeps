@@ -29,7 +29,7 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.room.name === 'E73N87') {
-            reaction = { compoundOne: RESOURCE_CATALYST, compoundTwo: RESOURCE_GHODIUM_ACID };
+            reaction = { compoundOne: RESOURCE_HYDROXIDE, compoundTwo: RESOURCE_GHODIUM_OXIDE };
         }
 
         if (this.room.name === 'E75N87') {

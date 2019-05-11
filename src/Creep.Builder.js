@@ -133,29 +133,29 @@ class CreepBuilder extends CreepWorker {
         }
 
         if (this.task === 'charge') {
-            if (!moveTarget && (this.isHome || this.atWork) && !this.room.storage) {
-                if (!moveTarget && this.room.containers.length > 0) {
-                    let container = this.pos.findClosestByRange(this.room.containers);
-                    if (container && container.store.energy > 0) {
+            if (moveTarget === null && (this.isHome || this.atWork) && (this.room.storage === null || _.sum(this.room.storage.store) < 1000)) {
+                if (moveTarget === null && this.room.containers.length > 0) {
+                    let container = this.getClosestByRange(this.room.containers);
+                    if (container !== null && container.store.energy > 0) {
                         moveTarget = container;
                     }
                 }
 
-                if (!moveTarget && this.room.sources.length > 0) {
-                    let source = this.pos.findClosestByRange(this.room.sources);
-                    if (source) {
+                if (moveTarget === null && this.room.sources.length > 0) {
+                    let source = this.getClosestByRange(this.room.sources);
+                    if (source !== null) {
                         moveTarget = source;
                     }
                 }
             }
 
-            if (!moveTarget && !this.isHome) {
+            if (moveTarget === null && !this.isHome) {
                 moveTarget = this.moveToRoom(this._mem.rooms.home, false);
             }
 
-            if (!moveTarget && this.room.storage) {
+            if (moveTarget === null && this.room.storage) {
                 let storage = this.room.storage;
-                if (storage && storage.store.energy > 0) {
+                if (storage !== null && storage.store.energy > 0) {
                     moveTarget = storage;
                 }
             }

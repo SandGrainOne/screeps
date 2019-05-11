@@ -10,6 +10,19 @@ let squadTypes = {
  * The SquadMaker class is a static helper class for the construction of squads.
  */
 class SquadMaker {
+    prepare () {
+        os.logger.info('preparing squads');
+    }
+
+    /**
+     * Analyse the given memory object and retrieve the correct AI instance.
+     * 
+     * @param {object} squadMemory 
+     */
+    getAiInstance (squadMemory) {
+        // os.logger.info(JSON.stringify(squadMemory));
+    }
+
     /**
      * Create a squad of the right type.
      * 
@@ -24,7 +37,7 @@ class SquadMaker {
         }
 
         if (!squad) {
-            os.log.warning('Squad ' + squadName + ' is of an unknown type: ' + squadType);
+            os.logger.warning('Squad ' + squadName + ' is of an unknown type: ' + squadType);
             squad = new SquadBase(squadName);
         }
 

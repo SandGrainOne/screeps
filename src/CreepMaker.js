@@ -40,7 +40,7 @@ class CreepMaker {
         }
 
         if (!smartCreep) {
-            os.log.warning('Creep ' + creep.name + ' has an invalid job: ' + job);
+            os.logger.warning('Creep ' + creep.name + ' has an invalid job: ' + job);
             smartCreep = new CreepBase(creep);
         }
 
@@ -52,7 +52,7 @@ class CreepMaker {
      */
     static createCreep (job, spawnName, bodyCode, homeRoom, workRoom) {
         if (!Game.spawns[spawnName]) {
-            os.log.error('No spawn with the name "' + spawnName + '".');
+            os.logger.error('No spawn with the name "' + spawnName + '".');
             return ERR_BUSY;
         }
 

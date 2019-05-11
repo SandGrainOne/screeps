@@ -396,7 +396,7 @@ class RoomReal extends RoomBase {
     }
 
     /**
-     * Perform all room spesific logic.
+     * Perform all room specific logic.
      */
     run () {
         // Prepare the room for the current tick.
@@ -559,12 +559,15 @@ class RoomReal extends RoomBase {
         }
     }
 
+    /**
+     * Create a list of jobs that needs to be occupied by creeps.
+     */
     createJobs () {
         this._mem.jobs.miners = this.sources.length;
-        this._mem.jobs.haulers = this.containers.length + this._room.terminal ? 1 : 0;
+        this._mem.jobs.haulers = this.containers.length + this._room.terminal !== null ? 1 : 0;
 
         this._mem.jobs.mineralminers = 0;
-        if (this.minerals && this.minerals.mineralAmount > 0 && this.extractor) {
+        if (this.minerals !== null && this.minerals.mineralAmount > 0 && this.extractor !== null) {
             this._mem.jobs.mineralminers = 1;
         }
 
@@ -579,10 +582,20 @@ class RoomReal extends RoomBase {
         }
 
         this._mem.jobs.settlers = 0;
-        if (this._room.controller && this._room.controller.reservation) {
-            if (this._room.controller.reservation.username === C.USERNAME && this._room.controller.reservation.ticksToEnd < 4000) {
+        if (this.controller !== null && this.controller.owner === undefined) {
+            if (this.controller.reservation !== undefined) {
+                if (this.controller.reservation.username === C.USERNAME && this.controller.reservation.ticksToEnd < 4000) {
+                    this._mem.jobs.settlers = 1;
+                }
+            }
+            else {
                 this._mem.jobs.settlers = 1;
             }
+        }
+
+        this._mem.jobs.dismantlers = 0;
+        if (this.flags[COLOR_GREY] !== undefined) {
+            this._mem.jobs.dismantlers = 1;
         }
     }
 
@@ -617,7 +630,7 @@ class RoomReal extends RoomBase {
     }
 
     processPower () {
-        if (this.powerSpawn) {
+        if (this.powerSpawn !== null) {
             if (this.powerSpawn.energy > 0 && this.powerSpawn.energy > POWER_SPAWN_ENERGY_RATIO) {
                 this.powerSpawn.processPower();
             }
@@ -654,7 +667,7 @@ class RoomReal extends RoomBase {
     }
 
     queueCreep (rule) {
-        if (!rule) {
+        if (rule === undefined || rule === null) {
             return;
         }
 
@@ -667,10 +680,10 @@ class RoomReal extends RoomBase {
     }
 
     remember (id, type) {
-        if (_.isUndefined(this._mem.ids)) {
+        if (this._mem.ids === undefined) {
             this._mem.ids = {};
         }
-        if (_.isUndefined(this._mem.ids[type])) {
+        if (this._mem.ids[type] === undefined) {
             this._mem.ids[type] = [];
         }
         this._mem.ids[type].push(id);

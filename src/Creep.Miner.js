@@ -61,12 +61,10 @@ class CreepMiner extends CreepWorker {
                 }
             }
             if (!standsOnContainer) {
-                let foundSites = this.pos.lookFor(LOOK_CONSTRUCTION_SITES);
-                if (foundSites.length > 0) {
-                    // There can only ever be one construction site in a single space.
-                    // The miner should only help with the construction of a container.
-                    if (foundSites[0].structureType === STRUCTURE_CONTAINER) {
-                        if (this.build(foundSites[0]) === OK) {
+                if (this.strength > 0 && this.energy > 0) {
+                    let constructionSite = this.getFirstInRange(this.room.constructionSites, 3);
+                    if (constructionSite !== null) {
+                        if (this.build(constructionSite) === OK) {
                             performedWork = true;
                         }
                     }
@@ -77,7 +75,7 @@ class CreepMiner extends CreepWorker {
         // The creep can't both repair/build and harvest in the same tick.
         if (!performedWork && this.atWork && this.load <= this.capacity) {
             let resourceNode = this.ResourceNode;
-            if (resourceNode && this.pos.isNearTo(resourceNode)) {
+            if (resourceNode !== null && this.pos.isNearTo(resourceNode)) {
                 if (resourceNode.mineralType) {
                     if (this.room.extractor && this.room.extractor.cooldown <= 0) {
                         this.harvest(resourceNode);
@@ -100,7 +98,7 @@ class CreepMiner extends CreepWorker {
         if (this.load >= this.capacity) {
             if (this.room.containers.length > 0) {
                 let container = this.getFirstInRange(this.room.containers, 1);
-                if (container) {
+                if (container !== null) {
                     for (let resourceType in this.carry) {
                         if (this.transfer(container, resourceType) === OK) {
                             break;
@@ -111,13 +109,13 @@ class CreepMiner extends CreepWorker {
 
             if (this.room.links && this.room.links.inputs.length > 0) {
                 let link = this.getFirstInRange(this.room.links.inputs, 1);
-                if (link) {
+                if (link !== null) {
                     this.transfer(link, RESOURCE_ENERGY);
                 }
             }
 
             let storage = this.room.storage;
-            if (storage && this.pos.isNearTo(storage)) {
+            if (storage !== null && this.pos.isNearTo(storage)) {
                 for (let resourceType in this.carry) {
                     if (this.transfer(storage, resourceType) === OK) {
                         break;
@@ -127,14 +125,14 @@ class CreepMiner extends CreepWorker {
 
             if (this.room.spawns.length > 0) {
                 let spawn = this.getFirstInRange(this.room.spawns, 1, (x) => x.energy < x.energyCapacity);
-                if (spawn) {
+                if (spawn !== null) {
                     this.transfer(spawn, RESOURCE_ENERGY);
                 }
             }
 
             if (this.room.extensions.length > 0) {
                 let extension = this.getFirstInRange(this.room.extensions, 1, (x) => x.energy < x.energyCapacity);
-                if (extension) {
+                if (extension !== null) {
                     this.transfer(extension, RESOURCE_ENERGY);
                 }
             }
@@ -214,28 +212,28 @@ class CreepMiner extends CreepWorker {
                 }
             }
 
-            if (!moveTarget && !this.isHome) {
+            if (moveTarget === null && !this.isHome) {
                 moveTarget = this.moveToRoom(this._mem.rooms.home, false);
             }
 
             if (this.isHome && this.energy > 0) {
                 // This should only happen early on before there is a storage in the room.
-                if (!moveTarget && this.room.spawns.length > 0) {
+                if (moveTarget === null && this.room.spawns.length > 0) {
                     let spawn = this.getClosestByRange(this.room.spawns, (x) => x.energy < x.energyCapacity);
-                    if (!_.isNull(spawn)) {
+                    if (spawn !== null) {
                         moveTarget = spawn;
                     }
                 }
-                if (!moveTarget && this.room.extensions.length > 0) {
+                if (moveTarget === null && this.room.extensions.length > 0) {
                     let extension = this.getClosestByRange(this.room.extensions, (x) => x.energy < x.energyCapacity);
-                    if (!_.isNull(extension)) {
+                    if (extension !== null) {
                         moveTarget = extension;
                     }
                 }
             }
         }
 
-        if (moveTarget) {
+        if (moveTarget !== null) {
             // Miners should move on to the same tile as a container. Not stop right before.
             let range = moveTarget.structureType === STRUCTURE_CONTAINER ? 0 : 1;
             this.moveTo(moveTarget, { 'range': range });

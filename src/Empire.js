@@ -15,10 +15,6 @@ class Empire {
     constructor () {
         this._mem = Memory.empire;
 
-        // Saving creeps to memory every tick to make the population visible.
-        // This is temporary. Should instead have a command to output creeps.
-        this._mem.creeps = {};
-
         this._rooms = new Map();
 
         this._creeps = {};
@@ -94,7 +90,7 @@ class Empire {
         for (let creepName in Memory.creeps) {
             let creep = Game.creeps[creepName];
 
-            if (!creep) {
+            if (creep === undefined) {
                 // The creep must have died.
                 delete Memory.creeps[creepName];
                 continue;
@@ -110,14 +106,6 @@ class Empire {
 
             let job = smartCreep.job;
             let workroom = creep.memory.rooms.work;
-
-            if (!this._mem.creeps[workroom]) {
-                this._mem.creeps[workroom] = {};
-            }
-            if (!this._mem.creeps[workroom][job + 's']) {
-                this._mem.creeps[workroom][job + 's'] = [];
-            }
-            this._mem.creeps[workroom][job + 's'].push(creepName);
 
             if (!this._creeps[workroom]) {
                 this._creeps[workroom] = {};
@@ -194,10 +182,10 @@ class Empire {
         }
 
         if (richestAmount - poorestAmount > 100000) {
-            // os.log.info(richest.name + '.terminal.store.energy: ' + richest.terminal.store.energy);
-            // os.log.info(poorest.name + '.terminal.storeCapacity - _.sum(' + poorest.name + '.terminal.store): ' + (poorest.terminal.storeCapacity - _.sum(poorest.terminal.store)));
+            // os.logger.info(richest.name + '.terminal.store.energy: ' + richest.terminal.store.energy);
+            // os.logger.info(poorest.name + '.terminal.storeCapacity - _.sum(' + poorest.name + '.terminal.store): ' + (poorest.terminal.storeCapacity - _.sum(poorest.terminal.store)));
             if (richest.terminal.store.energy > 30000 && poorest.terminal.store.energy < 100000 && poorest.terminal.storeCapacity - _.sum(poorest.terminal.store) > 20000) {
-                os.log.info('Transfering 10000 energy from ' + richest.name + '(' + richestAmount + ') to ' + poorest.name + '(' + poorestAmount + ')');
+                os.logger.info('Transfering 10000 energy from ' + richest.name + '(' + richestAmount + ') to ' + poorest.name + '(' + poorestAmount + ')');
                 richest.terminal.send(RESOURCE_ENERGY, 10000, poorest.name);
             }
         }
@@ -207,7 +195,7 @@ class Empire {
      * Analyze the next set of rooms.
      */
     analyzeRooms () {
-        if (_.isUndefined(this._roomsToBeAnalyzed) || this._roomsToBeAnalyzed.length <= 0) {
+        if (this._roomsToBeAnalyzed === undefined || this._roomsToBeAnalyzed.length <= 0) {
             return;
         }
 
@@ -222,7 +210,7 @@ class Empire {
     createCreep (job, bodyCode, homeRoom, workRoom) {
         let spawn = this.findSpawn(homeRoom);
 
-        if (_.isNull(spawn)) {
+        if (spawn === null) {
             return ERR_BUSY;
         }
 
@@ -245,13 +233,13 @@ class Empire {
 
     checkRoomMemory () {
         for (let room of this.rooms.values()) {
-            if (!_.isUndefined(room._mem.neighbours)) {
-                os.log.info('Room: ' + room.name);
+            if (room._mem.neighbours === null) {
+                os.logger.info('Room: ' + room.name);
                 delete room._mem.neighbours;
                 return;
             }
         }
-        os.log.info('Found no issues');
+        os.logger.info('Found no issues');
     }
 }
 
