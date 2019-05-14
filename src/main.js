@@ -110,16 +110,6 @@ module.exports.loop = function () {
             };
         }
 
-        if (room.name === 'E76N82') {
-            rule = {
-                'homeRoom': 'E76N83',
-                'jobs': {
-                    'hauler': { 'count': 1, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' },
-                    'dismantler': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWWWWWWCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' }
-                }
-            };
-        }
-
         if (room.name === 'E77N83') {
             rule = {
                 'homeRoom': 'E76N83',
@@ -222,6 +212,16 @@ module.exports.loop = function () {
                     'hauler': { 'count': 2, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' },
                     'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' },
                     'refueler': { 'count': room.jobs.refuelers, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' }
+                }
+            };
+        }
+
+        if (room.name === 'E67N87') {
+            rule = {
+                'homeRoom': 'E71N87',
+                'jobs': {
+                    'hauler': { 'count': 1, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' },
+                    'dismantler': { 'count': 1, 'body': 'WWWWWWWWWWWWWWWWWWWWCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' }
                 }
             };
         }

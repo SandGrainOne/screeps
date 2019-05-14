@@ -22,6 +22,8 @@ class Empire {
 
         this._roomsOwned = [];
         this._roomsToBeAnalyzed = [];
+
+        this._spawnQueue = [];
     }
 
     /**
@@ -53,6 +55,16 @@ class Empire {
             return this.rooms.get(name);
         }
         return new RoomBase(name);
+    }
+
+    queueCreepSpawn (spawningRule) {
+        if (spawningRule === null) {
+            return;
+        }
+        if (spawningRule.priority === undefined) {
+            spawningRule.priority = 5;
+        }
+        this._spawnQueue.push(spawningRule);
     }
 
     /**
