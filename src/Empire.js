@@ -67,6 +67,34 @@ class Empire {
         this._spawnQueue.push(spawningRule);
     }
 
+    performSpawning () {
+        if (this._spawnQueue.length === 0) {
+            return;
+        }
+
+        this._spawnQueue.sort((a, b) => a.priority - b.priority);
+
+        for (let i = 0; i < this._spawnQueue.length; i++) {
+            const job = this._spawnQueue[i];
+            const body = CreepMaker.buildBody(job.body);
+            const cost = CreepMaker.getCost(body);
+
+            // os.logger.info('Job: ' + JSON.stringify(job) + ' Cost: ' + cost);
+            
+/*             const room = this.getRoom(roomName);
+
+            if (room.isVisible) {
+                if (room.isMine) {
+                    for (const spawn of room.spawns) {
+                        if (!spawn.spawning) {
+                            // return spawn;
+                        }
+                    }
+                }
+            }    
+ */        }
+    }
+
     /**
      * This method is responsible for arranging all important game objects in easy to access collections.
      */

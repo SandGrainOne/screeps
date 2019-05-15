@@ -47,6 +47,17 @@ class CreepMaker {
         return smartCreep;
     }
 
+    static getCost (body) {
+        if (!Array.isArray(body) || body.length === 0) {
+            return o;
+        }
+        let cost = 0;
+        for (let i = 0; i < body.length; i++) {
+            cost += BODYPART_COST[body[i]];
+        }
+        return cost;
+    }
+
     /**
      * Trigger the spawning of a new creep.
      */

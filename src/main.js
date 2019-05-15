@@ -735,6 +735,13 @@ module.exports.loop = function () {
             for (let job in rule.jobs) {
                 let creepCount = roomPop[job + 's'] === undefined ? 0 : roomPop[job + 's'].length;
                 if (creepCount < rule.jobs[job].count) {
+                    const spawningRule = {
+                        'jobName': job,
+                        'body': rule.jobs[job].body,
+                        'homeRoom': rule.homeRoom,
+                        'workRoom': room.name
+                    };
+                    empire.queueCreepSpawn(spawningRule);
                     empire.createCreep(job, rule.jobs[job].body, rule.homeRoom, room.name);
                 }
             }
@@ -747,6 +754,8 @@ module.exports.loop = function () {
     for (let creepName in empire.creeps.all) {
         empire.creeps.all[creepName].act();
     }
+
+    empire.performSpawning();
 
     empire.tickObservations();
 
