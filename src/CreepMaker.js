@@ -49,12 +49,14 @@ class CreepMaker {
 
     static getCost (body) {
         if (!Array.isArray(body) || body.length === 0) {
-            return o;
+            return 0;
         }
+
         let cost = 0;
         for (let i = 0; i < body.length; i++) {
             cost += BODYPART_COST[body[i]];
         }
+
         return cost;
     }
 

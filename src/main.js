@@ -755,13 +755,8 @@ module.exports.loop = function () {
         empire.creeps.all[creepName].act();
     }
 
-    empire.performSpawning();
-
+    // empire.performSpawning();
     empire.tickObservations();
-
-    // Balance the energy in the empire over the rooms.
     empire.balanceEnergy();
-
-    // Perform an analysis of the next 2 rooms in the empire.
     empire.analyzeRooms();
 };

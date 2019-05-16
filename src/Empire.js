@@ -78,21 +78,53 @@ class Empire {
             const job = this._spawnQueue[i];
             const body = CreepMaker.buildBody(job.body);
             const cost = CreepMaker.getCost(body);
+            const room = this.getRoom(job.homeRoom);
 
-            // os.logger.info('Job: ' + JSON.stringify(job) + ' Cost: ' + cost);
-            
-/*             const room = this.getRoom(roomName);
-
+            let foundSpawn = null;
             if (room.isVisible) {
                 if (room.isMine) {
-                    for (const spawn of room.spawns) {
-                        if (!spawn.spawning) {
-                            // return spawn;
+                    if (cost < room.energyCapacityAvailable) {
+                        if (cost < room.energyAvailable) {
+                            let timeToAvailable = Infinity;
+                            for (let j = 0; i < room.spawns.length; j++) {
+                                if (room.spawns[j].spawning === undefined) {
+                                    foundSpawn = room.spawns[j];
+                                    break;
+                                }
+                                else {
+                                    if (timeToAvailable > room.spawns[j].spawning.remainingTime) {
+                                        timeToAvailable = room.spawns[j].spawning.remainingTime;
+                                    }
+                                }
+                            }
                         }
                     }
+                    else {
+                        os.logger.warning('Creep body too expensive for home room, ' + job.homeRoom);
+                    }
                 }
-            }    
- */        }
+            }
+
+            // TODO: investigate if it could be smart to ask for help from neighboring room.
+
+            if (foundSpawn !== null) {
+                const opts = {
+                    'memory': {
+                        'job': job.jobName,
+                        'work': {
+                            'task': null
+                        },
+                        'rooms': {
+                            'home': job.homeRoom,
+                            'work': job.workRoom
+                        },
+                        'spawnTime': body.length * 3
+                    }
+                };
+                const creepName = CreepMaker.generateName();
+                foundSpawn.spawnCreep(body, creepName, opts);
+            }
+        }
     }
 
     /**

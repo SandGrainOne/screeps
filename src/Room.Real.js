@@ -363,6 +363,13 @@ class RoomReal extends RoomBase {
     }
 
     /**
+     * Gets the amount of energy currently available in the room.
+     */
+    get energyAvailable () {
+        return this._room.energyAvailable;
+    }
+
+    /**
      * Gets the total energy capacity of all spawns and extensions in the room.
      */
     get energyCapacityAvailable () {
