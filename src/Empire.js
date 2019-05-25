@@ -57,74 +57,97 @@ class Empire {
         return new RoomBase(name);
     }
 
+    orderCreep (jobName, bodyCode, homeRoom, workRoom) {
+        let body = CreepMaker.buildBody(bodyCode);
+
+        const job = {
+            'priority': 1,
+            'jobName': jobName,
+            'body': body,
+            'homeRoom': homeRoom,
+            'workRoom': workRoom
+        };
+
+        if (this._mem.creepOrderQueue === undefined) {
+            this._mem.creepOrderQueue = [];
+        }
+
+        this._mem.creepOrderQueue.push(job);
+
+        return 'Added order for a ' + jobName + ' in ' + homeRoom + ' to the queue.';
+    }
+
     queueCreepSpawn (spawningRule) {
         if (spawningRule === null) {
             return;
         }
-        if (spawningRule.priority === undefined) {
-            spawningRule.priority = 5;
-        }
+
         this._spawnQueue.push(spawningRule);
     }
 
     performSpawning () {
+        if (this._mem.creepOrderQueue !== undefined) {
+            this._spawnQueue = this._spawnQueue.concat(this._mem.creepOrderQueue);
+            delete this._mem.creepOrderQueue;
+        }
+
         if (this._spawnQueue.length === 0) {
             return;
         }
 
-        this._spawnQueue.sort((a, b) => a.priority - b.priority);
+        if (this._spawnQueue.length > 1) {
+            this._spawnQueue.sort((a, b) => a.priority - b.priority);
+        }
 
+        const roomLocks = {};
         for (let i = 0; i < this._spawnQueue.length; i++) {
             const job = this._spawnQueue[i];
-            const body = CreepMaker.buildBody(job.body);
-            const cost = CreepMaker.getCost(body);
-            const room = this.getRoom(job.homeRoom);
 
-            let foundSpawn = null;
-            if (room.isVisible) {
-                if (room.isMine) {
-                    if (cost < room.energyCapacityAvailable) {
-                        if (cost < room.energyAvailable) {
-                            let timeToAvailable = Infinity;
-                            for (let j = 0; i < room.spawns.length; j++) {
-                                if (room.spawns[j].spawning === undefined) {
-                                    foundSpawn = room.spawns[j];
-                                    break;
-                                }
-                                else {
-                                    if (timeToAvailable > room.spawns[j].spawning.remainingTime) {
-                                        timeToAvailable = room.spawns[j].spawning.remainingTime;
-                                    }
-                                }
-                            }
+            // Spawn only one creep in each room. 
+            if (roomLocks[job.homeRoom]) {
+                continue;
+            }
+            roomLocks[job.homeRoom] = true;
+
+            let foundSpawn = this.findSpawn(job);
+            if (foundSpawn !== null) {
+                CreepMaker.spawnCreep(foundSpawn, job);
+            }
+        }
+    }
+
+    findSpawn (job) {
+        const cost = CreepMaker.getCost(job.body);
+        const room = this.getRoom(job.homeRoom);
+
+        let tta = Infinity;
+        let foundSpawn = null;
+        if (room.isMine) {
+            if (cost <= room.energyCapacityAvailable) {
+                if (cost <= room.energyAvailable) {
+                    for (let j = 0; j < room.spawns.length; j++) {
+                        if (room.spawns[j].spawning === null) {
+                            foundSpawn = room.spawns[j];
+                            tta = 0;
+                            break;
                         }
-                    }
-                    else {
-                        os.logger.warning('Creep body too expensive for home room, ' + job.homeRoom);
+
+                        if (tta > room.spawns[j].spawning.remainingTime) {
+                            foundSpawn = room.spawns[j];
+                            tta = room.spawns[j].spawning.remainingTime;
+                        }
                     }
                 }
             }
-
-            // TODO: investigate if it could be smart to ask for help from neighboring room.
-
-            if (foundSpawn !== null) {
-                const opts = {
-                    'memory': {
-                        'job': job.jobName,
-                        'work': {
-                            'task': null
-                        },
-                        'rooms': {
-                            'home': job.homeRoom,
-                            'work': job.workRoom
-                        },
-                        'spawnTime': body.length * 3
-                    }
-                };
-                const creepName = CreepMaker.generateName();
-                foundSpawn.spawnCreep(body, creepName, opts);
+            else {
+                os.logger.error('Creep body too expensive for home room: ' + job.jobName + ' , ' + job.homeRoom);
             }
         }
+        else {
+            os.logger.error('Invalid home room for creep: ' + job.jobName + ' , ' + job.homeRoom);
+        }
+
+        return tta === 0 ? foundSpawn : null;
     }
 
     /**
@@ -277,30 +300,6 @@ class Empire {
             let room = this._roomsToBeAnalyzed.pop();
             room.analyze();
         } while (count > 0);
-    }
-
-    createCreep (job, bodyCode, homeRoom, workRoom) {
-        let spawn = this.findSpawn(homeRoom);
-
-        if (spawn === null) {
-            return ERR_BUSY;
-        }
-
-        return CreepMaker.createCreep(job, spawn.name, bodyCode, homeRoom, workRoom);
-    }
-
-    findSpawn (roomName) {
-        let room = this.getRoom(roomName);
-        if (room.isVisible) {
-            if (room.isMine) {
-                for (const spawn of room.spawns) {
-                    if (!spawn.spawning) {
-                        return spawn;
-                    }
-                }
-            }
-        }
-        return null;
     }
 
     checkRoomMemory () {

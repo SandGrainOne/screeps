@@ -77,7 +77,7 @@ class CreepBase {
      * Gets a value indicating whether the creep is retired.
      */
     get isRetired () {
-        return this._creep.ticksToLive < (this._mem.spawnTime + C.RETIREMENT);
+        return this._creep.ticksToLive < (this._creep.body.length * CREEP_SPAWN_TIME + C.RETIREMENT);
     }
 
     /**

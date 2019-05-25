@@ -23,9 +23,6 @@ class RoomReal extends RoomBase {
         this._mem = room.memory;
         this._visible = true;
 
-        // Tick cache
-        this._cache = {};
-
         this._spawn = {};
         this._spawn.high = [];
         this._spawn.normal = [];

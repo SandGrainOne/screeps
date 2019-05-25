@@ -61,28 +61,28 @@ class CreepMaker {
     }
 
     /**
-     * Trigger the spawning of a new creep.
+     * Have the given spawn create a new creep based on the given rule.
      */
-    static createCreep (job, spawnName, bodyCode, homeRoom, workRoom) {
-        if (!Game.spawns[spawnName]) {
-            os.logger.error('No spawn with the name "' + spawnName + '".');
+    static spawnCreep (spawn, job) {
+        if (spawn === null || spawn.spawning !== null) {
             return ERR_BUSY;
         }
 
-        let body = CreepMaker.buildBody(bodyCode);
-        let memory = {
-            'job': job,
-            'work': {
-                'task': null
-            },
-            'rooms': {
-                'home': homeRoom,
-                'work': workRoom
-            },
-            'spawnTime': body.length * 3
+        const opts = {
+            'memory': {
+                'job': job.jobName,
+                'work': {
+                    'task': null
+                },
+                'rooms': {
+                    'home': job.homeRoom,
+                    'work': job.workRoom
+                }
+            }
         };
 
-        return Game.spawns[spawnName].createCreep(body, CreepMaker.generateName(), memory);
+        const creepName = CreepMaker.generateName();
+        return spawn.spawnCreep(job.body, creepName, opts);
     }
 
     /**

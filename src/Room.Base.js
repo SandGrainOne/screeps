@@ -16,6 +16,9 @@ class RoomBase {
         this._name = name;
         this._visible = false;
 
+        // Tick cache
+        this._cache = {};
+
         if (Memory.rooms[name] !== undefined) {
             this._mem = Memory.rooms[name];
         }
@@ -98,17 +101,19 @@ class RoomBase {
     }
 
     getOwnedRooms () {
-        if (this._mem.ownedRooms === undefined) {
-            return [];
+        if (this._cache.ownedRooms !== undefined) {
+            return this._cache.ownedRooms;
         }
 
-        let ownedRooms = [];
-        for (const roomDistance of this._mem.ownedRooms) {
-            const roomName = roomDistance.name;
-            ownedRooms.push(Empire.getRoom(roomName));
+        this._cache.ownedRooms = [];
+        if (this._mem.ownedRooms !== undefined) {
+            for (let i = 0; i < this._mem.ownedRooms.length; i++) {
+                const roomName = this._mem.ownedRooms[i].name;
+                this._cache.ownedRooms.push(Empire.getRoom(roomName));
+            }
         }
 
-        return ownedRooms;
+        return this._cache.ownedRooms;
     }
 }
 
