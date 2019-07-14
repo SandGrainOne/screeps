@@ -8,45 +8,21 @@ let CreepWorker = require('./Creep.Worker');
  */
 class CreepScavenger extends CreepWorker {
     /**
-     * Gets the creep job target. 
-     */
-    get target () {
-        if (this._cache.target === undefined) {
-            if (this._mem.work.target !== undefined) {
-                this._cache.target = Game.getObjectById(this._mem.work.target);
-            }
-            else {
-                this._cache.target = null;
-            }
-        }
-        return this._cache.target;
-    }
-
-    /**
-     * Sets the creep job target. 
-     */
-    set target (obj) {
-        if (obj !== null) {
-            this._cache.target = obj;
-            this._mem.work.target = obj.id;
-        }
-        else {
-            this._cache.target = null;
-            delete this._mem.work.target;
-        }
-    }
-
-    /**
      * Perform scavenger related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work () {
-        if (this.isRemoting && this.atWork && this.load < this.capacity) {
-            if (this.target === null) {
-                this.target = this.findTarget();
-            }
+        if (this.target === null) {
+            this.target = this.findTarget();
+        }
 
+        if (this.target !== null && this.target.isFake && this.atWork) {
+            // A fake target in a visible room. Find another target.
+            this.target = null;
+        }
+
+        if (this.atWork && this.load < this.capacity) {
             if (this.target !== null) {
                 if (this.pos.isNearTo(this.target)) {
                     let resourceType = this.selectResourceType(this.target);
@@ -58,7 +34,7 @@ class CreepScavenger extends CreepWorker {
             }
         }
 
-        if (this.isRemoting && this.isHome && this.load > 0) {
+        if (this.isHome && this.load > 0) {
             if (this.room.containers.length > 0) {
                 let container = this.getFirstInRange(this.room.containers, 1);
                 if (container !== null) {
@@ -69,6 +45,7 @@ class CreepScavenger extends CreepWorker {
                     }
                 }
             }
+
             if (this.energy > 0 && this.room.links.inputs.length > 0) {
                 let link = this.getFirstInRange(this.room.links.inputs, 1);
                 if (link !== null) {
@@ -125,7 +102,14 @@ class CreepScavenger extends CreepWorker {
     }
 
     findTarget () {
-        if (!this.atWork || this.isMine) {
+        if (!this.atWork) {
+            // TODO: Ask squad for possible work target?
+
+            const pos = this.moveToRoom(this.workRoom.name, false);
+            return { 'pos': pos, 'isFake': true };
+        }
+
+        if (this.atWork && this.room.isMine) {
             return null;
         }
 

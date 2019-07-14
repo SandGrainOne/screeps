@@ -10,50 +10,21 @@ let CreepWorker = require('./Creep.Worker');
  */
 class CreepDismantler extends CreepWorker {
     /**
-     * Gets the creep job target. 
-     */
-    get target () {
-        if (this._cache.target === undefined) {
-            if (this._mem.work.target !== undefined) {
-                this._cache.target = Game.getObjectById(this._mem.work.target);
-            }
-            else {
-                this._cache.target = null;
-            }
-        }
-        return this._cache.target;
-    }
-
-    /**
-     * Sets the creep job target. 
-     */
-    set target (obj) {
-        if (obj !== null) {
-            this._cache.target = obj;
-            this._mem.work.target = obj.id;
-        }
-        else {
-            this._cache.target = null;
-            delete this._mem.work.target;
-        }
-    }
-
-    /**
      * Perform dismantler related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work () {
-        if (!this.atWork) {
-            this.moveToRoom(this._mem.rooms.work);
-            return true;
-        }
-
         if (this.target === null) {
-            this.target = this.findTarget();
+            this.target = this.findWorkTarget();
         }
 
-        if (this.target !== null) {
+        if (this.target !== null && this.target.isFake && this.atWork) {
+            // A fake target in a visible room. Find another target.
+            this.target = null;
+        }
+
+        if (this.target !== null && this.atWork) {
             if (this.pos.isNearTo(this.target)) {
                 this.dismantle(this.target);
             }
@@ -67,20 +38,28 @@ class CreepDismantler extends CreepWorker {
             if (!this.pos.isNearTo(this.target)) {
                 this.moveTo(this.target);
             }
+
+            return true;
         }
 
-        return true;
+        return false;
     }
 
-    findTarget () {
+    findWorkTarget () {
         if (!this.atWork) {
-            return null;
+            // TODO: Ask squad for possible work target?
+
+            const pos = this.moveToRoom(this.workRoom.name, false);
+            return { 'pos': pos, 'isFake': true };
         }
 
         if (this.room.flags[COLOR_GREY] !== undefined) {
             for (const flag of this.room.flags[COLOR_GREY]) {
                 let structures = flag.pos.lookFor(LOOK_STRUCTURES);
                 if (structures.length > 0) {
+                    if (this.room.isMine || structures[0].my) {
+                        structures[0].notifyWhenAttacked(false);
+                    }
                     return structures[0];
                 }
             }
@@ -92,27 +71,45 @@ class CreepDismantler extends CreepWorker {
         }
 
         if (this.room.ramparts.length > 0) {
-            return this.getClosestByRange(this.room.ramparts);
+            const rampart = this.getClosestByRange(this.room.ramparts);
+            if (rampart !== null) {
+                return rampart;
+            }
         }
 
         if (this.room.towers.length > 0) {
-            return this.getClosestByRange(this.room.towers, (x) => x.energy === 0);
+            const tower = this.getClosestByRange(this.room.towers, (x) => x.energy === 0);
+            if (tower !== null) {
+                return tower;
+            }
         }
 
         if (this.room.spawns.length > 0) {
-            return this.getClosestByRange(this.room.spawns, (x) => x.energy === 0);
+            const spawn = this.getClosestByRange(this.room.spawns, (x) => x.energy === 0);
+            if (spawn !== null) {
+                return spawn;
+            }
         }
 
         if (this.room.extensions.length > 0) {
-            return this.getClosestByRange(this.room.extensions, (x) => x.energy === 0);
+            const extension = this.getClosestByRange(this.room.extensions, (x) => x.energy === 0);
+            if (extension !== null) {
+                return extension;
+            }
         }
 
         if (this.room.links.all.length > 0) {
-            return this.getClosestByRange(this.room.links.all, (x) => x.energy === 0);
+            const link = this.getClosestByRange(this.room.links.all, (x) => x.energy === 0);
+            if (link !== null) {
+                return link;
+            }
         }
 
         if (this.room.labs.all.length > 0) {
-            return this.getClosestByRange(this.room.labs.all, (x) => x.energy === 0 && x.mineralAmount === 0);
+            const lab = this.getClosestByRange(this.room.labs.all, (x) => x.energy === 0 && x.mineralAmount === 0);
+            if (lab !== null) {
+                return lab;
+            }
         }
 
         if (this.room.storage !== null && _.sum(this.room.storage.store) === 0) {
@@ -135,12 +132,16 @@ class CreepDismantler extends CreepWorker {
             return this.room.powerSpawn;
         }
 
-        if (this.room.nuker !== null && this.room.nuker.energy === 0 && this.room.nuker.ghodium === 0) {
+        if (this.room.nuker !== null) {
+            // A nuker cannot be emptied.
             return this.room.nuker;
         }
 
         if (this.room.walls.length > 0) {
-            return this.getClosestByRange(this.room.walls);
+            const wall = this.getClosestByRange(this.room.walls);
+            if (wall !== null) {
+                return wall;
+            }
         }
 
         return null;

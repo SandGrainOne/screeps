@@ -39,14 +39,22 @@ class CreepBase {
      * @returns {string} - Name of squad
      */
     get squad () {
-        return Empire.squads.get(this._mem.squad);
+        if (this._cache.squad !== undefined) {
+            return this._cache.squad;
+        }
+        this._cache.squad = Empire.squads.get(this._mem.squad);
+        return this._cache.squad;
     }
 
     /**
      * Gets the room where there creep currently reside.
      */
     get room () {
-        return Empire.rooms.get(this._creep.room.name);
+        if (this._cache.room !== undefined) {
+            return this._cache.room;
+        }
+        this._cache.room = Empire.rooms.get(this._creep.room.name);
+        return this._cache.room;
     }
 
     /**
@@ -102,10 +110,25 @@ class CreepBase {
     }
 
     /**
+     * Gets the designated home room.
+     */
+    get homeRoom () {
+        if (this._cache.homeRoom !== undefined) {
+            return this._cache.homeRoom;
+        }
+        this._cache.homeRoom = Empire.getRoom(this._mem.rooms.home);
+        return this._cache.homeRoom;
+    }
+
+    /**
      * Gets the designated work room.
      */
     get workRoom () {
-        return Empire.getRoom(this._mem.rooms.work);
+        if (this._cache.workRoom !== undefined) {
+            return this._cache.workRoom;
+        }
+        this._cache.workRoom = Empire.getRoom(this._mem.rooms.work);
+        return this._cache.workRoom;
     }
 
     /**
@@ -205,6 +228,43 @@ class CreepBase {
      */
     work () {
         return false;
+    }
+
+    /**
+     * Gets the the target RoomObject or its position if not visible.
+     */
+    get target () {
+        if (this._cache.target === undefined) {
+            if (this._mem.target !== undefined) {
+                this._cache.target = Game.getObjectById(this._mem.target.id);
+
+                if (this._cache.target === null && this._mem.target.pos !== undefined && !this.room.isVisible) {
+                    const posComponents = this._mem.target.pos.split(',');
+                    const pos = new RoomPosition(posComponents[0], posComponents[1], posComponents[2]);
+                    this._cache.target = { 'pos': pos, 'isFake': true };
+                }
+            }
+            else {
+                this._cache.target = null;
+            }
+        }
+        return this._cache.target;
+    }
+
+    /**
+     * Sets the creep job target.
+     */
+    set target (obj) {
+        if (obj !== null) {
+            this._cache.target = obj;
+            this._mem.target = {};
+            this._mem.target.id = obj.id;
+            this._mem.target.pos = `${obj.pos.x},${obj.pos.y},${obj.pos.roomName}`;
+        }
+        else {
+            this._cache.target = null;
+            delete this._mem.target;
+        }
     }
 
     /**

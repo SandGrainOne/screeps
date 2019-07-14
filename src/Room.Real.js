@@ -601,6 +601,11 @@ class RoomReal extends RoomBase {
         if (this.flags[COLOR_GREY] !== undefined) {
             this._mem.jobs.dismantlers = 1;
         }
+
+        this._mem.jobs.chemists = 0;
+        if (this.terminal !== null) {
+            this._mem.jobs.chemists = 1;
+        }
     }
 
     prepare () {

@@ -21,51 +21,32 @@ class CreepBuilder extends CreepWorker {
     }
 
     /**
-     * Gets the creep job target. 
-     */
-    get target () {
-        if (this._cache.target === undefined) {
-            this._cache.target = Game.getObjectById(this._mem.work.target); // TODO: work.target might be undefined.
-        }
-        return this._cache.target;
-    }
-
-    /**
-     * Sets the creep job target. 
-     */
-    set target (obj) {
-        if (obj !== null) {
-            this._cache.target = obj;
-            this._mem.work.target = obj.id;
-        }
-        else {
-            this._cache.target = null;
-            delete this._mem.work.target;
-        }
-    }
-
-    /**
      * Perform building and repair related logic.
      * 
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work () {
-        let moveTarget = null;
+        if (this.target === null && this.energy > 0) {
+            this.target = this.findTarget();
+        }
+
+        if (this.target !== null && this.target.isFake && this.atWork) {
+            // A fake target in a visible room. Find another target.
+            this.target = null;
+        }
 
         if (this.atWork) {
             if (this.target !== null) {
-                if (this.target instanceof ConstructionSite || this.target.hits < this.target.hitsMax) {
-                    if (!this.room.reserve(this.target.id, this.job, this.name)) {
+                if (!(this.target instanceof ConstructionSite)) {
+                    if (this.target.hits < this.target.hitsMax) {
+                        if (!this.room.reserve(this.target.id, this.job, this.name)) {
+                            this.target = null;
+                        }
+                    }
+                    else {
                         this.target = null;
                     }
                 }
-                else {
-                    this.target = null;
-                }
-            }
-
-            if (this.target === null && this.energy > 0) {
-                this.target = this.findTarget();
             }
 
             if (this.target !== null && this.energy > 0) {
@@ -107,6 +88,7 @@ class CreepBuilder extends CreepWorker {
             this.task = 'charge';
 
             if (this.target !== null) {
+                // Get a new target next time
                 this.target = null;
             }
         }
@@ -118,6 +100,8 @@ class CreepBuilder extends CreepWorker {
                 this.target = this.findTarget();
             }
         }
+
+        let moveTarget = null;
 
         if (this.task === 'work') {
             if (!this.atWork && this.target === null) {
