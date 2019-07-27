@@ -567,13 +567,31 @@ class RoomReal extends RoomBase {
      * Create a list of jobs that needs to be occupied by creeps.
      */
     createJobs () {
-        this._mem.jobs.miners = this.sources.length;
-        this._mem.jobs.haulers = this.containers.length + this._room.terminal !== null ? 1 : 0;
+        this._mem.jobs.miners = 0;
+        if (this.isMine && this.storage !== null) {
+            if (_.sum(this.storage.store) < this.storage.storeCapacity * 0.8) {
+                this._mem.jobs.miners = this.sources.length;
+            }
+        }
+        else {
+            this._mem.jobs.miners = this.sources.length;
+        }
 
         this._mem.jobs.mineralminers = 0;
-        if (this.minerals !== null && this.minerals.mineralAmount > 0 && this.extractor !== null) {
-            this._mem.jobs.mineralminers = 1;
+        if (this.isMine && this.terminal !== null) {
+            if (_.sum(this.terminal.store) - this.terminal.store.energy < this.terminal.storeCapacity * 0.8) {
+                if (this.minerals !== null && this.minerals.mineralAmount > 0 && this.extractor !== null) {
+                    this._mem.jobs.mineralminers = 1;
+                }
+            }
         }
+        else {
+            if (this.minerals !== null && this.minerals.mineralAmount > 0 && this.extractor !== null) {
+                this._mem.jobs.mineralminers = 1;
+            }
+        }
+
+        this._mem.jobs.haulers = this.containers.length + this._room.terminal !== null ? 1 : 0;
 
         this._mem.jobs.refuelers = 0;
         if (this.storage) {

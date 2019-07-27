@@ -115,9 +115,17 @@ function getSpawningRules (room) {
 
     if (room.name === 'E68N87') {
         rule = {
-            'homeRoom': 'E71N87',
+            'homeRoom': room.name,
             'jobs': {
-                'builder': { 'count': 4, 'body': 'WWWCCCMMM' }
+                'dismantler': { 'priority': 7, 'count': room.jobs.dismantlers, 'body': 'WWWWMM' },
+                'chemist': { 'count': room.jobs.chemists, 'body': 'CCCCMM' },
+                'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWCMM' },
+                'linker': { 'count': room.jobs.linkers, 'body': 'CCCCMM' },
+                'upgrader': { 'count': 3, 'body': 'WCMM' },
+                'builder': { 'count': 3, 'body': 'WCM' },
+                'hauler': { 'count': 2, 'body': 'CCCMMM' },
+                'miner': { 'count': room.jobs.miners, 'body': 'WWCM' },
+                'refueler': { 'priority': 1, 'count': room.jobs.refuelers, 'body': 'CCCMMM' }
             }
         };
     }
@@ -198,7 +206,6 @@ function getSpawningRules (room) {
         rule = {
             'homeRoom': 'E76N83',
             'jobs': {
-                'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWWWWWWWWWWWCCCCCMMMMMMMMMMMMMMMMMMMM' },
                 'builder': { 'count': 1, 'body': 'WCCCCMMMMM' },
                 'hauler': { 'count': 3, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMM' },
                 'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWWCCCMMMMM' },
@@ -232,16 +239,6 @@ function getSpawningRules (room) {
                 'hauler': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' },
                 'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' },
                 'refueler': { 'priority': 1, 'count': room.jobs.refuelers, 'body': 'CCCCCCCCCCCCMMMMMM' }
-            }
-        };
-    }
-
-    if (room.name === 'E73N82') {
-        rule = {
-            'homeRoom': 'E74N81',
-            'jobs': {
-                'hauler': { 'count': 1, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' },
-                'dismantler': { 'priority': 7, 'count': 1, 'body': 'WWWWWWWWWWWWWWWWWWWWWWWWCMMMMMMMMMMMMMMMMMMMMMMMMM' }
             }
         };
     }
@@ -347,6 +344,16 @@ function getSpawningRules (room) {
         };
     }
 
+    if (room.name === 'E72N84') {
+        rule = {
+            'homeRoom': 'E73N85',
+            'jobs': {
+                'hauler': { 'count': 1, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' },
+                'dismantler': { 'priority': 7, 'count': 1, 'body': 'WWWWWWWWWWWWWWWWWWWWWWWWCMMMMMMMMMMMMMMMMMMMMMMMMM' }
+            }
+        };
+    }
+
     if (room.name === 'E73N86') {
         rule = {
             'homeRoom': 'E73N85',
@@ -380,7 +387,6 @@ function getSpawningRules (room) {
         rule = {
             'homeRoom': 'E73N87',
             'jobs': {
-                'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWWWWWWWWWWWCCCCCMMMMMMMMMMMMMMMMMMMM' },
                 'builder': { 'count': 1, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                 'hauler': { 'count': 3, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMM' },
                 'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWWCCCMMMMM' },
@@ -434,21 +440,10 @@ function getSpawningRules (room) {
         rule = {
             'homeRoom': 'E75N87',
             'jobs': {
-                'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWWWWWWWWWWWCCCCCMMMMMMMMMMMMMMMMMMMM' },
                 'builder': { 'count': 1, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                 'hauler': { 'count': 3, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMM' },
                 'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWWCCCMMMMM' },
                 'patroler': { 'count': 1, 'body': 'MMMMMMMMMMMMMMMMMMMMMMMMRRRRRRRRRRRRRRRRRRRRMHHHHH' }
-            }
-        };
-    }
-
-    if (room.name === 'E72N88') {
-        rule = {
-            'homeRoom': 'E75N89',
-            'jobs': {
-                'hauler': { 'count': 1, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMMMMMMM' },
-                'dismantler': { 'priority': 7, 'count': 1, 'body': 'WWWWWWWWWWWWWWWWWWWWWWWWCMMMMMMMMMMMMMMMMMMMMMMMMM' }
             }
         };
     }
@@ -580,7 +575,6 @@ function getSpawningRules (room) {
         rule = {
             'homeRoom': 'E77N85',
             'jobs': {
-                'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWWWWWWWWWWWCCCCCMMMMMMMMMMMMMMMMMMMM' },
                 'patroler': { 'count': 1, 'body': 'MMMMMMMMMMMMMMMMMMMMMMMMRRRRRRRRRRRRRRRRRRRRMHHHHH' },
                 'builder': { 'count': 1, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                 'hauler': { 'count': 1, 'body': 'WCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' }
@@ -592,7 +586,6 @@ function getSpawningRules (room) {
         rule = {
             'homeRoom': 'E77N85',
             'jobs': {
-                'mineralminer': { 'count': room.jobs.mineralminers, 'body': 'WWWWWWWWWWWWWWWWWWWWWWWWWCCCCCMMMMMMMMMMMMMMMMMMMM' },
                 'builder': { 'count': 1, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
                 'hauler': { 'count': 4, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMM' },
                 'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWWCCCMMMMM' }
