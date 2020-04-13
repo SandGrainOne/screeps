@@ -12,20 +12,20 @@ class SquadBase {
     init (name) {
         this._name = name;
 
-        if (_.isUndefined(Memory.squads[this._name])) {
+        if (Memory.squads[this._name] === undefined) {
             Memory.squads[this._name] = {};
         }
         this._mem = Memory.squads[this._name];
 
-        if (_.isUndefined(this._mem.isRetired)) {
+        if (this._mem.isRetired === undefined) {
             this._mem.isRetired = false;
         }
 
-        if (_.isUndefined(this._mem.isWaiting)) {
+        if (this._mem.isWaiting === undefined) {
             this._mem.isWaiting = true;
         }
 
-        if (_.isUndefined(this._mem.isActive)) {
+        if (this._mem.isActive === undefined) {
             this._mem.isActive = false;
         }
     }

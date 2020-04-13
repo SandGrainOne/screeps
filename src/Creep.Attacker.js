@@ -68,7 +68,7 @@ class CreepAttacker extends CreepSoldier {
         }
 
         let redFlags = room.flags[COLOR_RED];
-        if (_.isArray(redFlags) && redFlags.length > 0) {
+        if (Array.isArray(redFlags) && redFlags.length > 0) {
             return redFlags[0];
         }
         return null;

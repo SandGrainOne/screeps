@@ -32,7 +32,7 @@ class SquadMaker {
     static create (squadName, squadType) {
         let squad = null;
 
-        if (!_.isUndefined(squadTypes[squadType])) {
+        if (squadTypes[squadType] !== undefined) {
             squad = new squadTypes[squadType](squadName);
         }
 

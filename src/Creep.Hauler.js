@@ -152,9 +152,11 @@ class CreepHauler extends CreepWorker {
             if (this.room.containers.length > 0) {
                 let container = this.getFirstInRange(this.room.containers, 1);
                 if (container !== null) {
-                    for (let resourceType in this.carry) {
-                        if (this.transfer(container, resourceType) === OK) {
-                            break;
+                    for (let resourceType in this.store) {
+                        if (this.store[resourceType] > 0) {
+                            if (this.transfer(container, resourceType) === OK) {
+                                break;
+                            }
                         }
                     }
                 }
@@ -174,9 +176,11 @@ class CreepHauler extends CreepWorker {
         if (this.isHome) {
             let storage = this.room.storage;
             if (storage !== null && this.pos.isNearTo(storage)) {
-                for (let resourceType in this.carry) {
-                    if (this.transfer(storage, resourceType) === OK) {
-                        break;
+                for (let resourceType in this.store) {
+                    if (this.store[resourceType] > 0) {
+                        if (this.transfer(storage, resourceType) === OK) {
+                            break;
+                        }
                     }
                 }
             }
@@ -248,7 +252,7 @@ class CreepHauler extends CreepWorker {
                 if (room.isVisible) {
                     if (room.containers.length > 0) {
                         for (let container of room.containers) {
-                            if (_.sum(container.store) > 400) {
+                            if (container.store.getUsedCapacity() > 400) {
                                 if (room.reserve(container.id, this.job, this.name)) {
                                     this._mem.work.target = container.id;
                                     moveTarget = container;

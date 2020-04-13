@@ -117,7 +117,7 @@ class CreepBuilder extends CreepWorker {
         }
 
         if (this.task === 'charge') {
-            if (moveTarget === null && (this.isHome || this.atWork) && (this.room.storage === null || _.sum(this.room.storage.store) < 1000)) {
+            if (moveTarget === null && (this.isHome || this.atWork) && (this.room.storage === null || this.room.storage.store.getUsedCapacity() < 1000)) {
                 if (moveTarget === null && this.room.containers.length > 0) {
                     let container = this.getClosestByRange(this.room.containers);
                     if (container !== null && container.store.energy > 0) {

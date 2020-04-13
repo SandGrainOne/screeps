@@ -165,7 +165,7 @@ class Empire {
 
             if (Game.time - room.tickAnalyzed > 20) {
                 if (this._roomsToBeAnalyzed.length > 0) {
-                    if (room.tickAnalyzed < _.last(this._roomsToBeAnalyzed).tickAnalyzed) {
+                    if (room.tickAnalyzed < this._roomsToBeAnalyzed[this._roomsToBeAnalyzed.length - 1].tickAnalyzed) {
                         this._roomsToBeAnalyzed.push(room);
                     }
                 }
@@ -277,9 +277,9 @@ class Empire {
         }
 
         if (richestAmount - poorestAmount > 100000) {
-            // os.logger.info(richest.name + '.terminal.store.energy: ' + richest.terminal.store.energy);
-            // os.logger.info(poorest.name + '.terminal.storeCapacity - _.sum(' + poorest.name + '.terminal.store): ' + (poorest.terminal.storeCapacity - _.sum(poorest.terminal.store)));
-            if (richest.terminal.store.energy > 30000 && poorest.terminal.store.energy < 100000 && poorest.terminal.storeCapacity - _.sum(poorest.terminal.store) > 20000) {
+            // os.logger.info('Richest: ' + richest.name + ' Total energy: ' + richestAmount + ' Terminal energy: ' + richest.terminal.store.energy + ' Required: 30000');
+            // os.logger.info('Poorest: ' + poorest.name + ' Total energy: ' + poorestAmount + ' Terminal space : ' + (poorest.terminal.store.getCapacity() - poorest.terminal.store.getUsedCapacity()) + ' Required: 20000');
+            if (richest.terminal.store.energy > 30000 && poorest.terminal.store.energy < 100000 && poorest.terminal.store.getCapacity() - poorest.terminal.store.getUsedCapacity() > 20000) {
                 os.logger.info('Transfering 10000 energy from ' + richest.name + '(' + richestAmount + ') to ' + poorest.name + '(' + poorestAmount + ')');
                 richest.terminal.send(RESOURCE_ENERGY, 10000, poorest.name);
             }

@@ -44,9 +44,11 @@ class CreepMineralMiner extends CreepWorker {
             if (this.room.containers.length > 0) {
                 let container = this.getFirstInRange(this.room.containers, 1);
                 if (container) {
-                    for (let resourceType in this.carry) {
-                        if (this.transfer(container, resourceType) === OK) {
-                            break;
+                    for (let resourceType in this.store) {
+                        if (this.store[resourceType] > 0) {
+                            if (this.transfer(container, resourceType) === OK) {
+                                break;
+                            }
                         }
                     }
                 }
@@ -54,9 +56,11 @@ class CreepMineralMiner extends CreepWorker {
 
             let storage = this.room.storage;
             if (storage && this.pos.isNearTo(storage)) {
-                for (let resourceType in this.carry) {
-                    if (this.transfer(storage, resourceType) === OK) {
-                        break;
+                for (let resourceType in this.store) {
+                    if (this.store[resourceType] > 0) {
+                        if (this.transfer(storage, resourceType) === OK) {
+                            break;
+                        }
                     }
                 }
             }
@@ -95,7 +99,7 @@ class CreepMineralMiner extends CreepWorker {
                 let range = 50;
                 if (this.room.containers.length > 0) {
                     for (let container of this.room.containers) {
-                        if (_.sum(container.store) >= container.storeCapacity) {
+                        if (container.store.getUsedCapacity() >= container.store.getCapacity()) {
                             continue;
                         }
                         let rangeToContainer = this.pos.getRangeTo(container);

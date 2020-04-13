@@ -38,9 +38,11 @@ class CreepScavenger extends CreepWorker {
             if (this.room.containers.length > 0) {
                 let container = this.getFirstInRange(this.room.containers, 1);
                 if (container !== null) {
-                    for (let resourceType in this.carry) {
-                        if (this.transfer(container, resourceType) === OK) {
-                            break;
+                    for (let resourceType in this.store) {
+                        if (this.store[resourceType] > 0) {
+                            if (this.transfer(container, resourceType) === OK) {
+                                break;
+                            }
                         }
                     }
                 }
@@ -49,7 +51,7 @@ class CreepScavenger extends CreepWorker {
             if (this.energy > 0 && this.room.links.inputs.length > 0) {
                 let link = this.getFirstInRange(this.room.links.inputs, 1);
                 if (link !== null) {
-                    if (link.energy < link.energyCapacity) {
+                    if (link.store.energy < link.store.getFreeCapacity(RESOURCE_ENERGY)) {
                         this.transfer(link, RESOURCE_ENERGY);
                     }
                 }
@@ -134,11 +136,11 @@ class CreepScavenger extends CreepWorker {
             }
         }
 
-        if (this.room.storage !== null && _.sum(this.room.storage.store) > 0) {
+        if (this.room.storage !== null && this.room.storage.store.getUsedCapacity() > 0) {
             return this.room.storage;
         }
 
-        if (this.room.terminal !== null && _.sum(this.room.terminal.store) > 0) {
+        if (this.room.terminal !== null && this.room.terminal.store.getUsedCapacity() > 0) {
             return this.room.terminal;
         }
 

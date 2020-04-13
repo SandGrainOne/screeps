@@ -64,7 +64,7 @@ class RoomBase {
      * Gets the state of the room.
      */
     get state () {
-        return _.isUndefined(this._mem.state) ? C.ROOM_STATE_NORMAL : this._mem.state;
+        return this._mem.state === undefined ? C.ROOM_STATE_NORMAL : this._mem.state;
     }
 
     /**

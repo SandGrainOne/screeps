@@ -182,7 +182,7 @@ class CreepChemist extends CreepWorker {
                 }
             }
             if (Object.keys(this.room.storage.store).length > 1) {
-                if (_.sum(this.room.terminal.store) < this.room.terminal.storeCapacity * 0.9) {
+                if (this.room.terminal.store.getUsedCapacity() < this.room.terminal.store.getCapacity() * 0.7) {
                     if (this.pos.isNearTo(this.room.storage)) {
                         for (let resourceType in this.room.storage.store) {
                             // Taking energy from the storage is handled by refuelers.

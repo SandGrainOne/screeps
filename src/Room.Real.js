@@ -110,7 +110,7 @@ class RoomReal extends RoomBase {
             return this._cache.tombstones;
         }
         this._cache.tombstones = this._room.find(FIND_TOMBSTONES, {
-            filter: (t) => _.sum(t.store) > 0
+            filter: (t) => t.store.getUsedCapacity() > 0
         });
         return this._cache.tombstones;
     }
@@ -138,7 +138,7 @@ class RoomReal extends RoomBase {
         }
         this._cache.containers = this.recall(STRUCTURE_CONTAINER);
         if (this._cache.containers.length > 1) {
-            this._cache.containers.sort((a, b) => _.sum(b.store) - _.sum(a.store));
+            this._cache.containers.sort((a, b) => b.store.getUsedCapacity() - a.store.getUsedCapacity());
         }
         return this._cache.containers;
     }
@@ -153,6 +153,20 @@ class RoomReal extends RoomBase {
         let extractors = this.recall(STRUCTURE_EXTRACTOR);
         this._cache.extractor = extractors.length > 0 ? extractors[0] : null;
         return this._cache.extractor;
+    }
+
+    /**
+     * Gets the room factory if it exists.
+     * 
+     * @returns {StructurePowerSpawn} The factory of the room or null.
+     */
+    get factory () {
+        if (this._cache.factory !== undefined) {
+            return this._cache.factory;
+        }
+        let factories = this.recall(STRUCTURE_FACTORY);
+        this._cache.factory = factories.length > 0 ? factories[0] : null;
+        return this._cache.factory;
     }
 
     /**
@@ -351,7 +365,7 @@ class RoomReal extends RoomBase {
         }
         let flagsArray = this._room.find(FIND_FLAGS);
         if (flagsArray.length > 0) {
-            this._cache.flags = _.groupBy(flagsArray, 'color');
+            this._cache.flags = this.groupBy(flagsArray, 'color');
         }
         else {
             this._cache.flags = {};
@@ -458,6 +472,9 @@ class RoomReal extends RoomBase {
                     break;
                 case STRUCTURE_POWER_SPAWN:
                     this.remember(structure.id, STRUCTURE_POWER_SPAWN);
+                    break;
+                case STRUCTURE_FACTORY:
+                    this.remember(structure.id, STRUCTURE_FACTORY);
                     break;
                 case STRUCTURE_LINK:
                     links.push(structure);
@@ -569,7 +586,7 @@ class RoomReal extends RoomBase {
     createJobs () {
         this._mem.jobs.miners = 0;
         if (this.isMine && this.storage !== null) {
-            if (_.sum(this.storage.store) < this.storage.storeCapacity * 0.8) {
+            if (this.storage.store.getUsedCapacity() < this.storage.store.getCapacity() * 0.9) {
                 this._mem.jobs.miners = this.sources.length;
             }
         }
@@ -579,7 +596,7 @@ class RoomReal extends RoomBase {
 
         this._mem.jobs.mineralminers = 0;
         if (this.isMine && this.terminal !== null) {
-            if (_.sum(this.terminal.store) - this.terminal.store.energy < this.terminal.storeCapacity * 0.8) {
+            if (this.terminal.store.getUsedCapacity() < this.terminal.store.getCapacity() * 0.5) {
                 if (this.minerals !== null && this.minerals.mineralAmount > 0 && this.extractor !== null) {
                     this._mem.jobs.mineralminers = 1;
                 }
@@ -594,7 +611,7 @@ class RoomReal extends RoomBase {
         this._mem.jobs.haulers = this.containers.length + this._room.terminal !== null ? 1 : 0;
 
         this._mem.jobs.refuelers = 0;
-        if (this.storage) {
+        if (this.storage && this.storage.store[RESOURCE_ENERGY] > 10000) {
             this._mem.jobs.refuelers = 2;
         }
 
@@ -621,7 +638,7 @@ class RoomReal extends RoomBase {
         }
 
         this._mem.jobs.chemists = 0;
-        if (this.terminal !== null) {
+        if (this.terminal !== null && this.labs !== null && this.labs.canRun) {
             this._mem.jobs.chemists = 1;
         }
     }
@@ -731,6 +748,14 @@ class RoomReal extends RoomBase {
             }
         }
         return gameObjects;
+    }
+
+    // https://stackoverflow.com/a/34890276/5097336
+    groupBy (xs, key) {
+        return xs.reduce(function(rv, x) {
+            (rv[x[key]] = rv[x[key]] || []).push(x);
+            return rv;
+        }, {});
     }
 }
 

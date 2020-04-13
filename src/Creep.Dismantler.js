@@ -112,11 +112,11 @@ class CreepDismantler extends CreepWorker {
             }
         }
 
-        if (this.room.storage !== null && _.sum(this.room.storage.store) === 0) {
+        if (this.room.storage !== null && this.room.storage.store.getUsedCapacity() === 0) {
             return this.room.storage;
         }
 
-        if (this.room.terminal !== null && _.sum(this.room.terminal.store) === 0) {
+        if (this.room.terminal !== null && this.room.terminal.store.getUsedCapacity() === 0) {
             return this.room.terminal;
         }
 

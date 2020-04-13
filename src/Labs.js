@@ -19,6 +19,10 @@ class Labs {
         this._cache = {};
     }
 
+    get canRun () {
+        return this._mem.canRun !== undefined && this._mem.canRun;
+    }
+
     get all () {
         if (this._cache.all !== undefined) {
             return this._cache.all;

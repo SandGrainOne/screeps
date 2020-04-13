@@ -314,12 +314,10 @@ class CreepBase {
 
         // Create and set some default move options.
         options = options || {};
-        _.defaults(options, {
-            ignoreCreeps: true,
-            reusePath: 60,
-            range: 1,
-            visualizePathStyle: { fill: 'transparent', stroke: '#fff', lineStyle: 'dashed', strokeWidth: 0.1, opacity: 0.2 }
-        });
+        options.ignoreCreeps = options.ignoreCreeps !== undefined ? options.ignoreCreeps : true;
+        options.reusePath = options.reusePath !== undefined ? options.reusePath : 60;
+        options.range = options.range !== undefined ? options.range : 1;
+        options.visualizePathStyle = options.visualizePathStyle !== undefined ? options.visualizePathStyle : { fill: 'transparent', stroke: '#fff', lineStyle: 'dashed', strokeWidth: 0.1, opacity: 0.2 };
 
         // If the target is an exit tile. The creep must move on it.
         if (this.isExit(target)) {
@@ -418,7 +416,7 @@ class CreepBase {
 
         for (let i = 0; i < roomObjects.length; i++) {
             if (this.pos.getRangeTo(roomObjects[i]) <= range) {
-                if (_.isUndefined(filter) || filter(roomObjects[i])) {
+                if (filter === undefined || filter(roomObjects[i])) {
                     return roomObjects[i];
                 }
             }

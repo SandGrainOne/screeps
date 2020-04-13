@@ -19,7 +19,7 @@ class CreepSettler extends CreepWorker {
                     this._creep.signController(this.room.controller, '');
                 }
 
-                if (this.room.name === 'E68N87') {
+                if (this.room.name === 'E73N84') {
                     this._creep.claimController(this.room.controller);
                 }
                 else {

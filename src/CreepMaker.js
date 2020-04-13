@@ -17,6 +17,7 @@ let wrappers = {
     'defender': require('./Creep.Defender'),
     'attacker': require('./Creep.Attacker'),
     'patroler': require('./Creep.Patroler'),
+    'assembler': require('./Creep.Assembler'),
     'scavenger': require('./Creep.Scavenger'),
     'dismantler': require('./Creep.Dismantler'),
     'mineralminer': require('./Creep.MineralMiner')
@@ -58,6 +59,31 @@ class CreepMaker {
         }
 
         return cost;
+    }
+
+    static getPriority (jobName) {
+        let priorities = {
+            'miner': 2,
+            'hauler': 3,
+            'linker': 4,
+            'healer': 8,
+            'chemist': 8,
+            'builder': 5,
+            'settler': 5,
+            'upgrader': 5,
+            'refueler': 1,
+            'defender': 8,
+            'attacker': 7,
+            'patroler': 6,
+            'assembler': 8,
+            'scavenger': 9,
+            'dismantler': 9,
+            'mineralminer': 5
+        };
+
+        let priority = priorities[jobName] !== undefined ? priorities[jobName] : 5;
+
+        return priority;
     }
 
     /**
