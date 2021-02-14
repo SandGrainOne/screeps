@@ -509,9 +509,9 @@ class RoomReal extends RoomBase {
             if (distance < 5) {
                 distance = Game.map.findRoute(this.name, roomName).length;
             }
-            let roomDistance = {
-                'name': roomName,
-                'distance': distance
+            const roomDistance = {
+                name: roomName,
+                distance: distance
             };
             roomDistances.push(roomDistance);
         }
@@ -752,7 +752,7 @@ class RoomReal extends RoomBase {
 
     // https://stackoverflow.com/a/34890276/5097336
     groupBy (xs, key) {
-        return xs.reduce(function(rv, x) {
+        return xs.reduce(function (rv, x) {
             (rv[x[key]] = rv[x[key]] || []).push(x);
             return rv;
         }, {});
