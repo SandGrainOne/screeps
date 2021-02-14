@@ -65,18 +65,37 @@ module.exports.loop = function () {
     empire.tickObservations();
     empire.balanceEnergy();
     empire.analyzeRooms();
+
+    if (Game.cpu.bucket > 9700) {
+        Game.cpu.generatePixel();
+    }
 };
 
 function getSpawningRules (room) {
+    if (room.name === 'E77N82') {
+        return {
+            'homeRoom': room.name,
+            'jobs': {
+                'upgrader': { 'count': 4, 'body': 'WCMM' },
+                'builder': { 'count': 2, 'body': 'WCMM' },
+                'hauler': { 'count': 2, 'body': 'CCMM' },
+                'miner': { 'count': room.jobs.miners, 'body': 'WCCMMM' },
+                'refueler': { 'count': room.jobs.refuelers, 'body': 'CCMM' }
+            }
+        };
+    }
+
     if (room.name === 'E57N79') {
         return {
             'homeRoom': room.name,
             'jobs': {
-                'upgrader': { 'count': 4, 'body': 'WWWWWCCMMMMM' },
-                'builder': { 'count': 2, 'body': 'WWWCCCCMMMMMMM' },
-                'hauler': { 'count': 2, 'body': 'CCCCCCMMMMMM' },
-                'miner': { 'count': room.jobs.miners, 'body': 'WWWWWCCMMMMM' },
-                'refueler': { 'count': room.jobs.refuelers, 'body': 'CCCCMMMM' }
+                'chemist': { 'count': room.jobs.chemists, 'body': 'CCCCCCCCMMMM' },
+                'linker': { 'count': room.jobs.linkers, 'body': 'CCCCCCCCCCCCCCCCMMMM' },
+                'upgrader': { 'count': 2, 'body': 'WWWWWWWWCCCCCMMMMMMMMMM' },
+                'builder': { 'count': 2, 'body': 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
+                'hauler': { 'count': 1, 'body': 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' },
+                'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' },
+                'refueler': { 'count': room.jobs.refuelers, 'body': 'CCCCCCCCCCCCMMMMMM' }
             }
         };
     }
@@ -321,9 +340,10 @@ function getSpawningRules (room) {
             'homeRoom': room.name,
             'jobs': {
                 'upgrader': { 'count': 4, 'body': 'WWCMM' },
-                'builder': { 'count': 2, 'body': 'WWCMM' },
+                'builder': { 'count': 4, 'body': 'WWCMM' },
                 'hauler': { 'count': 2, 'body': 'CCCCMMMM' },
                 'miner': { 'count': room.jobs.miners, 'body': 'WWWWCCMMMMMM' },
+                'linker': { 'count': room.jobs.linkers, 'body': 'CCCCCCCCM' },
                 'refueler': { 'count': room.jobs.refuelers, 'body': 'CCCCMMMM' }
             }
         };
@@ -709,6 +729,7 @@ function getSpawningRules (room) {
             'jobs': {
                 'settler': { 'count': room.jobs.settlers, 'body': 'LLMM' },
                 'attacker': { 'count': 1, 'body': 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
+                'builder': { 'count': 1, 'body': 'WCMM' },
                 'hauler': { 'count': 2, 'body': 'WCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMM' },
                 'miner': { 'count': room.jobs.miners, 'body': 'WWWWWWCCMMMM' }
             }
