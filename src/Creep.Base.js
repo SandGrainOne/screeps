@@ -340,7 +340,7 @@ class CreepBase {
                 if (this._mem._move && this._mem._move.path) {
                     let path = Room.deserializePath(this._mem._move.path);
                     let creeps = this._creep.room.lookForAt(LOOK_CREEPS, path[0].x, path[0].y);
-                    if (creeps.length > 0 && Game.creeps[creeps[0].name]) {
+                    if (creeps.length > 0 && Game.creeps[creeps[0].name] && creeps[0].memory.job !== 'miner' && creeps[0].memory.job !== 'linker') {
                         creeps[0].move(creeps[0].pos.getDirectionTo(this.pos));
                     }
                 }
