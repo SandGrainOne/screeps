@@ -294,7 +294,7 @@ class Empire {
             return;
         }
 
-        let count = Math.min(this._roomsToBeAnalyzed.length, 2);
+        let count = Math.min(this._roomsToBeAnalyzed.length, 3);
         do {
             count--;
             let room = this._roomsToBeAnalyzed.pop();
