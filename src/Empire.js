@@ -61,11 +61,11 @@ class Empire {
         const body = CreepMaker.buildBody(bodyCode);
 
         const job = {
-            'priority': 1,
-            'jobName': jobName,
-            'body': body,
-            'homeRoom': homeRoom,
-            'workRoom': workRoom
+            priority: 1,
+            jobName: jobName,
+            body: body,
+            homeRoom: homeRoom,
+            workRoom: workRoom
         };
 
         if (this._mem.creepOrderQueue === undefined) {

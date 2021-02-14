@@ -5,22 +5,22 @@ const C = require('./constants');
 const CreepBase = require('./Creep.Base');
 
 const wrappers = {
-    'miner': require('./Creep.Miner'),
-    'hauler': require('./Creep.Hauler'),
-    'linker': require('./Creep.Linker'),
-    'healer': require('./Creep.Healer'),
-    'chemist': require('./Creep.Chemist'),
-    'builder': require('./Creep.Builder'),
-    'settler': require('./Creep.Settler'),
-    'upgrader': require('./Creep.Upgrader'),
-    'refueler': require('./Creep.Refueler'),
-    'defender': require('./Creep.Defender'),
-    'attacker': require('./Creep.Attacker'),
-    'patroler': require('./Creep.Patroler'),
-    'assembler': require('./Creep.Assembler'),
-    'scavenger': require('./Creep.Scavenger'),
-    'dismantler': require('./Creep.Dismantler'),
-    'mineralminer': require('./Creep.MineralMiner')
+    miner: require('./Creep.Miner'),
+    hauler: require('./Creep.Hauler'),
+    linker: require('./Creep.Linker'),
+    healer: require('./Creep.Healer'),
+    chemist: require('./Creep.Chemist'),
+    builder: require('./Creep.Builder'),
+    settler: require('./Creep.Settler'),
+    upgrader: require('./Creep.Upgrader'),
+    refueler: require('./Creep.Refueler'),
+    defender: require('./Creep.Defender'),
+    attacker: require('./Creep.Attacker'),
+    patroler: require('./Creep.Patroler'),
+    assembler: require('./Creep.Assembler'),
+    scavenger: require('./Creep.Scavenger'),
+    dismantler: require('./Creep.Dismantler'),
+    mineralminer: require('./Creep.MineralMiner')
 };
 
 /**
@@ -63,22 +63,22 @@ class CreepMaker {
 
     static getPriority (jobName) {
         const priorities = {
-            'miner': 2,
-            'hauler': 3,
-            'linker': 4,
-            'healer': 8,
-            'chemist': 8,
-            'builder': 5,
-            'settler': 5,
-            'upgrader': 5,
-            'refueler': 1,
-            'defender': 8,
-            'attacker': 7,
-            'patroler': 6,
-            'assembler': 8,
-            'scavenger': 9,
-            'dismantler': 9,
-            'mineralminer': 5
+            miner: 2,
+            hauler: 3,
+            linker: 4,
+            healer: 8,
+            chemist: 8,
+            builder: 5,
+            settler: 5,
+            upgrader: 5,
+            refueler: 1,
+            defender: 8,
+            attacker: 7,
+            patroler: 6,
+            assembler: 8,
+            scavenger: 9,
+            dismantler: 9,
+            mineralminer: 5
         };
 
         const priority = priorities[jobName] !== undefined ? priorities[jobName] : 5;
@@ -95,14 +95,14 @@ class CreepMaker {
         }
 
         const opts = {
-            'memory': {
-                'job': job.jobName,
-                'work': {
-                    'task': null
+            memory: {
+                job: job.jobName,
+                work: {
+                    task: null
                 },
-                'rooms': {
-                    'home': job.homeRoom,
-                    'work': job.workRoom
+                rooms: {
+                    home: job.homeRoom,
+                    work: job.workRoom
                 }
             }
         };

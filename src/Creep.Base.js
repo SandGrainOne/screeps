@@ -241,7 +241,7 @@ class CreepBase {
                 if (this._cache.target === null && this._mem.target.pos !== undefined && !this.room.isVisible) {
                     const posComponents = this._mem.target.pos.split(',');
                     const pos = new RoomPosition(posComponents[0], posComponents[1], posComponents[2]);
-                    this._cache.target = { 'pos': pos, 'isFake': true };
+                    this._cache.target = { pos: pos, isFake: true };
                 }
             }
             else {

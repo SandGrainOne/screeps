@@ -3,7 +3,7 @@
 const SquadBase = require('./Squad.Base');
 
 const squadTypes = {
-    'dummy': require('./Squad.Dummy')
+    dummy: require('./Squad.Dummy')
 };
 
 /**

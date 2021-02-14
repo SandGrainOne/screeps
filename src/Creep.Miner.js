@@ -242,7 +242,7 @@ class CreepMiner extends CreepWorker {
         if (moveTarget !== null) {
             // Miners should move on to the same tile as a container. Not stop right before.
             const range = moveTarget.structureType === STRUCTURE_CONTAINER ? 0 : 1;
-            this.moveTo(moveTarget, { 'range': range });
+            this.moveTo(moveTarget, { range: range });
         }
 
         return true;

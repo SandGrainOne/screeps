@@ -50,7 +50,7 @@ class CreepDismantler extends CreepWorker {
             // TODO: Ask squad for possible work target?
 
             const pos = this.moveToRoom(this.workRoom.name, false);
-            return { 'pos': pos, 'isFake': true };
+            return { pos: pos, isFake: true };
         }
 
         if (this.room.flags[COLOR_GREY] !== undefined) {

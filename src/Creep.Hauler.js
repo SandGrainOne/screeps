@@ -28,7 +28,7 @@ class CreepHauler extends CreepWorker {
 
         if (!this.atWork && !room.isVisible) {
             Empire.observe(room.name, 10);
-            this.moveTo(new RoomPosition(25, 25, room.name), { 'range': 20 });
+            this.moveTo(new RoomPosition(25, 25, room.name), { range: 20 });
             return;
         }
 
