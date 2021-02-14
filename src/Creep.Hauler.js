@@ -297,7 +297,7 @@ class CreepHauler extends CreepWorker {
                     }
                 }
 
-                if (this.room.storage) {
+                if (this.room.storage && this.room.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 15000) {
                     let rangeToStorage = this.pos.getRangeTo(this.room.storage);
                     if (range > 4 || range >= rangeToStorage) {
                         moveTarget = this.room.storage;
@@ -329,6 +329,12 @@ class CreepHauler extends CreepWorker {
                     if (tower !== null) {
                         moveTarget = tower;
                     }
+                }
+            }
+
+            if (moveTarget === null) {
+                if (this.room.storage) {
+                    moveTarget = this.room.storage;
                 }
             }
         }
