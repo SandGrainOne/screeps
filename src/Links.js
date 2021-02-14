@@ -1,6 +1,6 @@
 'use strict';
 
-let C = require('./constants');
+const C = require('./constants');
 
 /**
  * This class is meant to combine all links in a room into a single logical unit
@@ -46,7 +46,7 @@ class Links {
         }
         this._cache.storage = null;
         if (this._mem.storage) {
-            let link = Game.getObjectById(this._mem.storage);
+            const link = Game.getObjectById(this._mem.storage);
             if (link) {
                 this._cache.storage = link;
             }
@@ -63,7 +63,7 @@ class Links {
         }
         this._cache.controller = null;
         if (this._mem.controller) {
-            let link = Game.getObjectById(this._mem.controller);
+            const link = Game.getObjectById(this._mem.controller);
             if (link) {
                 this._cache.controller = link;
             }
@@ -80,8 +80,8 @@ class Links {
         }
         this._cache.inputs = [];
         if (this._mem.inputs && this._mem.inputs.length > 0) {
-            for (let id of this._mem.inputs) {
-                let link = Game.getObjectById(id);
+            for (const id of this._mem.inputs) {
+                const link = Game.getObjectById(id);
                 if (link) {
                     this._cache.inputs.push(link);
                 }
@@ -106,7 +106,7 @@ class Links {
         this._mem.storage = null;
         this._mem.inputs = [];
 
-        for (let link of links) {
+        for (const link of links) {
             let rangeToStorage = 5;
             if (room.storage) {
                 rangeToStorage = link.pos.getRangeTo(room.storage);
@@ -142,7 +142,7 @@ class Links {
         // The linking system should not attempt to perform more than one transfer per tick.
         let transfered = false;
 
-        for (let inputLink of this.inputs) {
+        for (const inputLink of this.inputs) {
             if (inputLink.cooldown > 0) {
                 continue;
             }
@@ -174,7 +174,7 @@ class Links {
      * @param {Link} target - The link that should recieve the energy.
      */
     _transfer (sender, target) {
-        let amount = Math.min(sender.energy, target.energyCapacity - target.energy);
+        const amount = Math.min(sender.energy, target.energyCapacity - target.energy);
         if (amount >= C.LINK_MINIMUM_TRANSFER) {
             return sender.transferEnergy(target, amount);
         }

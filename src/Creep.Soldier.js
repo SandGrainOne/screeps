@@ -1,6 +1,6 @@
 'use strict';
 
-let CreepBase = require('./Creep.Base');
+const CreepBase = require('./Creep.Base');
 
 /**
  * Wrapper class for creeps with logic for war.
@@ -10,7 +10,7 @@ class CreepSoldier extends CreepBase {
      * Determine what task the creep should undertake this tick.
      */
     getTask () {
-        let task = super.getTask();
+        const task = super.getTask();
         if (task !== null) {
             return task;
         }

@@ -30,6 +30,6 @@ os.logger.error = function (message) {
  * @param {string} color - The hex code for a color
  */
 function _log (message, color) {
-    let output = `<font style="color:#${color}">${Game.time} - ${message}</font>`;
+    const output = `<font style="color:#${color}">${Game.time} - ${message}</font>`;
     console.log(output);
 };

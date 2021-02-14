@@ -1,8 +1,8 @@
 'use strict';
 
-let C = require('./constants');
+const C = require('./constants');
 
-let CreepWorker = require('./Creep.Worker');
+const CreepWorker = require('./Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for a refueler.
@@ -31,21 +31,21 @@ class CreepRefueler extends CreepWorker {
         }
 
         if (this.energy > 0 && this.room.towers.length > 0) {
-            let tower = this.getFirstInRange(this.room.towers, 1, (x) => x.energy < x.energyCapacity - 200);
+            const tower = this.getFirstInRange(this.room.towers, 1, (x) => x.energy < x.energyCapacity - 200);
             if (tower !== null) {
                 this.transfer(tower, RESOURCE_ENERGY);
             }
         }
 
         if (this.energy > 0 && this.room.spawns.length > 0) {
-            let spawn = this.getFirstInRange(this.room.spawns, 1, (x) => x.energy < x.energyCapacity);
+            const spawn = this.getFirstInRange(this.room.spawns, 1, (x) => x.energy < x.energyCapacity);
             if (spawn !== null) {
                 this.transfer(spawn, RESOURCE_ENERGY);
             }
         }
 
         if (this.energy > 0 && this.room.extensions.length > 0) {
-            let extension = this.getFirstInRange(this.room.extensions, 1, (x) => x.energy < x.energyCapacity);
+            const extension = this.getFirstInRange(this.room.extensions, 1, (x) => x.energy < x.energyCapacity);
             if (extension !== null) {
                 this.transfer(extension, RESOURCE_ENERGY);
             }

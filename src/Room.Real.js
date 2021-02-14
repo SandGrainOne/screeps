@@ -1,11 +1,11 @@
 'use strict';
 
-let C = require('./constants');
+const C = require('./constants');
 
-let RoomBase = require('./Room.Base');
+const RoomBase = require('./Room.Base');
 
-let Links = require('./Links');
-let Labs = require('./Labs');
+const Links = require('./Links');
+const Labs = require('./Labs');
 
 /**
  * Wrapper class with logic for visible rooms.
@@ -97,7 +97,7 @@ class RoomReal extends RoomBase {
         if (this._cache.minerals !== undefined) {
             return this._cache.minerals;
         }
-        let minerals = this._room.find(FIND_MINERALS);
+        const minerals = this._room.find(FIND_MINERALS);
         this._cache.minerals = minerals.length > 0 ? minerals[0] : null;
         return this._cache.minerals;
     }
@@ -150,7 +150,7 @@ class RoomReal extends RoomBase {
         if (this._cache.extractor !== undefined) {
             return this._cache.extractor;
         }
-        let extractors = this.recall(STRUCTURE_EXTRACTOR);
+        const extractors = this.recall(STRUCTURE_EXTRACTOR);
         this._cache.extractor = extractors.length > 0 ? extractors[0] : null;
         return this._cache.extractor;
     }
@@ -164,7 +164,7 @@ class RoomReal extends RoomBase {
         if (this._cache.factory !== undefined) {
             return this._cache.factory;
         }
-        let factories = this.recall(STRUCTURE_FACTORY);
+        const factories = this.recall(STRUCTURE_FACTORY);
         this._cache.factory = factories.length > 0 ? factories[0] : null;
         return this._cache.factory;
     }
@@ -292,7 +292,7 @@ class RoomReal extends RoomBase {
         if (this._cache.nuker !== undefined) {
             return this._cache.nuker;
         }
-        let nukers = this.recall(STRUCTURE_NUKER);
+        const nukers = this.recall(STRUCTURE_NUKER);
         this._cache.nuker = nukers.length > 0 ? nukers[0] : null;
         return this._cache.nuker;
     }
@@ -304,7 +304,7 @@ class RoomReal extends RoomBase {
         if (this._cache.observer !== undefined) {
             return this._cache.observer;
         }
-        let observers = this.recall(STRUCTURE_OBSERVER);
+        const observers = this.recall(STRUCTURE_OBSERVER);
         this._cache.observer = observers.length > 0 ? observers[0] : null;
         return this._cache.observer;
     }
@@ -318,7 +318,7 @@ class RoomReal extends RoomBase {
         if (this._cache.powerSpawn !== undefined) {
             return this._cache.powerSpawn;
         }
-        let powerSpawns = this.recall(STRUCTURE_POWER_SPAWN);
+        const powerSpawns = this.recall(STRUCTURE_POWER_SPAWN);
         this._cache.powerSpawn = powerSpawns.length > 0 ? powerSpawns[0] : null;
         return this._cache.powerSpawn;
     }
@@ -345,7 +345,7 @@ class RoomReal extends RoomBase {
             return this._cache.repairs;
         }
         this._cache.repairs = [];
-        for (let structure of this.recall('repair')) {
+        for (const structure of this.recall('repair')) {
             if (structure.hits < structure.hitsMax) {
                 this._cache.repairs.push(structure);
             }
@@ -363,7 +363,7 @@ class RoomReal extends RoomBase {
         if (this._cache.flags !== undefined) {
             return this._cache.flags;
         }
-        let flagsArray = this._room.find(FIND_FLAGS);
+        const flagsArray = this._room.find(FIND_FLAGS);
         if (flagsArray.length > 0) {
             this._cache.flags = this.groupBy(flagsArray, 'color');
         }
@@ -401,7 +401,7 @@ class RoomReal extends RoomBase {
             this._mem.reservations = {};
         }
 
-        let key = type + '_' + id;
+        const key = type + '_' + id;
         if (this._mem.reservations[key] === undefined) {
             this._mem.reservations[key] = { creepName: creepName, ttl: 2 };
             return true;
@@ -442,12 +442,12 @@ class RoomReal extends RoomBase {
         // Forget all stored ids before refilling the data structure.
         this._mem.ids = {};
 
-        let labs = [];
-        let links = [];
+        const labs = [];
+        const links = [];
 
         this.clearFlags();
 
-        for (let structure of this._room.find(FIND_STRUCTURES)) {
+        for (const structure of this._room.find(FIND_STRUCTURES)) {
             switch (structure.structureType) {
                 case STRUCTURE_CONTAINER:
                     this.remember(structure.id, STRUCTURE_CONTAINER);
@@ -497,9 +497,9 @@ class RoomReal extends RoomBase {
             delete this._mem.tickClaimed;
         }
 
-        let roomDistances = [];
+        const roomDistances = [];
 
-        for (let roomName of Empire.roomsOwned) {
+        for (const roomName of Empire.roomsOwned) {
             if (this.name === roomName) {
                 // Don't count self
                 continue;
@@ -523,18 +523,18 @@ class RoomReal extends RoomBase {
     }
 
     checkRepairs (structure) {
-        let greyFlags = this.flags[COLOR_GREY];
+        const greyFlags = this.flags[COLOR_GREY];
 
         if (greyFlags !== undefined) {
-            for (let greyFlag of greyFlags) {
+            for (const greyFlag of greyFlags) {
                 if (structure.pos.isEqualTo(greyFlag)) {
                     return;
                 }
             }
         }
 
+        const wallSize = 3600000;
         let hitsMax = 0;
-        let wallSize = 3600000;
 
         switch (structure.structureType) {
             case STRUCTURE_WALL:
@@ -568,11 +568,11 @@ class RoomReal extends RoomBase {
     }
 
     clearFlags () {
-        let greyFlags = this.flags[COLOR_GREY];
+        const greyFlags = this.flags[COLOR_GREY];
 
         if (greyFlags !== undefined) {
-            for (let greyFlag of greyFlags) {
-                let foundStructures = greyFlag.pos.lookFor(LOOK_STRUCTURES);
+            for (const greyFlag of greyFlags) {
+                const foundStructures = greyFlag.pos.lookFor(LOOK_STRUCTURES);
                 if (foundStructures.length === 0) {
                     greyFlag.remove();
                 }
@@ -644,7 +644,7 @@ class RoomReal extends RoomBase {
     }
 
     prepare () {
-        let hostileCreeps = this._room.find(FIND_HOSTILE_CREEPS);
+        const hostileCreeps = this._room.find(FIND_HOSTILE_CREEPS);
         if (hostileCreeps.length > 0) {
             this.state = C.ROOM_STATE_INVADED;
         }
@@ -658,14 +658,14 @@ class RoomReal extends RoomBase {
             return;
         }
 
-        let keys = Object.keys(this._mem.reservations);
+        const keys = Object.keys(this._mem.reservations);
 
         if (keys.length === 0) {
             delete this._mem.reservations;
             return;
         }
 
-        for (let key of keys) {
+        for (const key of keys) {
             this._mem.reservations[key].ttl = this._mem.reservations[key].ttl - 1;
             if (this._mem.reservations[key].ttl === 0) {
                 delete this._mem.reservations[key];
@@ -682,9 +682,9 @@ class RoomReal extends RoomBase {
     }
 
     defend () {
-        let hostiles = this._room.find(FIND_HOSTILE_CREEPS);
+        const hostiles = this._room.find(FIND_HOSTILE_CREEPS);
 
-        let damagedCreeps = this._room.find(FIND_MY_CREEPS, {
+        const damagedCreeps = this._room.find(FIND_MY_CREEPS, {
             filter: (creep) => creep.hits < creep.hitsMax
         });
 
@@ -692,7 +692,7 @@ class RoomReal extends RoomBase {
             return;
         }
 
-        for (let tower of this.towers) {
+        for (const tower of this.towers) {
             if (hostiles.length > 0) {
                 if (hostiles[0] !== null) { //  && hostiles[0].pos.y < 49
                     tower.attack(hostiles[0]);
@@ -701,7 +701,7 @@ class RoomReal extends RoomBase {
             }
 
             if (damagedCreeps.length > 0) {
-                let damagedCreep = damagedCreeps.pop();
+                const damagedCreep = damagedCreeps.pop();
                 tower.heal(damagedCreep);
                 continue;
             }
@@ -740,9 +740,9 @@ class RoomReal extends RoomBase {
         if (this._mem.ids[type] === undefined) {
             return [];
         }
-        let gameObjects = [];
-        for (let id of this._mem.ids[type]) {
-            let gameObject = Game.getObjectById(id);
+        const gameObjects = [];
+        for (const id of this._mem.ids[type]) {
+            const gameObject = Game.getObjectById(id);
             if (gameObject !== null) {
                 gameObjects.push(gameObject);
             }

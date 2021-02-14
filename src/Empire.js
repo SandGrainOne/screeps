@@ -1,9 +1,9 @@
 'use strict';
 
-let CreepMaker = require('./CreepMaker');
+const CreepMaker = require('./CreepMaker');
 
-let RoomBase = require('./Room.Base');
-let RoomReal = require('./Room.Real');
+const RoomBase = require('./Room.Base');
+const RoomReal = require('./Room.Real');
 
 /**
  * The Empire class primary purpose is to provide easy access to game objects like creeps and rooms.
@@ -58,7 +58,7 @@ class Empire {
     }
 
     orderCreep (jobName, bodyCode, homeRoom, workRoom) {
-        let body = CreepMaker.buildBody(bodyCode);
+        const body = CreepMaker.buildBody(bodyCode);
 
         const job = {
             'priority': 1,
@@ -109,7 +109,7 @@ class Empire {
             }
             roomLocks[job.homeRoom] = true;
 
-            let foundSpawn = this.findSpawn(job);
+            const foundSpawn = this.findSpawn(job);
             if (foundSpawn !== null) {
                 CreepMaker.spawnCreep(foundSpawn, job);
             }
@@ -154,8 +154,8 @@ class Empire {
      * This method is responsible for arranging all important game objects in easy to access collections.
      */
     prepare () {
-        for (let roomName in Game.rooms) {
-            let room = new RoomReal(Game.rooms[roomName]);
+        for (const roomName in Game.rooms) {
+            const room = new RoomReal(Game.rooms[roomName]);
 
             this.rooms.set(roomName, room);
 
@@ -175,15 +175,15 @@ class Empire {
             }
         }
 
-        for (let roomName in Memory.rooms) {
+        for (const roomName in Memory.rooms) {
             if (!this.rooms.has(roomName)) {
                 this.rooms.set(roomName, new RoomBase(roomName));
             }
         }
 
         // Loop through all creeps in memory and sort them to quick access buckets.
-        for (let creepName in Memory.creeps) {
-            let creep = Game.creeps[creepName];
+        for (const creepName in Memory.creeps) {
+            const creep = Game.creeps[creepName];
 
             if (creep === undefined) {
                 // The creep must have died.
@@ -191,7 +191,7 @@ class Empire {
                 continue;
             }
 
-            let smartCreep = CreepMaker.wrap(creep);
+            const smartCreep = CreepMaker.wrap(creep);
             this._creeps.all[smartCreep.name] = smartCreep;
 
             if (smartCreep.isRetired) {
@@ -199,8 +199,8 @@ class Empire {
                 continue;
             }
 
-            let job = smartCreep.job;
-            let workroom = creep.memory.rooms.work;
+            const job = smartCreep.job;
+            const workroom = creep.memory.rooms.work;
 
             if (!this._creeps[workroom]) {
                 this._creeps[workroom] = {};
@@ -227,9 +227,9 @@ class Empire {
 
         let index = 0;
 
-        for (let roomToObserve in this._mem.observations) {
+        for (const roomToObserve in this._mem.observations) {
             while (index < this.roomsOwned.length) {
-                let room = this.roomsOwned[index];
+                const room = this.roomsOwned[index];
                 index = index + 1;
 
                 if (room.observer !== null) {
@@ -257,13 +257,13 @@ class Empire {
         let richest = null;
         let richestAmount = 0;
 
-        for (let room of this.rooms.values()) {
+        for (const room of this.rooms.values()) {
             if (!room.isVisible || !room.isMine || !room.storage || !room.terminal) {
                 // Room can not take part in the energy balancing game.
                 continue;
             }
 
-            let roomEnergy = room.storage.store.energy + room.terminal.store.energy;
+            const roomEnergy = room.storage.store.energy + room.terminal.store.energy;
 
             if (poorest === null || roomEnergy < poorestAmount) {
                 poorestAmount = roomEnergy;
@@ -297,13 +297,13 @@ class Empire {
         let count = Math.min(this._roomsToBeAnalyzed.length, 3);
         do {
             count--;
-            let room = this._roomsToBeAnalyzed.pop();
+            const room = this._roomsToBeAnalyzed.pop();
             room.analyze();
         } while (count > 0);
     }
 
     checkRoomMemory () {
-        for (let room of this.rooms.values()) {
+        for (const room of this.rooms.values()) {
             if (room._mem.neighbours === null) {
                 os.logger.info('Room: ' + room.name);
                 delete room._mem.neighbours;

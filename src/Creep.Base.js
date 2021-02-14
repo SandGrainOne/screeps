@@ -1,6 +1,6 @@
 'use strict';
 
-let C = require('./constants');
+const C = require('./constants');
 
 /**
  * The CreepBase class is the base class for all creep wrappers. 
@@ -153,7 +153,7 @@ class CreepBase {
             this._mem.rooms.home = this._mem.rooms.work;
         }
 
-        let task = this.getTask();
+        const task = this.getTask();
 
         if (task !== null) {
             if (typeof this[task] !== 'function') {
@@ -203,12 +203,12 @@ class CreepBase {
         }
         else {
             if (this.room.spawns.length > 0) {
-                let spawn = this.getFirstInRange(this.room.spawns, 1);
+                const spawn = this.getFirstInRange(this.room.spawns, 1);
                 if (spawn) {
                     spawn.recycleCreep(this._creep);
                 }
                 else {
-                    let spawn = this.pos.findClosestByRange(this.room.spawns);
+                    const spawn = this.pos.findClosestByRange(this.room.spawns);
                     if (spawn) {
                         this.moveTo(spawn);
                     }
@@ -280,7 +280,7 @@ class CreepBase {
 
         // Micro manage where creeps go to exit a room while looking for a specific room.
         if (C.EXIT[this.room.name] && C.EXIT[this.room.name][roomName]) {
-            let coords = C.EXIT[this.room.name][roomName];
+            const coords = C.EXIT[this.room.name][roomName];
             moveTarget = new RoomPosition(coords.x, coords.y, this.room.name);
         }
 
@@ -328,7 +328,7 @@ class CreepBase {
             return OK;
         }
 
-        let previousPos = this._mem.previousPos || [0, 0];
+        const previousPos = this._mem.previousPos || [0, 0];
 
         if (this.pos.x === previousPos[0] && this.pos.y === previousPos[1]) {
             this._mem.stuckCounter = (this._mem.stuckCounter || 0) + 1;
@@ -338,8 +338,8 @@ class CreepBase {
             }
             else if (this._mem.stuckCounter > 1) {
                 if (this._mem._move && this._mem._move.path) {
-                    let path = Room.deserializePath(this._mem._move.path);
-                    let creeps = this._creep.room.lookForAt(LOOK_CREEPS, path[0].x, path[0].y);
+                    const path = Room.deserializePath(this._mem._move.path);
+                    const creeps = this._creep.room.lookForAt(LOOK_CREEPS, path[0].x, path[0].y);
                     if (creeps.length > 0 && Game.creeps[creeps[0].name] && creeps[0].memory.job !== 'miner' && creeps[0].memory.job !== 'linker') {
                         creeps[0].move(creeps[0].pos.getDirectionTo(this.pos));
                     }
@@ -380,7 +380,7 @@ class CreepBase {
         let currentRange = Infinity;
         let closest = null;
         for (let i = 0; i < roomObjects.length; i++) {
-            let range = this.pos.getRangeTo(roomObjects[i]);
+            const range = this.pos.getRangeTo(roomObjects[i]);
             if (currentRange > range) {
                 if (filter === undefined || filter(roomObjects[i])) {
                     currentRange = range;

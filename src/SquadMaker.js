@@ -1,8 +1,8 @@
 'use strict';
 
-let SquadBase = require('./Squad.Base');
+const SquadBase = require('./Squad.Base');
 
-let squadTypes = {
+const squadTypes = {
     'dummy': require('./Squad.Dummy')
 };
 

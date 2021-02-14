@@ -1,7 +1,7 @@
 'use strict';
 
-let c = require('./ai.core.constants');
-let utils = require('./ai.core.utils');
+const c = require('./ai.core.constants');
+const utils = require('./ai.core.utils');
 
 class Node {
     constructor () {

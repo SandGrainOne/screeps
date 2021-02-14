@@ -1,6 +1,6 @@
 'use strict';
 
-let CreepWorker = require('./Creep.Worker');
+const CreepWorker = require('./Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for an assembler.

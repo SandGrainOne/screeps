@@ -1,6 +1,6 @@
 'use strict';
 
-let CreepWorker = require('./Creep.Worker');
+const CreepWorker = require('./Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for a settler.
@@ -29,7 +29,7 @@ class CreepSettler extends CreepWorker {
         }
 
         if (!this.atWork) {
-            let room = this.atWork ? this.room : this.workRoom;
+            const room = this.atWork ? this.room : this.workRoom;
 
             if (room.isVisible && room.controller) {
                 this.moveTo(room.controller);

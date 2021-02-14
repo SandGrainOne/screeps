@@ -1,8 +1,8 @@
 'use strict';
 
-let C = require('./constants');
+const C = require('./constants');
 
-let CreepWorker = require('./Creep.Worker');
+const CreepWorker = require('./Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for a dismantler.
@@ -55,7 +55,7 @@ class CreepDismantler extends CreepWorker {
 
         if (this.room.flags[COLOR_GREY] !== undefined) {
             for (const flag of this.room.flags[COLOR_GREY]) {
-                let structures = flag.pos.lookFor(LOOK_STRUCTURES);
+                const structures = flag.pos.lookFor(LOOK_STRUCTURES);
                 if (structures.length > 0) {
                     if (this.room.isMine || structures[0].my) {
                         structures[0].notifyWhenAttacked(false);
@@ -158,7 +158,7 @@ class CreepDismantler extends CreepWorker {
             return ERR_BUSY;
         }
 
-        let res = this._creep.dismantle(target);
+        const res = this._creep.dismantle(target);
         if (res === OK) {
             this._energy = Math.min(this._capacity, this._energy + Math.floor(this._baseStrength * C.DISMANTLE_ENERGY_GAIN));
             this._performedWork.dismantle = true;

@@ -50,7 +50,7 @@ class Labs {
 
         this._cache.sourceOne = null;
         if (this._mem.sourceOne) {
-            let lab = Game.getObjectById(this._mem.sourceOne);
+            const lab = Game.getObjectById(this._mem.sourceOne);
             if (lab) {
                 this._cache.sourceOne = lab;
             }
@@ -69,7 +69,7 @@ class Labs {
 
         this._cache.sourceTwo = null;
         if (this._mem.sourceTwo) {
-            let lab = Game.getObjectById(this._mem.sourceTwo);
+            const lab = Game.getObjectById(this._mem.sourceTwo);
             if (lab) {
                 this._cache.sourceTwo = lab;
             }
@@ -88,8 +88,8 @@ class Labs {
 
         this._cache.producers = [];
         if (this._mem.producers && this._mem.producers.length > 0) {
-            for (let id of this._mem.producers) {
-                let lab = Game.getObjectById(id);
+            for (const id of this._mem.producers) {
+                const lab = Game.getObjectById(id);
                 if (lab) {
                     this._cache.producers.push(lab);
                 }
@@ -117,8 +117,8 @@ class Labs {
 
         labs.sort((a, b) => (a.pos.x + a.pos.y * 10) - (b.pos.x + b.pos.y * 10));
 
-        let s1 = Math.floor((labs.length - 1) / 2) - 1;
-        let s2 = s1 + Math.ceil((s1 + 2) / 2);
+        const s1 = Math.floor((labs.length - 1) / 2) - 1;
+        const s2 = s1 + Math.ceil((s1 + 2) / 2);
 
         for (let i = 0; i < labs.length; i++) {
             if (i === s1) {
@@ -147,7 +147,7 @@ class Labs {
             return;
         }
 
-        for (let producer of this.producers) {
+        for (const producer of this.producers) {
             if (producer.cooldown === 0) {
                 producer.runReaction(this.compoundOne, this.compoundTwo);
             }

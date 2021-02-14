@@ -1,6 +1,6 @@
 'use strict';
 
-let CreepWorker = require('./Creep.Worker');
+const CreepWorker = require('./Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for a scavenger.
@@ -25,8 +25,8 @@ class CreepScavenger extends CreepWorker {
         if (this.atWork && this.load < this.capacity) {
             if (this.target !== null) {
                 if (this.pos.isNearTo(this.target)) {
-                    let resourceType = this.selectResourceType(this.target);
-                    let result = this.withdraw(this.target, resourceType);
+                    const resourceType = this.selectResourceType(this.target);
+                    const result = this.withdraw(this.target, resourceType);
                     if (result === ERR_NOT_ENOUGH_RESOURCES) {
                         this.target = null;
                     }
@@ -36,9 +36,9 @@ class CreepScavenger extends CreepWorker {
 
         if (this.isHome && this.load > 0) {
             if (this.room.containers.length > 0) {
-                let container = this.getFirstInRange(this.room.containers, 1);
+                const container = this.getFirstInRange(this.room.containers, 1);
                 if (container !== null) {
-                    for (let resourceType in this.store) {
+                    for (const resourceType in this.store) {
                         if (this.store[resourceType] > 0) {
                             if (this.transfer(container, resourceType) === OK) {
                                 break;
@@ -49,7 +49,7 @@ class CreepScavenger extends CreepWorker {
             }
 
             if (this.energy > 0 && this.room.links.inputs.length > 0) {
-                let link = this.getFirstInRange(this.room.links.inputs, 1);
+                const link = this.getFirstInRange(this.room.links.inputs, 1);
                 if (link !== null) {
                     if (link.store.energy < link.store.getFreeCapacity(RESOURCE_ENERGY)) {
                         this.transfer(link, RESOURCE_ENERGY);
@@ -89,8 +89,8 @@ class CreepScavenger extends CreepWorker {
                     rangeToTarget = this.pos.getRangeTo(moveTarget);
                 }
                 if (this.energy > 0 && this.energy === this.load && this.room.links.inputs.length > 0) {
-                    let link = this.pos.findClosestByRange(this.room.links.inputs);
-                    let rangeToLink = this.pos.getRangeTo(link);
+                    const link = this.pos.findClosestByRange(this.room.links.inputs);
+                    const rangeToLink = this.pos.getRangeTo(link);
                     if (rangeToLink <= rangeToTarget) {
                         moveTarget = link;
                         rangeToTarget = rangeToLink;
@@ -116,21 +116,21 @@ class CreepScavenger extends CreepWorker {
         }
 
         if (this.room.towers.length > 0) {
-            let tower = this.getClosestByRange(this.room.towers, (x) => x.energy > 0);
+            const tower = this.getClosestByRange(this.room.towers, (x) => x.energy > 0);
             if (tower !== null) {
                 return tower;
             }
         }
 
         if (this.room.spawns.length > 0) {
-            let spawn = this.getClosestByRange(this.room.spawns, (x) => x.energy > 0);
+            const spawn = this.getClosestByRange(this.room.spawns, (x) => x.energy > 0);
             if (spawn !== null) {
                 return spawn;
             }
         }
 
         if (this.room.extensions.length > 0) {
-            let extension = this.getClosestByRange(this.room.extensions, (x) => x.energy > 0);
+            const extension = this.getClosestByRange(this.room.extensions, (x) => x.energy > 0);
             if (extension !== null) {
                 return extension;
             }
@@ -149,14 +149,14 @@ class CreepScavenger extends CreepWorker {
         }
 
         if (this.room.labs.all.length > 0) {
-            let lab = this.getClosestByRange(this.room.labs.all, (x) => x.energy > 0 || x.mineralAmount > 0);
+            const lab = this.getClosestByRange(this.room.labs.all, (x) => x.energy > 0 || x.mineralAmount > 0);
             if (lab !== null) {
                 return lab;
             }
         }
 
         if (this.room.links.all.length > 0) {
-            let link = this.getClosestByRange(this.room.links.all, (x) => x.energy > 0);
+            const link = this.getClosestByRange(this.room.links.all, (x) => x.energy > 0);
             if (link !== null) {
                 return link;
             }
@@ -168,7 +168,7 @@ class CreepScavenger extends CreepWorker {
     selectResourceType (target) {
         if (target.store !== undefined) {
             // Containers, Storage, Terminal, etc
-            for (let resourceType in target.store) {
+            for (const resourceType in target.store) {
                 if (target.store[resourceType] > 0) {
                     return resourceType;
                 }

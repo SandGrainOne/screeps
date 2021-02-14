@@ -7,8 +7,8 @@ require('./os.code');
 require('./os.logger');
 require('./os.profiler');
 
-let CreepMaker = require('./CreepMaker');
-let Empire = require('./Empire');
+const CreepMaker = require('./CreepMaker');
+const Empire = require('./Empire');
 
 const load = Math.round(Game.cpu.getUsed());
 os.logger.warning('Script reloaded. CPU used: ' + load + ', Bucket: ' + Game.cpu.bucket);
@@ -18,13 +18,13 @@ os.code.update();
 
 module.exports.loop = function () {
     // Make the empire available from the gobal scope
-    let empire = new Empire();
+    const empire = new Empire();
     global.Empire = empire;
 
     // Wrap all rooms and creeps in custom logic and make them easily available.
     empire.prepare();
 
-    for (let room of empire.rooms.values()) {
+    for (const room of empire.rooms.values()) {
         room.createJobs();
 
         const rule = getSpawningRules(room);
@@ -36,8 +36,8 @@ module.exports.loop = function () {
                 roomPop = {};
             }
 
-            for (let jobName in rule.jobs) {
-                let creepCount = roomPop[jobName + 's'] === undefined ? 0 : roomPop[jobName + 's'].length;
+            for (const jobName in rule.jobs) {
+                const creepCount = roomPop[jobName + 's'] === undefined ? 0 : roomPop[jobName + 's'].length;
                 if (creepCount < rule.jobs[jobName].count) {
                     const body = CreepMaker.buildBody(rule.jobs[jobName].body);
                     const priority = CreepMaker.getPriority(jobName);
@@ -57,7 +57,7 @@ module.exports.loop = function () {
         room.run();
     }
 
-    for (let creepName in empire.creeps.all) {
+    for (const creepName in empire.creeps.all) {
         empire.creeps.all[creepName].act();
     }
 

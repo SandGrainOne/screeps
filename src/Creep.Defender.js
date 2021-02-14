@@ -1,6 +1,6 @@
 'use strict';
 
-let CreepSoldier = require('./Creep.Soldier');
+const CreepSoldier = require('./Creep.Soldier');
 
 /**
  * Wrapper class for creeps with logic for a room defender.
@@ -13,10 +13,10 @@ class CreepDefender extends CreepSoldier {
      * @returns {Boolean} true if the creep has successfully performed some work.
      */
     work () {
-        let hostileCreep = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+        const hostileCreep = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
         if (hostileCreep) {
             if (this.room.isMine && this.room.ramparts > 0) {
-                let ramps = hostileCreep.pos.findInRange(FIND_MY_STRUCTURES, 1, { filter: (s) => s.structureType === STRUCTURE_RAMPART });
+                const ramps = hostileCreep.pos.findInRange(FIND_MY_STRUCTURES, 1, { filter: (s) => s.structureType === STRUCTURE_RAMPART });
                 if (ramps.length > 0) {
                     if (!this.pos.isEqualTo(ramps[0])) {
                         this.moveTo(ramps[0]);
@@ -31,7 +31,7 @@ class CreepDefender extends CreepSoldier {
             return true;
         }
 
-        let enemyStructure = this.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {
+        const enemyStructure = this.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {
             filter: (it) => it.structureType !== STRUCTURE_CONTROLLER && it.structureType !== STRUCTURE_POWER_BANK
         });
         if (enemyStructure !== null) {
@@ -42,7 +42,7 @@ class CreepDefender extends CreepSoldier {
         }
 
         // Attack ?
-        let flagAttack = this.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_RED });
+        const flagAttack = this.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_RED });
 
         if (flagAttack) {
             this.moveTo(flagAttack);

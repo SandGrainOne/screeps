@@ -1,6 +1,6 @@
 'use strict';
 
-let CreepWorker = require('./Creep.Worker');
+const CreepWorker = require('./Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for an upgrader.
@@ -15,7 +15,7 @@ class CreepUpgrader extends CreepWorker {
     work () {
         if (this.atWork && this.energy > 0) {
             if (this.room.isMine) {
-                let rangeToController = this.pos.getRangeTo(this.room.controller);
+                const rangeToController = this.pos.getRangeTo(this.room.controller);
                 if (rangeToController <= 3) {
                     this.upgrade(this.room.controller);
                 }
@@ -23,14 +23,14 @@ class CreepUpgrader extends CreepWorker {
         }
 
         if (this.isHome && this.energy < this.capacity) {
-            let storage = this.room.storage;
+            const storage = this.room.storage;
             if (storage !== null && storage.store.energy > 0 && this.pos.isNearTo(storage)) {
                 this.withdraw(storage, RESOURCE_ENERGY);
             }
         }
 
         if (this.atWork && this.energy < this.capacity) {
-            let link = this.room.links.controller;
+            const link = this.room.links.controller;
             if (link !== null && link.energy > 0 && this.pos.isNearTo(link)) {
                 this.withdraw(link, RESOURCE_ENERGY);
             }
@@ -38,7 +38,7 @@ class CreepUpgrader extends CreepWorker {
 
         if (this.atWork && this.energy < this.capacity) {
             if (this.room.containers.length > 0) {
-                let container = this.getFirstInRange(this.room.containers, 1);
+                const container = this.getFirstInRange(this.room.containers, 1);
                 if (container !== null) {
                     this.withdraw(container, RESOURCE_ENERGY);
                 }
@@ -47,7 +47,7 @@ class CreepUpgrader extends CreepWorker {
 
         if (this.atWork && this.energy < this.capacity) {
             if (this.room.sources.length > 0) {
-                let source = this.getFirstInRange(this.room.sources, 1);
+                const source = this.getFirstInRange(this.room.sources, 1);
                 if (source !== null) {
                     this.harvest(source);
                 }
@@ -69,7 +69,7 @@ class CreepUpgrader extends CreepWorker {
         }
         else if (this.isWorking) {
             if (this.room.isMine) {
-                let rangeToController = this.pos.getRangeTo(this.room.controller);
+                const rangeToController = this.pos.getRangeTo(this.room.controller);
                 if (rangeToController > 3) {
                     moveTarget = this.room.controller;
                 }
@@ -88,14 +88,14 @@ class CreepUpgrader extends CreepWorker {
             }
 
             if (moveTarget === null) {
-                let container = this.getClosestByRange(this.room.containers, (x) => x.store.energy > 400);
+                const container = this.getClosestByRange(this.room.containers, (x) => x.store.energy > 400);
                 if (container !== null && !this.pos.isNearTo(container)) {
                     moveTarget = container;
                 }
             }
 
             if (moveTarget === null) {
-                let source = this.getClosestByRange(this.room.sources);
+                const source = this.getClosestByRange(this.room.sources);
                 if (source !== null && !this.pos.isNearTo(source)) {
                     moveTarget = source;
                 }

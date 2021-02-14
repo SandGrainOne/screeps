@@ -1,6 +1,6 @@
 'use strict';
 
-let CreepSoldier = require('./Creep.Soldier');
+const CreepSoldier = require('./Creep.Soldier');
 
 /**
  * Wrapper class for creeps with logic for an attacker.
@@ -14,7 +14,7 @@ class CreepAttacker extends CreepSoldier {
      */
     work () {
         if (!this.atWork) {
-            let flagAttack = this.findAttackFlag();
+            const flagAttack = this.findAttackFlag();
             if (flagAttack) {
                 this.moveTo(flagAttack);
             }
@@ -24,11 +24,11 @@ class CreepAttacker extends CreepSoldier {
             return true;
         }
 
-        let hostileCreep = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+        const hostileCreep = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
         if (hostileCreep) {
             if (this.room.isMine && this.room.ramparts > 0) {
                 this.moveTo(hostileCreep);
-                let ramps = hostileCreep.pos.findInRange(FIND_MY_STRUCTURES, 1, { filter: (s) => s.structureType === STRUCTURE_RAMPART });
+                const ramps = hostileCreep.pos.findInRange(FIND_MY_STRUCTURES, 1, { filter: (s) => s.structureType === STRUCTURE_RAMPART });
                 if (ramps.length > 0) {
                     if (!this.pos.isEqualTo(ramps[0])) {
                         this.moveTo(ramps[0]);
@@ -43,7 +43,7 @@ class CreepAttacker extends CreepSoldier {
             return true;
         }
 
-        let enemyStructure = this.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {
+        const enemyStructure = this.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {
             filter: (it) => it.structureType !== STRUCTURE_CONTROLLER && it.structureType !== STRUCTURE_POWER_BANK
         });
         if (enemyStructure !== null) {
@@ -53,7 +53,7 @@ class CreepAttacker extends CreepSoldier {
             return true;
         }
 
-        let flagAttack = this.findAttackFlag();
+        const flagAttack = this.findAttackFlag();
         if (flagAttack && !this.pos.isNearTo(flagAttack)) {
             this.moveTo(flagAttack);
         }
@@ -62,12 +62,12 @@ class CreepAttacker extends CreepSoldier {
     }
 
     findAttackFlag () {
-        let room = this.atWork ? this.room : this.workRoom;
+        const room = this.atWork ? this.room : this.workRoom;
         if (!room.isVisible) {
             return null;
         }
 
-        let redFlags = room.flags[COLOR_RED];
+        const redFlags = room.flags[COLOR_RED];
         if (Array.isArray(redFlags) && redFlags.length > 0) {
             return redFlags[0];
         }

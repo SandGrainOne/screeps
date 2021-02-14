@@ -1,6 +1,6 @@
 'use strict';
 
-let CreepWorker = require('./Creep.Worker');
+const CreepWorker = require('./Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for a chemist.
@@ -67,7 +67,7 @@ class CreepChemist extends CreepWorker {
         let emptyCreep = false;
 
         if (this.load > 0) {
-            for (let resourceType in this.carry) {
+            for (const resourceType in this.carry) {
                 if (this.carry[resourceType] > 0) {
                     if (resourceType !== reaction.compoundOne && resourceType !== reaction.compoundTwo) {
                         emptyCreep = true;
@@ -103,7 +103,7 @@ class CreepChemist extends CreepWorker {
             }
 
             if (this.pos.isNearTo(deliveryTarget)) {
-                for (let resourceType in this.carry) {
+                for (const resourceType in this.carry) {
                     if (this.transfer(deliveryTarget, resourceType) === OK) {
                         break;
                     }
@@ -115,7 +115,7 @@ class CreepChemist extends CreepWorker {
             return true;
         }
 
-        for (let compound in reaction) {
+        for (const compound in reaction) {
             if (this.room.labs[compound].mineralType && this.room.labs[compound].mineralType !== reaction[compound]) {
                 if (this.pos.isNearTo(this.room.labs[compound])) {
                     this.withdraw(this.room.labs[compound], this.room.labs[compound].mineralType);
@@ -127,7 +127,7 @@ class CreepChemist extends CreepWorker {
             }
         }
 
-        for (let compound in reaction) {
+        for (const compound in reaction) {
             if (this.carry[reaction[compound]] && this.carry[reaction[compound]] >= this.capacity) {
                 if (this.room.labs[compound].mineralAmount <= 0) {
                     if (this.pos.isNearTo(this.room.labs[compound])) {
@@ -143,7 +143,7 @@ class CreepChemist extends CreepWorker {
 
         if (this.load <= 0) {
             if (this.room.terminal.store[reaction.compoundOne] && this.room.terminal.store[reaction.compoundTwo]) {
-                for (let compound in reaction) {
+                for (const compound in reaction) {
                     if (this.room.labs[compound].mineralAmount <= 0) {
                         if (this.pos.isNearTo(this.room.terminal)) {
                             this.withdraw(this.room.terminal, reaction[compound]);
@@ -158,7 +158,7 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.load < this.capacity) {
-            for (let producer of this.room.labs.producers) {
+            for (const producer of this.room.labs.producers) {
                 if (producer.mineralType && producer.mineralType !== REACTIONS[reaction.compoundOne][reaction.compoundTwo]) {
                     if (this.pos.isNearTo(producer)) {
                         this.withdraw(producer, producer.mineralType);
@@ -184,7 +184,7 @@ class CreepChemist extends CreepWorker {
             if (Object.keys(this.room.storage.store).length > 1) {
                 if (this.room.terminal.store.getUsedCapacity() < this.room.terminal.store.getCapacity() * 0.7) {
                     if (this.pos.isNearTo(this.room.storage)) {
-                        for (let resourceType in this.room.storage.store) {
+                        for (const resourceType in this.room.storage.store) {
                             // Taking energy from the storage is handled by refuelers.
                             if (resourceType === RESOURCE_ENERGY) {
                                 continue;
@@ -231,7 +231,7 @@ class CreepChemist extends CreepWorker {
         }
 
         if (this.load >= this.capacity) {
-            for (let resourceType in this.carry) {
+            for (const resourceType in this.carry) {
                 if (this.carry[resourceType] > 0) {
                     // Creep holds wrong type of resource. Get rid of it.
                     this.moveTo(this.room.terminal);

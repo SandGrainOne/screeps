@@ -1,10 +1,10 @@
 'use strict';
 
-let C = require('./constants');
+const C = require('./constants');
 
-let CreepBase = require('./Creep.Base');
+const CreepBase = require('./Creep.Base');
 
-let wrappers = {
+const wrappers = {
     'miner': require('./Creep.Miner'),
     'hauler': require('./Creep.Hauler'),
     'linker': require('./Creep.Linker'),
@@ -35,7 +35,7 @@ class CreepMaker {
     static wrap (creep) {
         let smartCreep = null;
 
-        let job = creep.memory.job;
+        const job = creep.memory.job;
         if (job && wrappers[job]) {
             smartCreep = new wrappers[job](creep);
         }
@@ -62,7 +62,7 @@ class CreepMaker {
     }
 
     static getPriority (jobName) {
-        let priorities = {
+        const priorities = {
             'miner': 2,
             'hauler': 3,
             'linker': 4,
@@ -81,7 +81,7 @@ class CreepMaker {
             'mineralminer': 5
         };
 
-        let priority = priorities[jobName] !== undefined ? priorities[jobName] : 5;
+        const priority = priorities[jobName] !== undefined ? priorities[jobName] : 5;
 
         return priority;
     }
@@ -145,10 +145,10 @@ class CreepMaker {
      * LLMM => [CLAIM, CLAIM, MOVE, MOVE]
      */
     static buildBody (codeChain) {
-        let body = [];
+        const body = [];
 
-        let codes = Array.from(codeChain);
-        for (let code of codes) {
+        const codes = Array.from(codeChain);
+        for (const code of codes) {
             body.push(C.BODY_PART_CODES[code]);
         }
 
@@ -164,10 +164,10 @@ class CreepMaker {
      * @return - Object with all job requirements.
      */
     static defineJobs (room) {
-        let jobs = {};
+        const jobs = {};
 
-        for (let jobName in wrappers) {
-            let job = wrappers[jobName].defineJob(room);
+        for (const jobName in wrappers) {
+            const job = wrappers[jobName].defineJob(room);
             if (job) {
                 jobs[jobName] = job;
             }

@@ -1,6 +1,6 @@
 'use strict';
 
-let C = require('./constants');
+const C = require('./constants');
 
 /**
  * This class is a wrapper for the room memory. It can not be used to wrap an actual room object, 

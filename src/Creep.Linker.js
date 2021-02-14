@@ -1,8 +1,8 @@
 'use strict';
 
-let C = require('./constants');
+const C = require('./constants');
 
-let CreepWorker = require('./Creep.Worker');
+const CreepWorker = require('./Creep.Worker');
 
 /**
  * Wrapper class for creeps with logic for a linker.
@@ -20,8 +20,8 @@ class CreepLinker extends CreepWorker {
             return true;
         }
 
-        let storage = this.room.storage;
-        let storageLink = this.room.links.storage;
+        const storage = this.room.storage;
+        const storageLink = this.room.links.storage;
 
         if (!storage || !storageLink) {
             return false;

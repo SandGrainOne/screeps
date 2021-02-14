@@ -1,6 +1,6 @@
 'use strict';
 
-let CreepSoldier = require('./Creep.Soldier');
+const CreepSoldier = require('./Creep.Soldier');
 
 /**
  * Wrapper class for creeps with logic for a healer.
@@ -17,13 +17,13 @@ class CreepHealer extends CreepSoldier {
             return true;
         }
 
-        let flagAttack = this.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_RED });
+        const flagAttack = this.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_RED });
 
         if (flagAttack) {
             this.moveTo(flagAttack);
         }
 
-        let target = this.pos.findClosestByRange(FIND_MY_CREEPS, { filter: (c) => c.hits < c.hitsMax });
+        const target = this.pos.findClosestByRange(FIND_MY_CREEPS, { filter: (c) => c.hits < c.hitsMax });
         if (target) {
             this.moveTo(target);
             if (this.pos.isNearTo(target)) {
@@ -38,11 +38,11 @@ class CreepHealer extends CreepSoldier {
             this._creep.heal(this._creep);
         }
 
-        let hostileCreep = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+        const hostileCreep = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
 
         if (hostileCreep) {
             if (this.pos.getRangeTo(hostileCreep) < 3) {
-                let flagRetreat = this.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
+                const flagRetreat = this.pos.findClosestByRange(FIND_FLAGS, { filter: (f) => f.color === COLOR_BLUE });
                 this.moveTo(flagRetreat);
             }
         }
