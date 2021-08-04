@@ -1,5 +1,5 @@
 module.exports = function (grunt) {
-    let config = require('./.secret.json');
+    const config = require('./.secret.json');
 
     var branch = grunt.option('branch') || config.branch;
     var ptr = grunt.option('ptr') ? true : config.ptr;
