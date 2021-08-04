@@ -134,52 +134,6 @@ function getSpawningRules (room) {
         };
     }
 
-    if (room.name === 'E68N87') {
-        return {
-            homeRoom: room.name,
-            jobs: {
-                dismantler: { count: room.jobs.dismantlers, body: 'WWWWWWWWWWWWWWWWWWWWWWWWCMMMMMMMMMMMMMMMMMMMMMMMMM' },
-                chemist: { count: room.jobs.chemists, body: 'CCCCCCCCMMMM' },
-                mineralminer: { count: room.jobs.mineralminers, body: 'WWWWWWWWWWWWWWWWWWWWWWWWWCCCCCMMMMMMMMMMMMMMMMMMMM' },
-                linker: { count: room.jobs.linkers, body: 'CCCCCCCCCCCCMMMMMM' },
-                upgrader: { count: 3, body: 'WWWWWCCCMMMM' },
-                builder: { count: 2, body: 'WWCCCCCCMMMMMMMM' },
-                hauler: { count: 2, body: 'CCCCCCCCCCCCMMMMMM' },
-                miner: { count: room.jobs.miners, body: 'WWWWWWCCMMMM' },
-                refueler: { count: room.jobs.refuelers, body: 'CCCCCCCCCCCCMMMMMM' }
-            }
-        };
-    }
-
-    if (room.name === 'E68N81') {
-        return {
-            homeRoom: 'E69N81',
-            jobs: {
-                attacker: { count: 1, body: 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
-                settler: { count: room.jobs.settlers, body: 'LLMM' },
-                hauler: { count: 2, body: 'WCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMMMMMMMM' },
-                miner: { count: room.jobs.miners, body: 'WWWWWWCCMMMM' }
-            }
-        };
-    }
-
-    if (room.name === 'E69N81') {
-        return {
-            homeRoom: room.name,
-            jobs: {
-                dismantler: { count: room.jobs.dismantlers, body: 'WWWWWWWWWWWWWWWWWWWWWWWWCMMMMMMMMMMMMMMMMMMMMMMMMM' },
-                chemist: { count: room.jobs.chemists, body: 'CCCCCCCCMMMM' },
-                mineralminer: { count: room.jobs.mineralminers, body: 'WWWWWWWWWWWWWWWWWWWWWWWWWCCCCCMMMMMMMMMMMMMMMMMMMM' },
-                linker: { count: room.jobs.linkers, body: 'CCCCCCCCCCCCCCCCMMMM' },
-                upgrader: { count: 1, body: 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
-                builder: { count: 2, body: 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
-                hauler: { count: 1, body: 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' },
-                miner: { count: room.jobs.miners, body: 'WWWWWWCCMMMM' },
-                refueler: { count: room.jobs.refuelers, body: 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' }
-            }
-        };
-    }
-
     if (room.name === 'E78N82') {
         return {
             homeRoom: 'E78N83',
@@ -301,50 +255,6 @@ function getSpawningRules (room) {
                 hauler: { count: 2, body: 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' },
                 miner: { count: room.jobs.miners, body: 'WWWWWWCCMMMM' },
                 refueler: { count: room.jobs.refuelers, body: 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' }
-            }
-        };
-    }
-
-    if (room.name === 'E71N88') {
-        return {
-            homeRoom: 'E71N87',
-            jobs: {
-                settler: { count: room.jobs.settlers, body: 'LLMM' },
-                attacker: { count: 1, body: 'TTTTTTTTTTAAAAAMMMMMMMMMMMMMMM' },
-                builder: { count: 1, body: 'WWCCCMMMMM' },
-                hauler: { count: 3, body: 'WCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' },
-                miner: { count: room.jobs.miners, body: 'WWWWWWCCMMM' }
-            }
-        };
-    }
-
-    if (room.name === 'E71N87') {
-        return {
-            homeRoom: room.name,
-            jobs: {
-                dismantler: { count: room.jobs.dismantlers, body: 'WWWWWWWWWWWWWWWWWWWWWWWWCMMMMMMMMMMMMMMMMMMMMMMMMM' },
-                chemist: { count: room.jobs.chemists, body: 'CCCCCCCCMMMM' },
-                mineralminer: { count: room.jobs.mineralminers, body: 'WWWWWWWWWWWWWWWWWWWWWWWWWCCCCCMMMMMMMMMMMMMMMMMMMM' },
-                builder: { count: 2, body: 'WWWWWCCCCCCCCCCMMMMMMMMMMMMMMM' },
-                upgrader: { count: 1, body: 'WWWWWWWWWWWWWWWCCCCCMMMMMMMMMM' },
-                hauler: { count: 3, body: 'CCCCCCCCCCCCCCCCCCCCMMMMMMMMMM' },
-                miner: { count: room.jobs.miners, body: 'WWWWWWCCMMMM' },
-                linker: { count: room.jobs.linkers, body: 'CCCCCCCCCCCCCCCCMMMM' },
-                refueler: { count: room.jobs.refuelers, body: 'CCCCCCCCCCCCMMMMMM' }
-            }
-        };
-    }
-
-    if (room.name === 'E73N84') {
-        return {
-            homeRoom: room.name,
-            jobs: {
-                upgrader: { count: 4, body: 'WWCMM' },
-                builder: { count: 4, body: 'WWCMM' },
-                hauler: { count: 2, body: 'CCCCMMMM' },
-                miner: { count: room.jobs.miners, body: 'WWWWCCMMMMMM' },
-                linker: { count: room.jobs.linkers, body: 'CCCCCCCCM' },
-                refueler: { count: room.jobs.refuelers, body: 'CCCCMMMM' }
             }
         };
     }
