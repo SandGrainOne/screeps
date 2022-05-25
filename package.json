@@ -10,7 +10,7 @@
         "eslint-plugin-node": "^11.1.0",
         "eslint-plugin-promise": "^5.1.0",
         "eslint-plugin-screeps": "^2.1.0",
-        "grunt": "^1.4.1",
+        "grunt": "^1.5.3",
         "grunt-screeps": "^1.5.0"
     }
 }
